@@ -1,3 +1,4 @@
+import { NavItem } from "@/types/app";
 import {
 	faBox,
 	faCalendar,
@@ -10,7 +11,6 @@ import {
 	faUsers,
 	faWrench,
 } from "@fortawesome/free-solid-svg-icons";
-import { NavItem } from "./types";
 
 export const ICON_MAP = {
 	speedometer: faGauge,

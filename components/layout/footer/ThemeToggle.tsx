@@ -9,8 +9,8 @@ export const ThemeToggle = () => {
 
 	// Prevent hydration mismatch by only rendering theme-dependent content after mount
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setMounted(true);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const toggleTheme = () => {

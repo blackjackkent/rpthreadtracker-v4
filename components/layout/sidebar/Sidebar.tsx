@@ -1,6 +1,6 @@
 import { SidebarMenuTitle } from "./SidebarMenuTitle";
 import { SidebarMenuLink } from "./SidebarMenuLink";
-import { NAV_ITEMS } from "@/lib/types/constants";
+import { NAV_ITEMS } from "@/lib/constants";
 
 interface SidebarProps {
 	isOpen: boolean;

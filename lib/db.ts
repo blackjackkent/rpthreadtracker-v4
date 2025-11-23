@@ -1,5 +1,5 @@
+import { AspNetUser } from "@/types/db";
 import sql from "mssql";
-import { AspNetUser } from "./types/db";
 
 let pool: sql.ConnectionPool | null = null;
 

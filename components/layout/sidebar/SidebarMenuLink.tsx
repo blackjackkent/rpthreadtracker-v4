@@ -1,6 +1,6 @@
 "use client";
-import { ICON_MAP } from "@/lib/types/constants";
-import { NavItem } from "@/lib/types/types";
+import { ICON_MAP } from "@/lib/constants";
+import { NavItem } from "@/types/app";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

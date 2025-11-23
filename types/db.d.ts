@@ -1,12 +1,3 @@
-// Application types
-export interface NavItem {
-	name: string;
-	url?: string;
-	icon?: string;
-	title?: boolean;
-}
-
-// Database types
 export interface Thread {
 	ThreadId: number;
 	CharacterId: number;
