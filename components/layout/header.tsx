@@ -16,32 +16,32 @@ export function Header({ user, onSidebarToggle }: HeaderProps) {
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
   return (
-    <header className="bg-sidebar border-b border-border sticky top-0 z-50">
-      <div className="h-16 flex items-center px-4 justify-between">
+    <header className="bg-primary text-white border-b border-primary-dark sticky top-0 z-50">
+      <div className="h-12 flex items-center px-3 justify-between">
         {/* Left side - Logo and sidebar toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={onSidebarToggle}
-            className="p-2 hover:bg-surface rounded transition-colors"
+            className="p-1.5 hover:bg-primary-dark rounded transition-colors"
             aria-label="Toggle sidebar"
           >
-            <FontAwesomeIcon icon={faBars} className="w-5 h-5" />
+            <FontAwesomeIcon icon={faBars} className="w-4 h-4" />
           </button>
-          <Link href="/dashboard" className="text-xl font-semibold hover:text-primary transition-colors">
+          <Link href="/dashboard" className="text-base font-semibold hover:text-primary-light transition-colors">
             RPTHREADTRACKER
           </Link>
         </div>
 
         {/* Right side - Add menu and profile dropdown */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {/* Add Menu Dropdown */}
           <div className="relative">
             <button
               onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-              className="p-2 hover:bg-surface rounded transition-colors"
+              className="p-1.5 hover:bg-primary-dark rounded transition-colors"
               aria-label="Add menu"
             >
-              <FontAwesomeIcon icon={faCirclePlus} className="w-5 h-5" />
+              <FontAwesomeIcon icon={faCirclePlus} className="w-4 h-4" />
             </button>
             {isAddMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-surface border border-border rounded shadow-lg">
@@ -65,10 +65,10 @@ export function Header({ user, onSidebarToggle }: HeaderProps) {
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="p-2 hover:bg-surface rounded transition-colors"
+              className="p-1.5 hover:bg-primary-dark rounded transition-colors"
               aria-label="User menu"
             >
-              <FontAwesomeIcon icon={faUser} className="w-5 h-5" />
+              <FontAwesomeIcon icon={faUser} className="w-4 h-4" />
             </button>
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-surface border border-border rounded shadow-lg">

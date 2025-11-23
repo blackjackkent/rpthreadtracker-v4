@@ -13,6 +13,13 @@
   --color-border: #4a4a4a;
   --color-text: #ffffff;
   --color-text-muted: #b0b0b0;
+
+  /* Always-light sidebar colors (don't change with theme) */
+  --color-sidebar-light: #f8f9fa;
+  --color-sidebar-border: #dee2e6;
+  --color-sidebar-text: #23282c;
+  --color-sidebar-text-muted: #6c757d;
+  --color-sidebar-hover: #e9ecef;
 }
 
 /* Light theme overrides */

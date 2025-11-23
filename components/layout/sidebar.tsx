@@ -39,16 +39,16 @@ export function Sidebar({ isOpen }: SidebarProps) {
 
   return (
     <aside
-      className={`bg-sidebar border-r border-border transition-all duration-300 ${
-        isOpen ? 'w-64' : 'w-0 md:w-16'
+      className={`bg-sidebar-light border-r border-sidebar-border transition-all duration-300 ${
+        isOpen ? 'w-48' : 'w-0 md:w-14'
       } overflow-hidden`}
     >
-      <nav className="p-4">
+      <nav className="p-3">
         <ul className="space-y-1">
           {navigationItems.map((item, index) => {
             if (item.title) {
               return (
-                <li key={`title-${index}`} className={`text-text-muted text-xs font-semibold uppercase mt-4 mb-2 ${!isOpen && 'md:hidden'}`}>
+                <li key={`title-${index}`} className={`text-sidebar-text-muted text-[10px] font-semibold uppercase mt-3 mb-1.5 ${!isOpen && 'md:hidden'}`}>
                   {item.name}
                 </li>
               );
@@ -60,17 +60,17 @@ export function Sidebar({ isOpen }: SidebarProps) {
               <li key={item.name}>
                 <Link
                   href={item.url || '#'}
-                  className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded transition-colors text-sm ${
                     isActive
                       ? 'bg-primary text-white'
-                      : 'hover:bg-surface text-text'
+                      : 'hover:bg-sidebar-hover text-sidebar-text-muted'
                   } ${!isOpen && 'md:justify-center'}`}
                   title={!isOpen ? item.name : undefined}
                 >
                   {item.icon && (
                     <FontAwesomeIcon
                       icon={iconMap[item.icon as keyof typeof iconMap]}
-                      className="w-4 h-4 flex-shrink-0"
+                      className="w-3.5 h-3.5 flex-shrink-0"
                     />
                   )}
                   <span className={`${!isOpen && 'md:hidden'}`}>{item.name}</span>
