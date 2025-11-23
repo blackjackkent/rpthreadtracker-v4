@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { User } from 'next-auth';
+import { signOut } from 'next-auth/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faCirclePlus, faUser } from '@fortawesome/free-solid-svg-icons';
 
@@ -97,14 +98,12 @@ export function Header({ user, onSidebarToggle }: HeaderProps) {
                 >
                   Help
                 </Link>
-                <form action="/api/auth/signout" method="POST">
-                  <button
-                    type="submit"
-                    className="w-full text-left px-4 py-2 hover:bg-background transition-colors border-t border-border"
-                  >
-                    Logout
-                  </button>
-                </form>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/login' })}
+                  className="w-full text-left px-4 py-2 hover:bg-background transition-colors border-t border-border"
+                >
+                  Logout
+                </button>
               </div>
             )}
           </div>

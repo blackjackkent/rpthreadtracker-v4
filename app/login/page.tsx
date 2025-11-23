@@ -2,26 +2,37 @@
 
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  login: z.string().min(1, 'Email or username is required'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  async function onSubmit(data: LoginFormData) {
     setError(null);
-    setLoading(true);
-
-    const formData = new FormData(event.currentTarget);
-    const login = formData.get('login') as string;
-    const password = formData.get('password') as string;
 
     try {
       const result = await signIn('credentials', {
-        login,
-        password,
+        login: data.login,
+        password: data.password,
         redirect: false,
       });
 
@@ -33,8 +44,6 @@ export default function LoginPage() {
       }
     } catch (error) {
       setError('An error occurred. Please try again.');
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -44,7 +53,7 @@ export default function LoginPage() {
         <div>
           <h2 className="text-center text-3xl font-bold">Sign in to your account</h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div>
               <label htmlFor="login" className="block text-sm font-medium">
@@ -52,12 +61,14 @@ export default function LoginPage() {
               </label>
               <input
                 id="login"
-                name="login"
                 type="text"
-                required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                disabled={loading}
+                {...register('login')}
+                className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                disabled={isSubmitting}
               />
+              {errors.login && (
+                <p className="mt-1 text-sm text-red-500">{errors.login.message}</p>
+              )}
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium">
@@ -65,27 +76,29 @@ export default function LoginPage() {
               </label>
               <input
                 id="password"
-                name="password"
                 type="password"
-                required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                disabled={loading}
+                {...register('password')}
+                className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                disabled={isSubmitting}
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+              )}
             </div>
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/20">
+              <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-300"
+            disabled={isSubmitting}
+            className="w-full rounded-md bg-primary px-4 py-2 text-white hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
       </div>
