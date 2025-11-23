@@ -1,58 +1,61 @@
 @import "tailwindcss";
 
 @theme {
-  /* Custom colors */
-  --color-primary: #418ce4;
-  --color-primary-dark: #3a7dcc;
-  --color-primary-light: #95c6ff;
+	/* Custom colors */
+	--color-primary: #418ce4;
+	--color-primary-dark: #3a7dcc;
+	--color-primary-light: #95c6ff;
 
-  /* Dark theme (default) colors */
-  --color-background: #333333;
-  --color-surface: #3f3f3f;
-  --color-sidebar: #2a2a2a;
-  --color-border: #4a4a4a;
-  --color-text: #ffffff;
-  --color-text-muted: #b0b0b0;
+	/* Always-light sidebar colors (don't change with theme) */
+	--color-sidebar-light: #f8f9fa;
+	--color-sidebar-border: #dee2e6;
+	--color-sidebar-text: #23282c;
+	--color-sidebar-text-muted: #6c757d;
+	--color-sidebar-hover: #e9ecef;
+}
 
-  /* Always-light sidebar colors (don't change with theme) */
-  --color-sidebar-light: #f8f9fa;
-  --color-sidebar-border: #dee2e6;
-  --color-sidebar-text: #23282c;
-  --color-sidebar-text-muted: #6c757d;
-  --color-sidebar-hover: #e9ecef;
+/* Dark theme (default) */
+.dark-theme {
+	--color-background: #333333;
+	--color-surface: #3f3f3f;
+	--color-sidebar: #2a2a2a;
+	--color-border: #4a4a4a;
+	--color-text: #ffffff;
+	--color-text-muted: #b0b0b0;
 }
 
 /* Light theme overrides */
 .light-theme {
-  --color-background: #ffffff;
-  --color-surface: #ffffff;
-  --color-sidebar: #f8f9fa;
-  --color-border: #dee2e6;
-  --color-text: #23282c;
-  --color-text-muted: #6c757d;
+	--color-background: #ffffff;
+	--color-surface: #ffffff;
+	--color-sidebar: #f8f9fa;
+	--color-border: #dee2e6;
+	--color-text: #23282c;
+	--color-text-muted: #6c757d;
 }
 
 html,
 body {
-  height: 100vh;
-  margin: 0;
-  padding: 0;
+	height: 100vh;
+	margin: 0;
+	padding: 0;
 }
 
 body {
-  @apply bg-[var(--color-background)] text-[var(--color-text)];
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	@apply bg-background text-text;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		"Helvetica Neue", Arial, sans-serif;
 }
 
 /* App layout structure */
 .app {
-  @apply flex flex-col min-h-screen;
+	@apply flex flex-col min-h-screen;
 }
 
 .app-body {
-  @apply flex flex-1 overflow-x-hidden;
+	@apply flex flex-1 overflow-x-hidden;
 }
 
 .main {
-  @apply flex-1 min-w-0;
+	@apply flex-1 min-w-0;
 }

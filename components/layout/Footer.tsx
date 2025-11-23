@@ -1,34 +1,7 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-  const [isDarkTheme, setIsDarkTheme] = useState(true);
-
-  useEffect(() => {
-    // Check localStorage for theme preference on mount
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      setIsDarkTheme(false);
-      document.body.classList.add('light-theme');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = !isDarkTheme;
-    setIsDarkTheme(newTheme);
-
-    if (newTheme) {
-      // Dark theme
-      document.body.classList.remove('light-theme');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      // Light theme
-      document.body.classList.add('light-theme');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
   return (
     <footer className="bg-sidebar border-t border-border p-4">
@@ -54,16 +27,7 @@ export function Footer() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div>
-            Switch to{' '}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="hover:text-primary transition-colors underline"
-            >
-              {isDarkTheme ? 'light theme' : 'dark theme'}
-            </button>
-          </div>
+          <ThemeToggle />
           <div>
             Support on{' '}
             <a
