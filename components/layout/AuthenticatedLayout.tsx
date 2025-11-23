@@ -3,8 +3,8 @@
 import { ReactNode, useState } from "react";
 import { User } from "next-auth";
 import { Header } from "./header/Header";
-import { Sidebar } from "./Sidebar";
-import { Footer } from "./Footer";
+import { Sidebar } from "./sidebar/Sidebar";
+import { Footer } from "./footer/Footer";
 
 interface AuthenticatedLayoutProps {
 	children: ReactNode;

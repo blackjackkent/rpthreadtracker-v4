@@ -31,12 +31,12 @@ export const Footer = () => {
 					<div>
 						Support on{" "}
 						<a
-							href="https://www.patreon.com/bePatron?u=4797959"
+							href="https://www.paypal.com/donate/?business=MUTFLWGEW8Y52&no_recurring=0&currency_code=USD"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="hover:text-primary transition-colors"
 						>
-							Patreon
+							PayPal
 						</a>
 					</div>
 				</div>

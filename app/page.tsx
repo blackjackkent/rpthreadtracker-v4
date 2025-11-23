@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { AuthenticatedLayout } from "@/components/layout/AuthenticatedLayout";
 import { redirect } from "next/navigation";
-import { AtAGlance } from "@/components/dashboard/AtAGlance";
+import { AtAGlance } from "@/components/dashboard/at-a-glance/AtAGlance";
 import { getActiveThreadsCount, getQueuedThreadsCount } from "@/lib/db";
 
 export default async function Home() {
