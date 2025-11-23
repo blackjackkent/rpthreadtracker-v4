@@ -18,13 +18,13 @@ interface AtAGlanceProps {
 	isLoading?: boolean;
 }
 
-export function AtAGlance({
+export const AtAGlance = ({
 	activeThreadsCount = 0,
 	yourTurnCount = 0,
 	theirTurnCount = 0,
 	queuedCount = 0,
 	isLoading = false,
-}: AtAGlanceProps) {
+}: AtAGlanceProps) => {
 	return (
 		<div className="bg-surface border border-border rounded-lg shadow-sm">
 			{/* Header with accent */}
@@ -70,4 +70,4 @@ export function AtAGlance({
 			</div>
 		</div>
 	);
-}
+};

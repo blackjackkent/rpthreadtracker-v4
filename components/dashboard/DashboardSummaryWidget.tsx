@@ -12,13 +12,13 @@ interface DashboardSummaryWidgetProps {
 	isLoading?: boolean;
 }
 
-export function DashboardSummaryWidget({
+export const DashboardSummaryWidget = ({
 	count,
 	label,
 	icon,
 	href,
 	isLoading = false,
-}: DashboardSummaryWidgetProps) {
+}: DashboardSummaryWidgetProps) => {
 	return (
 		<Link
 			href={href}
@@ -53,4 +53,4 @@ export function DashboardSummaryWidget({
 			</div>
 		</Link>
 	);
-}
+};

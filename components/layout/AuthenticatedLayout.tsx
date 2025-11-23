@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from "react";
 import { User } from "next-auth";
-import { Header } from "./Header";
+import { Header } from "./header/Header";
 import { Sidebar } from "./Sidebar";
 import { Footer } from "./Footer";
 
@@ -11,10 +11,10 @@ interface AuthenticatedLayoutProps {
 	user: User;
 }
 
-export function AuthenticatedLayout({
+export const AuthenticatedLayout = ({
 	children,
 	user,
-}: AuthenticatedLayoutProps) {
+}: AuthenticatedLayoutProps) => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
 	return (
@@ -35,4 +35,4 @@ export function AuthenticatedLayout({
 			<Footer />
 		</div>
 	);
-}
+};
