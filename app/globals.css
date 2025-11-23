@@ -1,26 +1,51 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Custom colors */
+  --color-primary: #418ce4;
+  --color-primary-dark: #3a7dcc;
+  --color-primary-light: #95c6ff;
+
+  /* Dark theme (default) colors */
+  --color-background: #333333;
+  --color-surface: #3f3f3f;
+  --color-sidebar: #2a2a2a;
+  --color-border: #4a4a4a;
+  --color-text: #ffffff;
+  --color-text-muted: #b0b0b0;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Light theme overrides */
+.light-theme {
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-sidebar: #f8f9fa;
+  --color-border: #dee2e6;
+  --color-text: #23282c;
+  --color-text-muted: #6c757d;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-[var(--color-background)] text-[var(--color-text)];
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* App layout structure */
+.app {
+  @apply flex flex-col min-h-screen;
+}
+
+.app-body {
+  @apply flex flex-1 overflow-x-hidden;
+}
+
+.main {
+  @apply flex-1 min-w-0;
 }
