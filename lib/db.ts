@@ -146,3 +146,57 @@ export async function updateUserPassword(userId: string, newPasswordHash: string
     .input('passwordHash', sql.NVarChar, newPasswordHash)
     .query('UPDATE dbo.AspNetUsers SET PasswordHash = @passwordHash WHERE Id = @userId');
 }
+
+// Thread-related interfaces
+export interface Thread {
+  ThreadId: number;
+  CharacterId: number;
+  PostId: string;
+  UserTitle: string;
+  PartnerUrlIdentifier: string;
+  IsArchived: boolean;
+  DateMarkedQueued: Date | null;
+  Description: string;
+}
+
+export interface Character {
+  CharacterId: number;
+  UserId: string;
+  CharacterName: string;
+  UrlIdentifier: string;
+  IsOnHiatus: boolean;
+  PlatformId: number;
+}
+
+// Thread queries
+export async function getActiveThreadsCount(userId: string): Promise<number> {
+  const db = await getDb();
+  const result = await db
+    .request()
+    .input('userId', sql.NVarChar, userId)
+    .query(`
+      SELECT COUNT(*) as count
+      FROM dbo.Threads t
+      INNER JOIN dbo.Characters c ON t.CharacterId = c.CharacterId
+      WHERE c.UserId = @userId
+        AND t.IsArchived = 0
+    `);
+
+  return result.recordset[0]?.count || 0;
+}
+
+export async function getQueuedThreadsCount(userId: string): Promise<number> {
+  const db = await getDb();
+  const result = await db
+    .request()
+    .input('userId', sql.NVarChar, userId)
+    .query(`
+      SELECT COUNT(*) as count
+      FROM dbo.Threads t
+      INNER JOIN dbo.Characters c ON t.CharacterId = c.CharacterId
+      WHERE c.UserId = @userId
+        AND t.DateMarkedQueued IS NOT NULL
+    `);
+
+  return result.recordset[0]?.count || 0;
+}
