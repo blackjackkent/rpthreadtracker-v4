@@ -10,8 +10,16 @@ export default auth((req) => {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
-  // Add protected routes here
-  const protectedRoutes = ['/dashboard', '/profile'];
+  // Protected routes - all app routes except login
+  const protectedRoutes = [
+    '/dashboard',
+    '/threads',
+    '/manage-characters',
+    '/tools',
+    '/settings',
+    '/help',
+    '/profile'
+  ];
   const isProtectedRoute = protectedRoutes.some((route) =>
     req.nextUrl.pathname.startsWith(route)
   );

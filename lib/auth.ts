@@ -60,7 +60,6 @@ export const authConfig: NextAuthConfig = {
             id: user.Id,
             email: user.Email,
             name: user.UserName,
-            emailVerified: user.EmailConfirmed,
           };
         } catch (error) {
           console.error('Authentication error:', error);
@@ -76,14 +75,12 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.emailVerified = user.emailVerified;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.emailVerified = token.emailVerified as boolean;
       }
       return session;
     },
