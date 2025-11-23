@@ -1,6 +1,6 @@
-import { navigationItems } from "@/lib/navigation";
 import { SidebarMenuTitle } from "./SidebarMenuTitle";
 import { SidebarMenuLink } from "./SidebarMenuLink";
+import { NAV_ITEMS } from "@/lib/types/constants";
 
 interface SidebarProps {
 	isOpen: boolean;
@@ -15,7 +15,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
 		>
 			<nav className="p-3">
 				<ul className="space-y-1">
-					{navigationItems.map((item, index) => {
+					{NAV_ITEMS.map((item, index) => {
 						if (item.title) {
 							return (
 								<SidebarMenuTitle
