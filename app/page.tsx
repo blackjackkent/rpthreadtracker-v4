@@ -2,10 +2,10 @@ import { auth } from "@/lib/auth";
 import { AuthenticatedLayout } from "@/components/layout/AuthenticatedLayout";
 import { redirect } from "next/navigation";
 import { AtAGlance } from "@/components/dashboard/at-a-glance/AtAGlance";
-import { getActiveThreadsCount, getQueuedThreadsCount } from "@/lib/db";
+import { getDashboardStats } from "@/lib/thread-status-service";
 
 // Force dynamic rendering to always fetch fresh data
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
 	const session = await auth();
@@ -14,20 +14,8 @@ export default async function Home() {
 		redirect("/login");
 	}
 
-	// Fetch real data from database
-	const [activeThreadsCount, queuedCount] = await Promise.all([
-		getActiveThreadsCount(session.user.id),
-		getQueuedThreadsCount(session.user.id),
-	]);
-
-	// TODO: Replace with real data from TumblrClient API (Phase 3)
-	// Your Turn and Their Turn require Tumblr API integration
-	const mockStats = {
-		activeThreadsCount,
-		yourTurnCount: 0, // Will be calculated via Tumblr API
-		theirTurnCount: 0, // Will be calculated via Tumblr API
-		queuedCount,
-	};
+	// Fetch dashboard stats (includes Tumblr API data for Your Turn/Their Turn/Queued)
+	const stats = await getDashboardStats(session.user.id);
 
 	return (
 		<AuthenticatedLayout user={session.user}>
@@ -42,10 +30,10 @@ export default async function Home() {
 
 				{/* At a Glance Section */}
 				<AtAGlance
-					activeThreadsCount={mockStats.activeThreadsCount}
-					yourTurnCount={mockStats.yourTurnCount}
-					theirTurnCount={mockStats.theirTurnCount}
-					queuedCount={mockStats.queuedCount}
+					activeThreadsCount={stats.activeThreadsCount}
+					yourTurnCount={stats.yourTurnCount}
+					theirTurnCount={stats.theirTurnCount}
+					queuedCount={stats.queuedCount}
 				/>
 			</div>
 		</AuthenticatedLayout>

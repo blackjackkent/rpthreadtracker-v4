@@ -72,14 +72,38 @@ export async function getActiveThreadsCount(userId: string): Promise<number> {
 	});
 }
 
-export async function getQueuedThreadsCount(userId: string): Promise<number> {
-	return prisma.threads.count({
+// Thread data for status calculation
+export interface ThreadWithCharacter {
+	ThreadId: number;
+	PostId: string | null;
+	PartnerUrlIdentifier: string | null;
+	DateMarkedQueued: Date | null;
+	IsArchived: boolean;
+	Characters: {
+		UrlIdentifier: string | null;
+	};
+}
+
+export async function getActiveThreadsForUser(
+	userId: string
+): Promise<ThreadWithCharacter[]> {
+	return prisma.threads.findMany({
 		where: {
 			Characters: {
 				UserId: userId,
 			},
-			DateMarkedQueued: {
-				not: null,
+			IsArchived: false,
+		},
+		select: {
+			ThreadId: true,
+			PostId: true,
+			PartnerUrlIdentifier: true,
+			DateMarkedQueued: true,
+			IsArchived: true,
+			Characters: {
+				select: {
+					UrlIdentifier: true,
+				},
 			},
 		},
 	});
