@@ -5,6 +5,7 @@ import { User } from "next-auth";
 import { Header } from "./header/Header";
 import { Sidebar } from "./sidebar/Sidebar";
 import { Footer } from "./footer/Footer";
+import { ThreadStatusProvider } from "@/components/providers/ThreadStatusProvider";
 
 interface AuthenticatedLayoutProps {
 	children: ReactNode;
@@ -18,21 +19,23 @@ export const AuthenticatedLayout = ({
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
 	return (
-		<div className="app">
-			<Header
-				user={user}
-				onSidebarToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-			/>
+		<ThreadStatusProvider userId={user.id}>
+			<div className="app">
+				<Header
+					user={user}
+					onSidebarToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+				/>
 
-			<div className="app-body">
-				<Sidebar isOpen={isSidebarOpen} />
+				<div className="app-body">
+					<Sidebar isOpen={isSidebarOpen} />
 
-				<main className="main">
-					<div className="container mx-auto p-4">{children}</div>
-				</main>
+					<main className="main">
+						<div className="container mx-auto p-4">{children}</div>
+					</main>
+				</div>
+
+				<Footer />
 			</div>
-
-			<Footer />
-		</div>
+		</ThreadStatusProvider>
 	);
 };

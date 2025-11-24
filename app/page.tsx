@@ -1,41 +1,36 @@
-import { auth } from "@/lib/auth";
+"use client";
+
 import { AuthenticatedLayout } from "@/components/layout/AuthenticatedLayout";
-import { redirect } from "next/navigation";
-import { AtAGlance } from "@/components/dashboard/at-a-glance/AtAGlance";
-import { getDashboardStats } from "@/lib/thread-status-service";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-// Force dynamic rendering to always fetch fresh data
-export const dynamic = "force-dynamic";
+export default function Home() {
+	const { data: session, status } = useSession();
+	const router = useRouter();
 
-export default async function Home() {
-	const session = await auth();
+	useEffect(() => {
+		if (status === "unauthenticated") {
+			router.push("/login");
+		}
+	}, [status, router]);
 
-	if (!session) {
-		redirect("/login");
+	if (status === "loading") {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<div className="text-text-muted">Loading...</div>
+			</div>
+		);
 	}
 
-	// Fetch dashboard stats (includes Tumblr API data for Your Turn/Their Turn/Queued)
-	const stats = await getDashboardStats(session.user.id);
+	if (!session) {
+		return null; // Will redirect via useEffect
+	}
 
 	return (
 		<AuthenticatedLayout user={session.user}>
-			<div className="space-y-6 p-6">
-				<div>
-					<h1 className="text-3xl font-semibold">Dashboard</h1>
-					<p className="text-text-muted mt-1">
-						Welcome back,{" "}
-						<span className="font-semibold text-text">{session.user.name}</span>
-					</p>
-				</div>
-
-				{/* At a Glance Section */}
-				<AtAGlance
-					activeThreadsCount={stats.activeThreadsCount}
-					yourTurnCount={stats.yourTurnCount}
-					theirTurnCount={stats.theirTurnCount}
-					queuedCount={stats.queuedCount}
-				/>
-			</div>
+			<DashboardContent userName={session.user.name || "User"} />
 		</AuthenticatedLayout>
 	);
 }
