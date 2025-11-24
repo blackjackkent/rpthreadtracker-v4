@@ -6,22 +6,20 @@
 	--color-primary-dark: #3a7dcc;
 	--color-primary-light: #95c6ff;
 
-	/* Always-light sidebar colors (don't change with theme) */
-	--color-sidebar-light: #f8f9fa;
-	--color-sidebar-border: #dee2e6;
-	--color-sidebar-text: #23282c;
-	--color-sidebar-text-muted: #6c757d;
-	--color-sidebar-hover: #e9ecef;
-}
-
-/* Dark theme (default) */
-.dark-theme {
+	/* Dark theme colors (default) */
 	--color-background: #333333;
 	--color-surface: #3f3f3f;
 	--color-sidebar: #2a2a2a;
 	--color-border: #4a4a4a;
 	--color-text: #ffffff;
 	--color-text-muted: #b0b0b0;
+
+	/* Always-light sidebar colors */
+	--color-sidebar-light: #f8f9fa;
+	--color-sidebar-border: #dee2e6;
+	--color-sidebar-text: #23282c;
+	--color-sidebar-text-muted: #6c757d;
+	--color-sidebar-hover: #e9ecef;
 }
 
 /* Light theme overrides */
