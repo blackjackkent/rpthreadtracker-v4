@@ -1,15 +1,126 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../lib/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlserver"
   url      = env("DATABASE_URL")
+}
+
+model AspNetRoles {
+  Id               String            @id(map: "PK_dbo.AspNetRoles") @db.NVarChar(128)
+  Name             String            @db.NVarChar(Max)
+  ConcurrencyStamp String?           @db.NVarChar(Max)
+  NormalizedName   String?           @db.NVarChar(Max)
+  AspNetUserRoles  AspNetUserRoles[]
+}
+
+model AspNetUserClaims {
+  Id          Int         @id(map: "PK_dbo.AspNetUserClaims") @default(autoincrement())
+  ClaimType   String?     @db.NVarChar(Max)
+  ClaimValue  String?     @db.NVarChar(Max)
+  UserId      String      @db.NVarChar(128)
+  AspNetUsers AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, map: "FK_AspNetUsers_AspNetUserClaims")
+}
+
+model AspNetUserRoles {
+  UserId      String      @db.NVarChar(128)
+  RoleId      String      @db.NVarChar(128)
+  AspNetRoles AspNetRoles @relation(fields: [RoleId], references: [Id], onDelete: Cascade, map: "FK_AspNetRoles_AspNetUserRoles")
+  AspNetUsers AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, map: "FK_AspNetUsers_AspNetUserRoles")
+
+  @@id([UserId, RoleId], map: "PK_dbo.AspNetUserRoles")
+}
+
+model AspNetUsers {
+  Id                   String             @id(map: "PK_dbo.AspNetUsers") @db.NVarChar(128)
+  AccessFailedCount    Int
+  ConcurrencyStamp     String?            @db.NVarChar(Max)
+  Email                String?            @db.NVarChar(256)
+  EmailConfirmed       Boolean
+  LockoutEnabled       Boolean
+  LockoutEnd           DateTime?          @db.DateTimeOffset
+  NormalizedEmail      String?            @db.NVarChar(256)
+  NormalizedUserName   String?            @db.NVarChar(256)
+  PasswordHash         String?            @db.NVarChar(Max)
+  PhoneNumber          String?            @db.NVarChar(Max)
+  PhoneNumberConfirmed Boolean
+  SecurityStamp        String?            @db.NVarChar(Max)
+  TwoFactorEnabled     Boolean
+  UserName             String?            @db.NVarChar(256)
+  AspNetUserClaims     AspNetUserClaims[]
+  AspNetUserRoles      AspNetUserRoles[]
+  Characters           Characters[]
+  ProfileSettings      ProfileSettings[]
+  RefreshTokens        RefreshTokens[]
+}
+
+model Characters {
+  CharacterId   Int         @id(map: "PK_dbo.Character") @default(autoincrement())
+  UserId        String      @db.NVarChar(128)
+  UrlIdentifier String?     @db.NVarChar(Max)
+  CharacterName String?     @db.NVarChar(Max)
+  IsOnHiatus    Boolean
+  PlatformId    Int
+  AspNetUsers   AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, map: "FK_AspNetUsers_Characters")
+  Platforms     Platforms   @relation(fields: [PlatformId], references: [PlatformId], onDelete: Cascade, map: "FK_Platforms_Characters")
+  Threads       Threads[]
+}
+
+model Logging {
+  Id          Int      @id(map: "PK_dbo.Logging") @default(autoincrement())
+  Application String   @db.NVarChar(50)
+  Logged      DateTime @db.DateTime
+  Level       String   @db.NVarChar(50)
+  Message     String   @db.NVarChar(Max)
+  Logger      String?  @db.NVarChar(250)
+  Callsite    String?  @db.NVarChar(Max)
+  Exception   String?  @db.NVarChar(Max)
+  UserId      String?  @db.NVarChar(50)
+}
+
+model Platforms {
+  PlatformId   Int          @id(map: "PK_Platforms") @default(autoincrement())
+  PlatformName String?      @db.NChar(255)
+  Characters   Characters[]
+}
+
+model ProfileSettings {
+  SettingsId                      Int         @id(map: "PK_ProfileSettings") @default(autoincrement())
+  UserId                          String      @db.NVarChar(128)
+  ShowDashboardThreadDistribution Boolean
+  UseInvertedTheme                Boolean
+  AllowMarkQueued                 Boolean
+  LastNewsReadDate                DateTime?   @db.DateTime
+  ThreadTablePageSize             Int
+  AspNetUsers                     AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, map: "FK_AspNetUsers_ProfileSettings")
+}
+
+model RefreshTokens {
+  Id          String      @id(map: "PK_RefreshTokens") @db.NVarChar(128)
+  IssuedUtc   DateTime    @db.DateTime
+  ExpiresUtc  DateTime    @db.DateTime
+  Token       String      @db.NVarChar(Max)
+  UserId      String      @db.NVarChar(128)
+  AspNetUsers AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, map: "FK_RefreshTokens_AspNetUsers")
+}
+
+model Threads {
+  ThreadId             Int          @id(map: "PK_dbo.Threads") @default(autoincrement())
+  CharacterId          Int
+  PostId               String?      @db.NVarChar(Max)
+  UserTitle            String?      @db.NVarChar(Max)
+  PartnerUrlIdentifier String?      @db.VarChar(50)
+  IsArchived           Boolean
+  DateMarkedQueued     DateTime?    @db.DateTime
+  Description          String?      @db.NVarChar(250)
+  Characters           Characters   @relation(fields: [CharacterId], references: [CharacterId], onDelete: Cascade, onUpdate: NoAction, map: "FK_dbo.Threads_dbo.Characters_CharacterId")
+  ThreadTags           ThreadTags[]
+}
+
+model ThreadTags {
+  TagID    String   @id(map: "PK_dbo.ThreadTags") @db.VarChar(128)
+  TagText  String   @db.VarChar(140)
+  ThreadID Int?
+  Threads  Threads? @relation(fields: [ThreadID], references: [ThreadId], onDelete: Cascade, onUpdate: NoAction, map: "FK_dbo.ThreadTags_dbo.Threads_ThreadId")
 }

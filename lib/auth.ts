@@ -47,7 +47,7 @@ export const authConfig: NextAuthConfig = {
 					// Verify the password using all known hash formats
 					const { verified, hashType } = await verifyPassword(
 						password,
-						user.PasswordHash
+						!!user.PasswordHash ? user.PasswordHash : ""
 					);
 
 					if (!verified) {

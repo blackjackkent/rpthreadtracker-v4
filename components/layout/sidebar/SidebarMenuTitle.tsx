@@ -1,4 +1,4 @@
-import { NavItem } from "@/lib/navigation";
+import { NavItem } from "@/types/app";
 
 type SidebarMenuTitleProps = {
 	item: NavItem;
