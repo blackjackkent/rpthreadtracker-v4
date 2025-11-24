@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { AtAGlance } from "@/components/dashboard/at-a-glance/AtAGlance";
 import { getActiveThreadsCount, getQueuedThreadsCount } from "@/lib/db";
 
+// Force dynamic rendering to always fetch fresh data
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
 	const session = await auth();
 
