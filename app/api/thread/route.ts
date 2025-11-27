@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTumblrPostWithRetry } from "@/lib/tumblr-client";
 import { calculateThreadStatus } from "@/lib/thread-status-calculator";
-import type {
-	ThreadStatusRequest,
-	ThreadStatusResponse,
-} from "@/types/tumblr";
+import { requireAuth } from "@/lib/api-auth";
+import type { ThreadStatusRequest } from "@/types/tumblr";
 
 /**
  * GET /api/thread
  * Fetch thread status for a single thread
  * Query params: postId, characterUrlIdentifier, partnerUrlIdentifier (optional), dateMarkedQueued (optional)
+ *
+ * @requires Authentication
  */
 export async function GET(request: NextRequest) {
+	// Require authentication
+	const authResult = await requireAuth();
+	if (authResult instanceof NextResponse) return authResult;
+
 	const searchParams = request.nextUrl.searchParams;
 
 	const postId = searchParams.get("postId");
@@ -58,8 +62,14 @@ export async function GET(request: NextRequest) {
  * POST /api/thread
  * Batch fetch thread status for multiple threads
  * Body: ThreadStatusRequest[]
+ *
+ * @requires Authentication
  */
 export async function POST(request: NextRequest) {
+	// Require authentication
+	const authResult = await requireAuth();
+	if (authResult instanceof NextResponse) return authResult;
+
 	try {
 		const body: ThreadStatusRequest[] = await request.json();
 

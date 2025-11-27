@@ -1,19 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { getActiveThreadsForUser } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/api-auth";
+import { getActiveThreadsForUser } from "@/lib/db/thread";
 
 /**
  * GET /api/threads/active
  * Fetch all active threads for the authenticated user
+ *
+ * @requires Authentication
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
+	// Require authentication
+	const authResult = await requireAuth();
+	if (authResult instanceof NextResponse) return authResult;
+	const session = authResult;
+
 	try {
-		const session = await auth();
-
-		if (!session) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-		}
-
 		const activeThreads = await getActiveThreadsForUser(session.user.id);
 
 		return NextResponse.json(activeThreads);

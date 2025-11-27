@@ -20,7 +20,7 @@ export const authConfig: NextAuthConfig = {
 
 					// Dynamic imports to avoid loading Node.js modules in Edge Runtime
 					const { getUserByEmail, getUserByUsername, updateUserPassword } =
-						await import("./db");
+						await import("./db/user");
 					const { verifyPassword, hashPasswordBcrypt } = await import(
 						"./password-verifiers"
 					);

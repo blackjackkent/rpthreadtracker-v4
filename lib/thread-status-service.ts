@@ -1,8 +1,6 @@
-import type { ThreadWithCharacter } from "@/lib/db";
-import type {
-	ThreadStatusRequest,
-	ThreadStatusResponse,
-} from "@/types/tumblr";
+import type { ThreadStatusRequest, ThreadStatusResponse } from "@/types/tumblr";
+import { getActiveThreadsForUser } from "./db/thread";
+import { ThreadWithCharacter } from "./db/types";
 
 export interface DashboardStats {
 	activeThreadsCount: number;

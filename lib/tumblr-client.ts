@@ -41,9 +41,7 @@ export async function getTumblrPost(
 		})) as TumblrBlogPostsResponse;
 
 		if (!response || !response.posts || response.posts.length === 0) {
-			console.warn(
-				`Post not found: blog=${blogIdentifier}, postId=${postId}`
-			);
+			console.warn(`Post not found: blog=${blogIdentifier}, postId=${postId}`);
 			return null;
 		}
 
@@ -70,6 +68,7 @@ export async function getTumblrPostWithRetry(
 		try {
 			const post = await getTumblrPost(blogIdentifier, postId);
 			return post;
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
 			// Check if it's a rate limit error (429)
 			if (error?.status === 429 && attempt < maxRetries - 1) {
@@ -79,7 +78,9 @@ export async function getTumblrPostWithRetry(
 				const delay = baseDelay + jitter;
 
 				console.warn(
-					`Rate limited (429). Retrying in ${Math.round(delay)}ms... (attempt ${attempt + 1}/${maxRetries})`
+					`Rate limited (429). Retrying in ${Math.round(delay)}ms... (attempt ${
+						attempt + 1
+					}/${maxRetries})`
 				);
 				await new Promise((resolve) => setTimeout(resolve, delay));
 				continue;
