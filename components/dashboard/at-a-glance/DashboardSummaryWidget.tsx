@@ -19,10 +19,14 @@ export const DashboardSummaryWidget = ({
 	href,
 	isLoading = false,
 }: DashboardSummaryWidgetProps) => {
+	// Generate kebab-case test ID from label
+	const testId = label.toLowerCase().replace(/\s+/g, "-");
+
 	return (
 		<Link
 			href={href}
 			className="block bg-surface border-2 border-border rounded-lg p-4 shadow-md transition-all hover:shadow-xl hover:border-primary hover:-translate-y-1 cursor-pointer"
+			data-testid={`${testId}-widget`}
 		>
 			{/* Loading indicator - top right */}
 			<div className="text-right mb-2 h-6">
@@ -40,7 +44,12 @@ export const DashboardSummaryWidget = ({
 			</div>
 
 			{/* Count - large number */}
-			<div className="text-4xl font-bold mb-1 text-primary">{count}</div>
+			<div
+				className="text-4xl font-bold mb-1 text-primary"
+				data-testid={`${testId}-count`}
+			>
+				{count}
+			</div>
 
 			{/* Label - uppercase small text */}
 			<div className="text-xs uppercase font-semibold text-text-muted tracking-wide">

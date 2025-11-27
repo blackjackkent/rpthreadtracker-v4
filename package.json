@@ -8,7 +8,12 @@
 		"start": "next start",
 		"lint": "eslint && tsc",
 		"clean": "rimraf .next",
-		"dev:clean": "npm run clean && npm run dev"
+		"dev:clean": "npm run clean && npm run dev",
+		"test": "playwright test",
+		"test:ui": "playwright test --ui",
+		"test:headed": "playwright test --headed",
+		"test:debug": "playwright test --debug",
+		"test:report": "playwright show-report"
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-svg-core": "^7.1.0",
@@ -29,10 +34,11 @@
 		"zod": "^4.1.12"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.57.0",
 		"@tailwindcss/postcss": "^4",
 		"@types/bcrypt": "^6.0.0",
 		"@types/mssql": "^9.1.8",
-		"@types/node": "^20",
+		"@types/node": "^20.19.25",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
 		"eslint": "^9.39.1",

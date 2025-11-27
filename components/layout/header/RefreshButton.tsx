@@ -17,12 +17,13 @@ export function RefreshButton() {
 			disabled={isRefreshing}
 			className="flex items-center gap-2 px-3 py-2 text-text hover:bg-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 			title="Refresh Tumblr data"
+			data-testid="refresh-tumblr-button"
 		>
 			<FontAwesomeIcon
 				icon={faSync}
 				className={isRefreshing ? "animate-spin" : ""}
 			/>
-			<span className="hidden sm:inline">
+			<span className="hidden sm:inline" data-testid="refresh-progress">
 				{isRefreshing
 					? progress
 						? `Refreshing... ${progress.current}/${progress.total}`
