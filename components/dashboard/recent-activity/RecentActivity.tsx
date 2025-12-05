@@ -34,28 +34,36 @@ export function RecentActivity() {
 
 	if (recentThreads.length === 0) {
 		return (
-			<div className="bg-surface border border-border rounded-lg p-6">
-				<h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-					<FontAwesomeIcon icon={faBolt} className="text-primary" />
-					Recent Activity
-				</h2>
-				<p className="text-text-muted text-sm">
-					You do not owe a reply on any of your threads! Nice job!
-				</p>
+			<div className="bg-surface border border-border rounded-lg shadow-sm flex flex-col md:h-[400px]">
+				<div className="px-4 py-3 border-b-2 border-primary bg-linear-to-r from-primary/5 to-transparent">
+					<h2 className="text-lg font-semibold flex items-center gap-2">
+						<FontAwesomeIcon icon={faBolt} className="w-4 h-4 text-primary" />
+						<span>Recent Activity</span>
+					</h2>
+				</div>
+				<div className="p-4">
+					<p className="text-text-muted text-sm">
+						You do not owe a reply on any of your threads! Nice job!
+					</p>
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="bg-surface border border-border rounded-lg p-6">
-			<h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-				<FontAwesomeIcon icon={faBolt} className="text-primary" />
-				Recent Activity
-			</h2>
-			<div className="divide-y divide-border">
-				{recentThreads.map((thread) => (
-					<RecentThreadItem key={thread.threadId} thread={thread} />
-				))}
+		<div className="bg-surface border border-border rounded-lg shadow-sm flex flex-col md:h-[400px]">
+			<div className="px-4 py-3 border-b-2 border-primary bg-linear-to-r from-primary/5 to-transparent">
+				<h2 className="text-lg font-semibold flex items-center gap-2">
+					<FontAwesomeIcon icon={faBolt} className="w-4 h-4 text-primary" />
+					<span>Recent Activity</span>
+				</h2>
+			</div>
+			<div className="flex-1 overflow-y-auto p-4">
+				<div className="divide-y divide-border">
+					{recentThreads.map((thread) => (
+						<RecentThreadItem key={thread.threadId} thread={thread} />
+					))}
+				</div>
 			</div>
 		</div>
 	);

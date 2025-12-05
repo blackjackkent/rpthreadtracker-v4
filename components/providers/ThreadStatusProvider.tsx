@@ -76,7 +76,6 @@ export function ThreadStatusProvider({
 			setThreadStatuses(result.threadStatuses);
 			setDashboardStats(result.dashboardStats);
 			setLastRefreshed(new Date());
-			toast.success("Thread data refreshed successfully");
 		} catch (error) {
 			console.error("Error refreshing thread statuses:", error);
 			toast.error("Failed to refresh thread data. Please try again.");
