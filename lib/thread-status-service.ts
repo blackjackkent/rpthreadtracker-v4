@@ -146,7 +146,6 @@ function calculateStats(
 	let queuedCount = 0;
 
 	for (const status of allStatuses) {
-		console.log(status);
 		if (status.isQueued) {
 			queuedCount++;
 		}
