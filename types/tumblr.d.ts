@@ -13,7 +13,7 @@ export interface ThreadStatusRequest {
 export interface ThreadStatusResponse {
 	threadId?: number;
 	postId: string;
-	lastPostDate: Date;
+	lastPostDate: Date | null; // null if post not found
 	lastPosterUrlIdentifier: string;
 	lastPostUrl: string;
 	isCallingCharactersTurn: boolean;

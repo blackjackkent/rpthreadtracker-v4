@@ -34,14 +34,19 @@ export async function getTumblrPost(
 	postId: string
 ): Promise<TumblrPost | null> {
 	try {
-		const response = (await client.blogPosts(blogIdentifier, {
+		// Normalize blog identifier to lowercase (Tumblr URLs are case-insensitive)
+		const normalizedBlogIdentifier = blogIdentifier.toLowerCase();
+
+		const response = (await client.blogPosts(normalizedBlogIdentifier, {
 			id: postId,
 			notes_info: true, // Critical: include reblog notes
-			type: "text", // Only fetch text posts (RP threads)
+			// Note: Not filtering by type - posts can be text, photo, link, etc.
 		})) as TumblrBlogPostsResponse;
 
 		if (!response || !response.posts || response.posts.length === 0) {
-			console.warn(`Post not found: blog=${blogIdentifier}, postId=${postId}`);
+			console.warn(
+				`Post not found: blog=${normalizedBlogIdentifier}, postId=${postId}`
+			);
 			return null;
 		}
 

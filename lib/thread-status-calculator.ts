@@ -53,7 +53,7 @@ function getMostRecentRelevantNote(
  * Calculate thread status based on Tumblr post data
  * @param request - Thread status request with post and character info
  * @param post - The Tumblr post data (or null if not found)
- * @returns Thread status response
+ * @returns Thread status response with null date if post not found
  */
 export function calculateThreadStatus(
 	request: ThreadStatusRequest,
@@ -62,15 +62,15 @@ export function calculateThreadStatus(
 	const { threadId, postId, characterUrlIdentifier, partnerUrlIdentifier } =
 		request;
 
-	// Handle missing post - default to character's turn
+	// Handle missing post - mark as user's turn with null date
 	if (!post) {
 		return {
 			threadId,
 			postId,
-			lastPostDate: new Date(),
+			lastPostDate: null, // null indicates post not found
 			lastPosterUrlIdentifier: "",
 			lastPostUrl: "",
-			isCallingCharactersTurn: true,
+			isCallingCharactersTurn: true, // Treat as user's turn
 			isQueued: false,
 		};
 	}
