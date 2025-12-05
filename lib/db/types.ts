@@ -17,14 +17,16 @@ export type {
 	ProfileSettings,
 };
 
-// Thread data for status calculation
+// Thread data for status calculation with character details
 export interface ThreadWithCharacter {
 	ThreadId: number;
 	PostId: string | null;
+	UserTitle: string | null;
 	PartnerUrlIdentifier: string | null;
 	DateMarkedQueued: Date | null;
 	IsArchived: boolean;
 	Characters: {
+		CharacterName: string | null;
 		UrlIdentifier: string | null;
 	};
 }

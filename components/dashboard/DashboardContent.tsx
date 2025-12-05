@@ -1,6 +1,8 @@
 "use client";
 
 import { AtAGlance } from "./at-a-glance/AtAGlance";
+import { RecentActivity } from "./recent-activity/RecentActivity";
+import { YourCharacters } from "./your-characters/YourCharacters";
 import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 
 interface DashboardContentProps {
@@ -33,6 +35,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 					{isRefreshing ? "Loading thread data..." : "No thread data available"}
 				</div>
 			)}
+
+			{/* Two Column Layout for Recent Activity and Your Characters */}
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<RecentActivity />
+				<YourCharacters />
+			</div>
 		</div>
 	);
 }

@@ -7,7 +7,7 @@ import React, {
 	useCallback,
 	useEffect,
 } from "react";
-import type { ThreadStatusResponse } from "@/types/tumblr";
+import type { ThreadStatusWithDetails } from "@/types/tumblr";
 import {
 	refreshThreadStatusesInChunks,
 	type DashboardStats,
@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 
 interface ThreadStatusContextValue {
 	// Thread status data
-	threadStatuses: Map<number, ThreadStatusResponse>;
+	threadStatuses: Map<number, ThreadStatusWithDetails>;
 	dashboardStats: DashboardStats | null;
 
 	// Refresh state
@@ -27,7 +27,7 @@ interface ThreadStatusContextValue {
 
 	// Methods
 	refreshThreadStatuses: () => Promise<void>;
-	getThreadStatus: (threadId: number) => ThreadStatusResponse | null;
+	getThreadStatus: (threadId: number) => ThreadStatusWithDetails | null;
 }
 
 const ThreadStatusContext = createContext<ThreadStatusContextValue | null>(
@@ -52,7 +52,7 @@ export function ThreadStatusProvider({
 	userId,
 }: ThreadStatusProviderProps) {
 	const [threadStatuses, setThreadStatuses] = useState<
-		Map<number, ThreadStatusResponse>
+		Map<number, ThreadStatusWithDetails>
 	>(new Map());
 	const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
 		null
@@ -76,6 +76,7 @@ export function ThreadStatusProvider({
 			setThreadStatuses(result.threadStatuses);
 			setDashboardStats(result.dashboardStats);
 			setLastRefreshed(new Date());
+			toast.success("Thread data refreshed successfully");
 		} catch (error) {
 			console.error("Error refreshing thread statuses:", error);
 			toast.error("Failed to refresh thread data. Please try again.");
@@ -86,7 +87,7 @@ export function ThreadStatusProvider({
 	}, [userId]);
 
 	const getThreadStatus = useCallback(
-		(threadId: number): ThreadStatusResponse | null => {
+		(threadId: number): ThreadStatusWithDetails | null => {
 			return threadStatuses.get(threadId) || null;
 		},
 		[threadStatuses]

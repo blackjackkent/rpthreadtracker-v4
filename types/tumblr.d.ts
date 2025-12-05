@@ -20,6 +20,24 @@ export interface ThreadStatusResponse {
 	isQueued: boolean;
 }
 
+// Thread details from database
+export interface ThreadDetails {
+	threadId: number;
+	postId: string;
+	userTitle: string | null;
+	partnerUrlIdentifier: string | null;
+	dateMarkedQueued: Date | null;
+	characterName: string;
+	characterUrlIdentifier: string;
+}
+
+// Combined thread status with details (used in context)
+export interface ThreadStatusWithDetails extends ThreadStatusResponse {
+	userTitle: string | null;
+	characterName: string;
+	characterUrlIdentifier: string;
+}
+
 // Tumblr API Note types
 export interface TumblrNote {
 	type: string; // "reblog" | "like" | "reply"

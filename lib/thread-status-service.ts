@@ -1,4 +1,8 @@
-import type { ThreadStatusRequest, ThreadStatusResponse } from "@/types/tumblr";
+import type {
+	ThreadStatusRequest,
+	ThreadStatusResponse,
+	ThreadStatusWithDetails,
+} from "@/types/tumblr";
 import { getActiveThreadsForUser } from "./db/thread";
 import { ThreadWithCharacter } from "./db/types";
 
@@ -15,7 +19,7 @@ export interface RefreshProgress {
 }
 
 export interface RefreshResult {
-	threadStatuses: Map<number, ThreadStatusResponse>;
+	threadStatuses: Map<number, ThreadStatusWithDetails>;
 	dashboardStats: DashboardStats;
 }
 
@@ -255,11 +259,27 @@ export async function refreshThreadStatusesInChunks(
 	// Flatten all results
 	const allStatuses = chunkResults.flat();
 
-	// Build thread statuses map
-	const threadStatusesMap = new Map<number, ThreadStatusResponse>();
+	// Build thread lookup map for merging
+	const threadMap = new Map<number, ThreadWithCharacter>();
+	for (const thread of activeThreads) {
+		threadMap.set(thread.ThreadId, thread);
+	}
+
+	// Build thread statuses map with merged details
+	const threadStatusesMap = new Map<number, ThreadStatusWithDetails>();
 	for (const status of allStatuses) {
 		if (status.threadId) {
-			threadStatusesMap.set(status.threadId, status);
+			const thread = threadMap.get(status.threadId);
+			if (thread) {
+				// Merge status with thread details
+				const mergedStatus: ThreadStatusWithDetails = {
+					...status,
+					userTitle: thread.UserTitle,
+					characterName: thread.Characters.CharacterName || "",
+					characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
+				};
+				threadStatusesMap.set(status.threadId, mergedStatus);
+			}
 		}
 	}
 
