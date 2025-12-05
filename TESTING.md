@@ -253,7 +253,7 @@ await fillField(page, 'input[name="login"]', "testuser");
 // Click and wait for navigation
 await clickAndWait(page, '[data-testid="submit-button"]', {
 	waitForNavigation: true,
-	url: "/dashboard",
+	url: "/",
 });
 ```
 
