@@ -146,9 +146,11 @@ function calculateStats(
 	let queuedCount = 0;
 
 	for (const status of allStatuses) {
+		console.log(status);
 		if (status.isQueued) {
 			queuedCount++;
-		} else if (status.isCallingCharactersTurn) {
+		}
+		if (status.isCallingCharactersTurn) {
 			yourTurnCount++;
 		} else {
 			theirTurnCount++;
@@ -227,25 +229,24 @@ export async function refreshThreadStatusesInChunks(
 				cache: "no-store",
 			});
 
-			if (response.ok) {
-				const chunkStatuses: ThreadStatusResponse[] = await response.json();
-
-				// Update progress
-				completedCount += chunk.length;
-				if (onProgress) {
-					onProgress({
-						current: completedCount,
-						total: threadsWithPostId.length,
-					});
-				}
-
-				return chunkStatuses;
+			if (!response.ok) {
+				throw new Error(`Failed to fetch thread statuses: ${response.status}`);
 			}
 
-			return [];
+			const chunkStatuses: ThreadStatusResponse[] = await response.json();
+
+			// Update progress
+			completedCount += chunk.length;
+			if (onProgress) {
+				onProgress({
+					current: completedCount,
+					total: threadsWithPostId.length,
+				});
+			}
+			return chunkStatuses;
 		} catch (error) {
 			console.error("Error fetching chunk:", error);
-			return [];
+			throw error; // Re-throw to propagate the error up
 		}
 	});
 

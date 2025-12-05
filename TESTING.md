@@ -16,6 +16,7 @@ This document explains how to write and run end-to-end (E2E) tests for RPThreadT
 ## Overview
 
 We use **Playwright** for end-to-end testing because it:
+
 - Supports multiple browsers (Chromium, Firefox, WebKit)
 - Handles authentication and session management well
 - Has built-in network mocking for API calls
@@ -102,25 +103,25 @@ npx playwright show-report
 ### Basic Test Structure
 
 ```typescript
-import { test, expect } from '@playwright/test';
-import { mockTumblrAPI } from '../../fixtures/mock-api';
+import { test, expect } from "@playwright/test";
+import { mockTumblrAPI } from "../../fixtures/mock-api";
 
-test.describe('Feature Name', () => {
-  // Mock API before each test
-  test.beforeEach(async ({ page }) => {
-    await mockTumblrAPI(page);
-  });
+test.describe("Feature Name", () => {
+	// Mock API before each test
+	test.beforeEach(async ({ page }) => {
+		await mockTumblrAPI(page);
+	});
 
-  test('should do something', async ({ page }) => {
-    // Navigate to page
-    await page.goto('/');
+	test("should do something", async ({ page }) => {
+		// Navigate to page
+		await page.goto("/");
 
-    // Interact with page
-    await page.click('[data-testid="some-button"]');
+		// Interact with page
+		await page.click('[data-testid="some-button"]');
 
-    // Assert expected behavior
-    await expect(page.locator('[data-testid="result"]')).toBeVisible();
-  });
+		// Assert expected behavior
+		await expect(page.locator('[data-testid="result"]')).toBeVisible();
+	});
 });
 ```
 
@@ -131,13 +132,15 @@ Always prefer `data-testid` selectors over CSS classes or text content:
 ```typescript
 // ✅ GOOD - Uses data-testid
 await page.click('[data-testid="refresh-tumblr-button"]');
-await expect(page.locator('[data-testid="active-threads-count"]')).toHaveText('5');
+await expect(page.locator('[data-testid="active-threads-count"]')).toHaveText(
+	"5"
+);
 
 // ❌ BAD - Uses CSS class (fragile, changes with styling)
-await page.click('.refresh-button');
+await page.click(".refresh-button");
 
 // ❌ BAD - Uses text content (fragile, changes with copy)
-await page.click('text=Refresh');
+await page.click("text=Refresh");
 ```
 
 ### Adding data-testid to Components
@@ -146,16 +149,17 @@ When creating new components, add `data-testid` attributes:
 
 ```tsx
 export const MyComponent = () => {
-  return (
-    <div data-testid="my-component">
-      <button data-testid="my-button">Click me</button>
-      <span data-testid="my-count">{count}</span>
-    </div>
-  );
+	return (
+		<div data-testid="my-component">
+			<button data-testid="my-button">Click me</button>
+			<span data-testid="my-count">{count}</span>
+		</div>
+	);
 };
 ```
 
 **Naming Convention:**
+
 - Use kebab-case: `my-component-name`
 - Be descriptive: `active-threads-count` not just `count`
 - Append type suffix for clarity: `-button`, `-widget`, `-count`, `-form`
@@ -165,6 +169,7 @@ export const MyComponent = () => {
 ### Why Mock APIs?
 
 All tests mock external API calls by default to:
+
 - **Prevent hitting real Tumblr API** (avoid rate limits)
 - **Make tests faster** (no network requests)
 - **Make tests reliable** (no external dependencies)
@@ -177,45 +182,46 @@ Import and use the mock helpers from `tests/fixtures/mock-api.ts`:
 #### Basic Mocking (Default Data)
 
 ```typescript
-import { mockTumblrAPI } from '../../fixtures/mock-api';
+import { mockTumblrAPI } from "../../fixtures/mock-api";
 
 test.beforeEach(async ({ page }) => {
-  await mockTumblrAPI(page);
+	await mockTumblrAPI(page);
 });
 ```
 
 This mocks:
+
 - `POST /api/thread` - Returns 3 mock threads (1 your turn, 1 their turn, 1 queued)
 - `GET /api/threads/active` - Returns 3 mock active threads
 
 #### Custom Data Mocking
 
 ```typescript
-import { mockTumblrAPIWithCustomData } from '../../fixtures/mock-api';
+import { mockTumblrAPIWithCustomData } from "../../fixtures/mock-api";
 
-test('should display 10 active threads', async ({ page }) => {
-  await mockTumblrAPIWithCustomData(page, {
-    activeCount: 10,
-    yourTurnCount: 4,
-    theirTurnCount: 5,
-    queuedCount: 1,
-  });
+test("should display 10 active threads", async ({ page }) => {
+	await mockTumblrAPIWithCustomData(page, {
+		activeCount: 10,
+		yourTurnCount: 4,
+		theirTurnCount: 5,
+		queuedCount: 1,
+	});
 
-  await page.goto('/');
-  // ... assertions
+	await page.goto("/");
+	// ... assertions
 });
 ```
 
 #### Error Scenario Mocking
 
 ```typescript
-import { mockTumblrAPI } from '../../fixtures/mock-api';
+import { mockTumblrAPI } from "../../fixtures/mock-api";
 
-test('should handle API errors', async ({ page }) => {
-  await mockTumblrAPI(page, { shouldFail: true });
+test("should handle API errors", async ({ page }) => {
+	await mockTumblrAPI(page, { shouldFail: true });
 
-  await page.goto('/');
-  // ... expect error toast
+	await page.goto("/");
+	// ... expect error toast
 });
 ```
 
@@ -225,10 +231,10 @@ For tests that need real database calls but mock external APIs:
 
 ```typescript
 test.beforeEach(async ({ page }) => {
-  // Only mock Tumblr API, let database calls through
-  await page.route('**/api/thread', (route) => {
-    route.fulfill({ status: 200, body: JSON.stringify(mockData) });
-  });
+	// Only mock Tumblr API, let database calls through
+	await page.route("**/api/thread", (route) => {
+		route.fulfill({ status: 200, body: JSON.stringify(mockData) });
+	});
 });
 ```
 
@@ -239,31 +245,35 @@ We provide utility functions in `tests/utils/test-helpers.ts`:
 ### Form Helpers
 
 ```typescript
-import { fillField, clickAndWait } from '../utils/test-helpers';
+import { fillField, clickAndWait } from "../utils/test-helpers";
 
 // Fill a field and verify it was filled
-await fillField(page, 'input[name="username"]', 'testuser');
+await fillField(page, 'input[name="login"]', "testuser");
 
 // Click and wait for navigation
 await clickAndWait(page, '[data-testid="submit-button"]', {
-  waitForNavigation: true,
-  url: '/dashboard',
+	waitForNavigation: true,
+	url: "/dashboard",
 });
 ```
 
 ### Toast Notifications
 
 ```typescript
-import { waitForToast } from '../utils/test-helpers';
+import { waitForToast } from "../utils/test-helpers";
 
-await waitForToast(page, 'success');
-await waitForToast(page, 'error', 10000); // Custom timeout
+await waitForToast(page, "success");
+await waitForToast(page, "error", 10000); // Custom timeout
 ```
 
 ### Element Helpers
 
 ```typescript
-import { waitForElement, getNumericValue, elementExists } from '../utils/test-helpers';
+import {
+	waitForElement,
+	getNumericValue,
+	elementExists,
+} from "../utils/test-helpers";
 
 // Wait for element
 await waitForElement(page, '[data-testid="my-component"]');
@@ -274,14 +284,14 @@ expect(count).toBe(5);
 
 // Check if element exists
 if (await elementExists(page, '[data-testid="error-message"]')) {
-  // Handle error state
+	// Handle error state
 }
 ```
 
 ### Authentication Helpers
 
 ```typescript
-import { login, logout, isLoggedIn } from '../utils/test-helpers';
+import { login, logout, isLoggedIn } from "../utils/test-helpers";
 
 // Login without using fixture
 test.use({ storageState: { cookies: [], origins: [] } }); // No auth
@@ -297,10 +307,10 @@ const loggedIn = await isLoggedIn(page);
 ### API Helpers
 
 ```typescript
-import { waitForAPIResponse } from '../utils/test-helpers';
+import { waitForAPIResponse } from "../utils/test-helpers";
 
 // Wait for specific API call
-await waitForAPIResponse(page, '/api/threads/active', 200);
+await waitForAPIResponse(page, "/api/threads/active", 200);
 ```
 
 ## Best Practices
@@ -309,7 +319,7 @@ await waitForAPIResponse(page, '/api/threads/active', 200);
 
 ```typescript
 test.beforeEach(async ({ page }) => {
-  await mockTumblrAPI(page); // Prevents real API calls
+	await mockTumblrAPI(page); // Prevents real API calls
 });
 ```
 
@@ -320,24 +330,24 @@ test.beforeEach(async ({ page }) => {
 await page.click('[data-testid="submit-button"]');
 
 // ❌ BAD
-await page.click('.btn-primary');
+await page.click(".btn-primary");
 ```
 
 ### 3. **Test User Behavior, Not Implementation**
 
 ```typescript
 // ✅ GOOD - Tests what user sees
-test('should show error when login fails', async ({ page }) => {
-  await page.goto('/login');
-  await page.fill('input[name="username"]', 'wrong');
-  await page.fill('input[name="password"]', 'wrong');
-  await page.click('button[type="submit"]');
-  await expect(page.locator('text=/invalid|incorrect/i')).toBeVisible();
+test("should show error when login fails", async ({ page }) => {
+	await page.goto("/login");
+	await page.fill('input[name="login"]', "wrong");
+	await page.fill('input[name="password"]', "wrong");
+	await page.click('button[type="submit"]');
+	await expect(page.locator("text=/invalid|incorrect/i")).toBeVisible();
 });
 
 // ❌ BAD - Tests implementation details
-test('should call loginUser function', async ({ page }) => {
-  // Don't test internal function calls, test user-visible outcomes
+test("should call loginUser function", async ({ page }) => {
+	// Don't test internal function calls, test user-visible outcomes
 });
 ```
 
@@ -357,9 +367,9 @@ Each test should be able to run in isolation:
 
 ```typescript
 test.beforeEach(async ({ page }) => {
-  // Reset state for each test
-  await mockTumblrAPI(page);
-  await page.goto('/');
+	// Reset state for each test
+	await mockTumblrAPI(page);
+	await page.goto("/");
 });
 ```
 
@@ -367,29 +377,33 @@ test.beforeEach(async ({ page }) => {
 
 ```typescript
 // ✅ GOOD
-test('should display error toast when refresh fails');
+test("should display error toast when refresh fails");
 
 // ❌ BAD
-test('error handling');
+test("error handling");
 ```
 
 ### 7. **Group Related Tests**
 
 ```typescript
-test.describe('Dashboard - At a Glance', () => {
-  test.describe('Widget Navigation', () => {
-    test('should navigate to Your Turn when clicking widget', async ({ page }) => {
-      // ...
-    });
+test.describe("Dashboard - At a Glance", () => {
+	test.describe("Widget Navigation", () => {
+		test("should navigate to Your Turn when clicking widget", async ({
+			page,
+		}) => {
+			// ...
+		});
 
-    test('should navigate to Their Turn when clicking widget', async ({ page }) => {
-      // ...
-    });
-  });
+		test("should navigate to Their Turn when clicking widget", async ({
+			page,
+		}) => {
+			// ...
+		});
+	});
 
-  test.describe('Refresh Functionality', () => {
-    // ...
-  });
+	test.describe("Refresh Functionality", () => {
+		// ...
+	});
 });
 ```
 
@@ -403,7 +417,7 @@ test.describe('Dashboard - At a Glance', () => {
 
 ```typescript
 test.beforeEach(async ({ page }) => {
-  await mockTumblrAPI(page);
+	await mockTumblrAPI(page);
 });
 ```
 
@@ -412,6 +426,7 @@ test.beforeEach(async ({ page }) => {
 **Symptom:** Tests redirecting to login page unexpectedly.
 
 **Solution:**
+
 1. Check that test user exists in database
 2. Verify credentials in `.env.test.local` or `auth.setup.ts`
 3. Run auth setup manually: `npx playwright test tests/e2e/auth/auth.setup.ts`
@@ -422,6 +437,7 @@ test.beforeEach(async ({ page }) => {
 **Symptom:** `Error: locator.click: Target closed` or timeout errors.
 
 **Solution:**
+
 1. Check component has `data-testid` attribute
 2. Run test in headed mode to see what's on page: `npx playwright test --headed`
 3. Use debug mode: `npx playwright test --debug`
@@ -432,6 +448,7 @@ test.beforeEach(async ({ page }) => {
 **Symptom:** Tests pass/fail randomly.
 
 **Solution:**
+
 1. Add proper waits: `await expect(locator).toBeVisible()` instead of `await page.waitForTimeout()`
 2. Increase timeout for slow operations: `{ timeout: 10000 }`
 3. Check for race conditions (concurrent API calls)
@@ -442,6 +459,7 @@ test.beforeEach(async ({ page }) => {
 **Symptom:** `Error: connect ECONNREFUSED ::1:3000`
 
 **Solution:**
+
 1. Make sure dev server isn't already running
 2. Kill any orphaned Node processes
 3. Check port 3000 is available: `netstat -ano | findstr :3000`
@@ -480,18 +498,18 @@ touch tests/e2e/threads/thread-list.spec.ts
 ### 2. Write Test
 
 ```typescript
-import { test, expect } from '@playwright/test';
-import { mockTumblrAPI } from '../../fixtures/mock-api';
+import { test, expect } from "@playwright/test";
+import { mockTumblrAPI } from "../../fixtures/mock-api";
 
-test.describe('Thread List', () => {
-  test.beforeEach(async ({ page }) => {
-    await mockTumblrAPI(page);
-  });
+test.describe("Thread List", () => {
+	test.beforeEach(async ({ page }) => {
+		await mockTumblrAPI(page);
+	});
 
-  test('should display all threads', async ({ page }) => {
-    await page.goto('/threads/all');
-    await expect(page.locator('[data-testid="thread-list"]')).toBeVisible();
-  });
+	test("should display all threads", async ({ page }) => {
+		await page.goto("/threads/all");
+		await expect(page.locator('[data-testid="thread-list"]')).toBeVisible();
+	});
 });
 ```
 
@@ -500,11 +518,7 @@ test.describe('Thread List', () => {
 ```tsx
 // components/threads/ThreadList.tsx
 export const ThreadList = () => {
-  return (
-    <div data-testid="thread-list">
-      {/* ... */}
-    </div>
-  );
+	return <div data-testid="thread-list">{/* ... */}</div>;
 };
 ```
 
@@ -530,7 +544,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install dependencies
         run: npm ci
@@ -560,6 +574,7 @@ jobs:
 ## Questions?
 
 If you encounter issues not covered here:
+
 1. Check the [Playwright documentation](https://playwright.dev)
 2. Run tests in debug mode: `npx playwright test --debug`
 3. Open an issue in the repository

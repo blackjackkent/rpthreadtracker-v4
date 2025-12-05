@@ -15,7 +15,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 			<div>
 				<h1 className="text-3xl font-semibold">Dashboard</h1>
 				<p className="text-text-muted mt-1">
-					Welcome back, <span className="font-semibold text-text">{userName}</span>
+					Welcome back,{" "}
+					<span className="font-semibold text-text">{userName}</span>
 				</p>
 			</div>
 

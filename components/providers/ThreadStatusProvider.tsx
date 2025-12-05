@@ -13,6 +13,7 @@ import {
 	type DashboardStats,
 	type RefreshProgress,
 } from "@/lib/thread-status-service";
+import { toast } from "react-toastify";
 
 interface ThreadStatusContextValue {
 	// Thread status data
@@ -36,9 +37,7 @@ const ThreadStatusContext = createContext<ThreadStatusContextValue | null>(
 export function useThreadStatus() {
 	const context = useContext(ThreadStatusContext);
 	if (!context) {
-		throw new Error(
-			"useThreadStatus must be used within ThreadStatusProvider"
-		);
+		throw new Error("useThreadStatus must be used within ThreadStatusProvider");
 	}
 	return context;
 }
@@ -77,8 +76,10 @@ export function ThreadStatusProvider({
 			setThreadStatuses(result.threadStatuses);
 			setDashboardStats(result.dashboardStats);
 			setLastRefreshed(new Date());
+			toast.success("Thread data refreshed successfully");
 		} catch (error) {
 			console.error("Error refreshing thread statuses:", error);
+			toast.error("Failed to refresh thread data. Please try again.");
 		} finally {
 			setIsRefreshing(false);
 			setProgress(null);

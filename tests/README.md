@@ -40,31 +40,39 @@ tests/
 ## Key Features
 
 ### ✅ Automatic Authentication
+
 Tests use a stored authentication state, so you don't need to log in for every test.
 
 ### ✅ API Mocking
+
 All tests mock external API calls to prevent hitting the real Tumblr API:
 
 ```typescript
-import { mockTumblrAPI } from '../../fixtures/mock-api';
+import { mockTumblrAPI } from "../../fixtures/mock-api";
 
 test.beforeEach(async ({ page }) => {
-  await mockTumblrAPI(page); // Mocks Tumblr API calls
+	await mockTumblrAPI(page); // Mocks Tumblr API calls
 });
 ```
 
 ### ✅ Test Helpers
+
 Utility functions for common tasks:
 
 ```typescript
-import { fillField, waitForToast, getNumericValue } from '../utils/test-helpers';
+import {
+	fillField,
+	waitForToast,
+	getNumericValue,
+} from "../utils/test-helpers";
 
-await fillField(page, 'input[name="username"]', 'testuser');
-await waitForToast(page, 'success');
+await fillField(page, 'input[name="login"]', "testuser");
+await waitForToast(page, "success");
 const count = await getNumericValue(page, '[data-testid="thread-count"]');
 ```
 
 ### ✅ data-testid Selectors
+
 Components use `data-testid` attributes for reliable test selectors:
 
 ```typescript
@@ -72,47 +80,51 @@ Components use `data-testid` attributes for reliable test selectors:
 await page.click('[data-testid="refresh-button"]');
 
 // ❌ Fragile - breaks when CSS classes change
-await page.click('.btn-primary');
+await page.click(".btn-primary");
 ```
 
 ## Writing Your First Test
 
 1. **Create test file:**
+
 ```bash
 touch tests/e2e/my-feature/my-test.spec.ts
 ```
 
 2. **Write test:**
+
 ```typescript
-import { test, expect } from '@playwright/test';
-import { mockTumblrAPI } from '../../fixtures/mock-api';
+import { test, expect } from "@playwright/test";
+import { mockTumblrAPI } from "../../fixtures/mock-api";
 
-test.describe('My Feature', () => {
-  test.beforeEach(async ({ page }) => {
-    await mockTumblrAPI(page);
-  });
+test.describe("My Feature", () => {
+	test.beforeEach(async ({ page }) => {
+		await mockTumblrAPI(page);
+	});
 
-  test('should work correctly', async ({ page }) => {
-    await page.goto('/my-page');
-    await page.click('[data-testid="my-button"]');
-    await expect(page.locator('[data-testid="result"]')).toBeVisible();
-  });
+	test("should work correctly", async ({ page }) => {
+		await page.goto("/my-page");
+		await page.click('[data-testid="my-button"]');
+		await expect(page.locator('[data-testid="result"]')).toBeVisible();
+	});
 });
 ```
 
 3. **Add data-testid to component:**
+
 ```tsx
 export const MyComponent = () => {
-  return (
-    <div data-testid="my-component">
-      <button data-testid="my-button">Click me</button>
-      <span data-testid="result">Success!</span>
-    </div>
-  );
+	return (
+		<div data-testid="my-component">
+			<button data-testid="my-button">Click me</button>
+			<span data-testid="result">Success!</span>
+		</div>
+	);
 };
 ```
 
 4. **Run test:**
+
 ```bash
 npx playwright test tests/e2e/my-feature/my-test.spec.ts
 ```
@@ -135,6 +147,7 @@ Test configuration is in `playwright.config.ts`. Key settings:
 You need a test user in your database. Configure credentials in one of two ways:
 
 **Option 1: Environment Variables (Recommended)**
+
 ```env
 # .env.test.local
 TEST_USERNAME=testuser
@@ -147,6 +160,7 @@ Edit `tests/e2e/auth/auth.setup.ts` and update the credentials.
 ### First Time Setup
 
 Run the authentication setup once:
+
 ```bash
 npx playwright test tests/e2e/auth/auth.setup.ts
 ```
@@ -184,23 +198,26 @@ npx playwright codegen http://localhost:3000
 ## Debugging
 
 ### View test in slow motion:
+
 ```bash
 npx playwright test --headed --slowMo=1000
 ```
 
 ### Use debug mode:
+
 ```bash
 npm run test:debug
 ```
 
 ### Check what's on the page:
+
 ```typescript
 // Print all data-testids
-const testIds = await page.locator('[data-testid]').allTextContents();
+const testIds = await page.locator("[data-testid]").allTextContents();
 console.log(testIds);
 
 // Take screenshot
-await page.screenshot({ path: 'debug.png' });
+await page.screenshot({ path: "debug.png" });
 
 // Pause execution
 await page.pause();
@@ -209,6 +226,7 @@ await page.pause();
 ## Full Documentation
 
 See [TESTING.md](../TESTING.md) for comprehensive documentation including:
+
 - Best practices
 - Troubleshooting guide
 - CI/CD integration

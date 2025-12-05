@@ -7,13 +7,9 @@ import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 export function RefreshButton() {
 	const { refreshThreadStatuses, isRefreshing, progress } = useThreadStatus();
 
-	const handleRefresh = () => {
-		refreshThreadStatuses();
-	};
-
 	return (
 		<button
-			onClick={handleRefresh}
+			onClick={refreshThreadStatuses}
 			disabled={isRefreshing}
 			className="flex items-center gap-2 px-3 py-2 text-text hover:bg-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 			title="Refresh Tumblr data"
