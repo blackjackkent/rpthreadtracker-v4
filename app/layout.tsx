@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
 import "./globals.css";
 import "@/lib/fontawesome";
 import { Providers } from "@/components/Providers";
-
-export const metadata: Metadata = {
-	title: "RPThreadTracker",
-	description: "RP and Collaborative Writing Management Tool",
-};
+import { LayoutContent } from "@/components/layout/LayoutContent";
 
 export default function RootLayout({
 	children,
@@ -16,7 +11,9 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className="antialiased">
-				<Providers>{children}</Providers>
+				<Providers>
+					<LayoutContent>{children}</LayoutContent>
+				</Providers>
 			</body>
 		</html>
 	);
