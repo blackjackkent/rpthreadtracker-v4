@@ -97,7 +97,7 @@ export function RecentThreadItem({ thread }: RecentThreadItemProps) {
 				{/* Right Column: Date & Actions */}
 				<div className="text-xs sm:text-right">
 					<div className="text-text-muted mb-1">
-						{formatDate(thread.lastPostDate)}
+						{!!thread.lastPostDate && formatDate(thread.lastPostDate)}
 					</div>
 					<div className="flex flex-wrap gap-1 sm:justify-end">
 						<button
