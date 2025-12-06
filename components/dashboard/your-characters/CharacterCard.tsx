@@ -7,11 +7,18 @@ interface CharacterCardProps {
 }
 
 export function CharacterCard({ character }: CharacterCardProps) {
-	const displayName = character.characterName || character.characterUrlIdentifier;
+	const displayName =
+		character.characterName || character.characterUrlIdentifier;
+	const tumblrUrl = `https://${character.characterUrlIdentifier}.tumblr.com`;
 
 	return (
-		<div className="bg-background border border-border rounded-lg p-4 hover:border-primary transition-colors">
-			<div className="flex items-start justify-between gap-2">
+		<a
+			href={tumblrUrl}
+			target="_blank"
+			rel="noopener noreferrer"
+			className="bg-background border border-border rounded-lg p-4 hover:border-primary transition-colors block"
+		>
+			<div className="flex items-center justify-between gap-2">
 				<div className="flex-1 min-w-0">
 					<h3 className="font-medium text-sm truncate">{displayName}</h3>
 					{character.characterName && (
@@ -26,6 +33,6 @@ export function CharacterCard({ character }: CharacterCardProps) {
 					</span>
 				</div>
 			</div>
-		</div>
+		</a>
 	);
 }
