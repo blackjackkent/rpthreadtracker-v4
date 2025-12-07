@@ -4,8 +4,18 @@ import { faCirclePlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 
-export const AddMenu = () => {
+interface AddMenuProps {
+	onAddCharacter: () => void;
+}
+
+export const AddMenu = ({ onAddCharacter }: AddMenuProps) => {
 	const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+
+	const handleAddCharacter = () => {
+		setIsAddMenuOpen(false);
+		onAddCharacter();
+	};
+
 	return (
 		<div className="relative">
 			<button
@@ -24,7 +34,7 @@ export const AddMenu = () => {
 						Track New Thread
 					</button>
 					<button
-						onClick={() => setIsAddMenuOpen(false)}
+						onClick={handleAddCharacter}
 						className="w-full text-left px-4 py-2 hover:bg-background transition-colors"
 					>
 						Add Character
