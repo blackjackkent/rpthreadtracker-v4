@@ -30,7 +30,7 @@ export default async function ArchivedPage() {
 			lastPostDate: null,
 			lastPosterUrlIdentifier: "",
 			lastPostUrl: "",
-			isCallingCharactersTurn: undefined,
+			isCallingCharactersTurn: false, // Archived threads don't have turn status
 			isQueued: thread.DateMarkedQueued !== null,
 
 			// Tags

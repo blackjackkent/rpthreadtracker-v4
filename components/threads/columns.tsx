@@ -35,7 +35,9 @@ export const createThreadColumns = (
 			<input
 				type="checkbox"
 				checked={table.getIsAllRowsSelected()}
-				indeterminate={table.getIsSomeRowsSelected()}
+				ref={(el) => {
+					if (el) el.indeterminate = table.getIsSomeRowsSelected();
+				}}
 				onChange={table.getToggleAllRowsSelectedHandler()}
 				className="cursor-pointer"
 			/>

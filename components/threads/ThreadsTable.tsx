@@ -13,13 +13,17 @@ import {
 	RowSelectionState,
 } from "@tanstack/react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSort, faSortUp, faSortDown } from "@fortawesome/free-solid-svg-icons";
+import {
+	faSort,
+	faSortUp,
+	faSortDown,
+} from "@fortawesome/free-solid-svg-icons";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { ThreadExpandedRow } from "./ThreadExpandedRow";
 
 interface ThreadsTableProps {
 	threads: ThreadStatusWithDetails[];
-	columns: ColumnDef<ThreadStatusWithDetails, any>[];
+	columns: ColumnDef<ThreadStatusWithDetails>[];
 	onRowSelectionChange?: (selectedThreadIds: number[]) => void;
 	initialPageSize?: number; // User's saved preference from ProfileSettings
 }
@@ -84,7 +88,8 @@ export const ThreadsTable = ({
 										key={header.id}
 										className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider"
 										style={{
-											width: header.getSize() !== 150 ? header.getSize() : undefined,
+											width:
+												header.getSize() !== 150 ? header.getSize() : undefined,
 										}}
 									>
 										{header.isPlaceholder ? null : (
@@ -113,7 +118,10 @@ export const ThreadsTable = ({
 																className="w-3 h-3"
 															/>
 														) : (
-															<FontAwesomeIcon icon={faSort} className="w-3 h-3" />
+															<FontAwesomeIcon
+																icon={faSort}
+																className="w-3 h-3"
+															/>
 														)}
 													</span>
 												)}
@@ -131,7 +139,10 @@ export const ThreadsTable = ({
 								<tr className="hover:bg-background/50">
 									{row.getVisibleCells().map((cell) => (
 										<td key={cell.id} className="px-4 py-3 text-sm text-text">
-											{flexRender(cell.column.columnDef.cell, cell.getContext())}
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext()
+											)}
 										</td>
 									))}
 								</tr>

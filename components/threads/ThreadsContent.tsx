@@ -13,6 +13,7 @@ import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { ThreadsTable } from "./ThreadsTable";
 import { createThreadColumns } from "./columns";
 import type { ThreadFilterFunction } from "./filters";
+import type { ColumnDef } from "@tanstack/react-table";
 
 interface ThreadsContentProps {
 	threads: ThreadStatusWithDetails[];
@@ -118,7 +119,7 @@ export const ThreadsContent = ({
 		// TODO: Show confirmation dialog, call bulk delete server action
 	};
 
-	const columns = createThreadColumns(columnActions, isArchived);
+	const columns = createThreadColumns(columnActions, isArchived) as ColumnDef<ThreadStatusWithDetails>[];
 
 	return (
 		<div className="space-y-6 p-6">
