@@ -3,6 +3,8 @@
 import { AtAGlance } from "./at-a-glance/AtAGlance";
 import { RecentActivity } from "./recent-activity/RecentActivity";
 import { YourCharacters } from "./your-characters/YourCharacters";
+import { RandomThreadGenerator } from "./random-thread/RandomThreadGenerator";
+import { SupportTracker } from "./support/SupportTracker";
 import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 
 interface DashboardContentProps {
@@ -40,6 +42,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 				<RecentActivity />
 				<YourCharacters />
+			</div>
+
+			{/* Two Column Layout for Random Thread Generator and Support */}
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<RandomThreadGenerator />
+				<SupportTracker />
 			</div>
 		</div>
 	);
