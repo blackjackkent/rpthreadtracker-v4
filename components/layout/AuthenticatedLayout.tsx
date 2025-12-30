@@ -63,6 +63,7 @@ export const AuthenticatedLayout = ({
 				<Footer />
 
 				<UpsertCharacterModal
+					key={isAddCharacterModalOpen ? "add-character" : "closed"}
 					isOpen={isAddCharacterModalOpen}
 					onClose={() => setIsAddCharacterModalOpen(false)}
 					onSubmit={handleAddCharacter}

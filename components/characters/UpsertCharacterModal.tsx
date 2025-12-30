@@ -1,9 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import type { Character } from "./columns";
+
+const characterFormSchema = z.object({
+	characterName: z.string().optional(),
+	urlIdentifier: z
+		.string()
+		.min(1, "URL Identifier is required")
+		.regex(
+			/^[A-Za-z\d-]+$/,
+			"URL Identifier must contain only letters, numbers, and hyphens"
+		),
+});
+
+type CharacterFormData = z.infer<typeof characterFormSchema>;
 
 interface UpsertCharacterModalProps {
 	isOpen: boolean;
@@ -24,48 +40,40 @@ export const UpsertCharacterModal = ({
 	characterToEdit,
 	isLoading = false,
 }: UpsertCharacterModalProps) => {
-	const [characterName, setCharacterName] = useState("");
-	const [urlIdentifier, setUrlIdentifier] = useState("");
-	const [error, setError] = useState("");
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		setError,
+		reset,
+	} = useForm<CharacterFormData>({
+		resolver: zodResolver(characterFormSchema),
+		defaultValues: {
+			characterName: characterToEdit?.characterName || "",
+			urlIdentifier: characterToEdit?.urlIdentifier || "",
+		},
+	});
 
-	// Pre-fill form when editing
+	// Reset form when characterToEdit changes
 	useEffect(() => {
-		if (characterToEdit) {
-			setCharacterName(characterToEdit.characterName || "");
-			setUrlIdentifier(characterToEdit.urlIdentifier || "");
-		} else {
-			setCharacterName("");
-			setUrlIdentifier("");
-		}
-		setError("");
-	}, [characterToEdit, isOpen]);
+		reset({
+			characterName: characterToEdit?.characterName || "",
+			urlIdentifier: characterToEdit?.urlIdentifier || "",
+		});
+	}, [characterToEdit, reset]);
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError("");
-
-		// Validate
-		if (!urlIdentifier.trim()) {
-			setError("URL Identifier is required");
-			return;
-		}
-
-		if (!/^[A-z\d-]+$/.test(urlIdentifier)) {
-			setError(
-				"URL Identifier must contain only letters, numbers, and hyphens"
-			);
-			return;
-		}
-
+	const onSubmitForm = async (data: CharacterFormData) => {
 		try {
 			await onSubmit({
-				characterName: characterName.trim() || undefined,
-				urlIdentifier: urlIdentifier.trim(),
-				platformId: 1, // Tumblr
+				characterName: data.characterName?.trim() || undefined,
+				urlIdentifier: data.urlIdentifier.trim(),
+				platformId: 1, // Always Tumblr
 			});
 			onClose();
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "An error occurred");
+			setError("root", {
+				message: err instanceof Error ? err.message : "An error occurred",
+			});
 		}
 	};
 
@@ -74,10 +82,7 @@ export const UpsertCharacterModal = ({
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center">
 			{/* Backdrop */}
-			<div
-				className="absolute inset-0 bg-black/50"
-				onClick={onClose}
-			></div>
+			<div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
 
 			{/* Modal */}
 			<div className="relative bg-surface border border-border rounded-lg shadow-xl w-full max-w-md mx-4">
@@ -95,11 +100,11 @@ export const UpsertCharacterModal = ({
 				</div>
 
 				{/* Body */}
-				<form onSubmit={handleSubmit}>
+				<form onSubmit={handleSubmit(onSubmitForm)}>
 					<div className="px-6 py-4 space-y-4">
-						{error && (
+						{errors.root && (
 							<div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded">
-								{error}
+								{errors.root.message}
 							</div>
 						)}
 
@@ -114,12 +119,16 @@ export const UpsertCharacterModal = ({
 							<input
 								type="text"
 								id="characterName"
-								value={characterName}
-								onChange={(e) => setCharacterName(e.target.value)}
+								{...register("characterName")}
 								className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
 								placeholder="Character Name (optional)"
 								disabled={isLoading}
 							/>
+							{errors.characterName && (
+								<p className="mt-1 text-xs text-red-500">
+									{errors.characterName.message}
+								</p>
+							)}
 						</div>
 
 						{/* Platform (disabled, always Tumblr) */}
@@ -150,19 +159,23 @@ export const UpsertCharacterModal = ({
 							<input
 								type="text"
 								id="urlIdentifier"
-								value={urlIdentifier}
-								onChange={(e) => setUrlIdentifier(e.target.value)}
+								{...register("urlIdentifier")}
 								className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
 								placeholder="myawesomeblog"
-								required
 								disabled={isLoading}
 							/>
+							{errors.urlIdentifier && (
+								<p className="mt-1 text-xs text-red-500">
+									{errors.urlIdentifier.message}
+								</p>
+							)}
 							<p className="mt-1 text-xs text-text-muted">
 								For a Tumblr account, this will be the part of your URL before
-								".tumblr.com". For instance, if your URL is{" "}
-								<strong>http://myawesomeblog.tumblr.com</strong>, you would enter{" "}
-								<strong>myawesomeblog</strong> in this field. (You can track more
-								than one character with the same URL, if your blog is multi-muse.)
+								&quot;.tumblr.com&quot;. For instance, if your URL is{" "}
+								<strong>http://myawesomeblog.tumblr.com</strong>, you would
+								enter <strong>myawesomeblog</strong> in this field. (You can
+								track more than one character with the same URL, if your blog is
+								multi-muse.)
 							</p>
 						</div>
 					</div>

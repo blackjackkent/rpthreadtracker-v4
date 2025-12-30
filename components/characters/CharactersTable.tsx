@@ -9,7 +9,11 @@ import {
 	type SortingState,
 } from "@tanstack/react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSort, faSortUp, faSortDown } from "@fortawesome/free-solid-svg-icons";
+import {
+	faSort,
+	faSortUp,
+	faSortDown,
+} from "@fortawesome/free-solid-svg-icons";
 import { createCharacterColumns, type Character } from "./columns";
 
 interface CharactersTableProps {
@@ -39,6 +43,8 @@ export const CharactersTable = ({
 		[onEdit, onToggleHiatus, onDelete]
 	);
 
+	// TanStack Table v8 works with React 19 but isn't optimized by React Compiler yet
+	// eslint-disable-next-line react-hooks/incompatible-library
 	const table = useReactTable({
 		data: characters,
 		columns,
@@ -54,7 +60,7 @@ export const CharactersTable = ({
 		return (
 			<div className="bg-surface border border-border rounded-lg p-8 text-center">
 				<p className="text-text-muted">
-					No characters found. Click "Add Character" to get started!
+					No characters found. Click &quot;Add Character&quot; to get started!
 				</p>
 			</div>
 		);
@@ -88,8 +94,8 @@ export const CharactersTable = ({
 															header.column.getIsSorted() === "asc"
 																? faSortUp
 																: header.column.getIsSorted() === "desc"
-																	? faSortDown
-																	: faSort
+																? faSortDown
+																: faSort
 														}
 														className="w-3 h-3 text-text-muted"
 													/>

@@ -127,6 +127,7 @@ export const CharactersContent = ({
 			/>
 
 			<UpsertCharacterModal
+				key={characterToEdit?.characterId || (isModalOpen ? "new" : "closed")}
 				isOpen={isModalOpen}
 				onClose={handleCloseModal}
 				onSubmit={handleSubmit}

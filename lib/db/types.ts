@@ -1,21 +1,6 @@
-import type {
-	AspNetUsers,
-	Characters,
-	Threads,
-	ThreadTags,
-	Platforms,
-	ProfileSettings,
-} from "@prisma/client";
-
-// Re-export Prisma-generated types
-export type {
-	AspNetUsers,
-	Characters,
-	Threads,
-	ThreadTags,
-	Platforms,
-	ProfileSettings,
-};
+// Prisma generates types from the schema automatically
+// Import them from @prisma/client if needed in other files
+export type { AspNetUsers, Characters, Threads, ThreadTags, Platforms, ProfileSettings } from "@prisma/client";
 
 // Thread data for status calculation with character details
 export interface ThreadWithCharacter {
