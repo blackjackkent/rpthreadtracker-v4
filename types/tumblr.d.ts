@@ -31,11 +31,40 @@ export interface ThreadDetails {
 	characterUrlIdentifier: string;
 }
 
-// Combined thread status with details (used in context)
+// Thread tag from database
+export interface ThreadTag {
+	tagId: string; // TagID (PK, UUID)
+	tagText: string; // TagText (max 140 chars)
+	threadId: number; // ThreadID (FK)
+}
+
+// Combined thread status with details (used in context and thread tables)
 export interface ThreadStatusWithDetails extends ThreadStatusResponse {
+	// Fields from ThreadDetails
 	userTitle: string | null;
 	characterName: string;
 	characterUrlIdentifier: string;
+
+	// Additional database fields needed for thread management
+	partnerUrlIdentifier: string | null;
+	dateMarkedQueued: Date | null;
+	isArchived: boolean;
+	description: string | null;
+	characterId: number;
+
+	// Tags from ThreadTags table
+	tags?: ThreadTag[];
+}
+
+// Thread form data for create/update operations
+export interface ThreadFormData {
+	threadId?: number; // undefined for create
+	userTitle?: string;
+	characterId: number;
+	partnerUrlIdentifier?: string;
+	postId: string;
+	description?: string;
+	tags?: string[]; // array of tag text strings (not full tag objects)
 }
 
 // Tumblr API Note types

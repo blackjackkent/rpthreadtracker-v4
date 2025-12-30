@@ -274,9 +274,21 @@ export async function refreshThreadStatusesInChunks(
 				// Merge status with thread details
 				const mergedStatus: ThreadStatusWithDetails = {
 					...status,
+					// Database fields
 					userTitle: thread.UserTitle,
 					characterName: thread.Characters.CharacterName || "",
 					characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
+					partnerUrlIdentifier: thread.PartnerUrlIdentifier,
+					dateMarkedQueued: thread.DateMarkedQueued,
+					isArchived: thread.IsArchived,
+					description: thread.Description,
+					characterId: thread.Characters.CharacterId,
+					// Tags (will need to be fetched separately if needed)
+					tags: thread.ThreadTags?.map((tag) => ({
+						tagId: tag.TagID,
+						tagText: tag.TagText,
+						threadId: tag.ThreadID || 0,
+					})),
 				};
 				threadStatusesMap.set(status.threadId, mergedStatus);
 			}
