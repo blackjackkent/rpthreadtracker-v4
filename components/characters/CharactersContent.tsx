@@ -12,6 +12,7 @@ import {
 	toggleCharacterHiatus,
 	deleteCharacter,
 } from "@/app/actions/character";
+import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 
 interface CharactersContentProps {
 	initialCharacters: Character[];
@@ -21,6 +22,7 @@ export const CharactersContent = ({
 	initialCharacters,
 }: CharactersContentProps) => {
 	const router = useRouter();
+	const { refreshCharacters } = useThreadStatus();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [characterToEdit, setCharacterToEdit] = useState<Character | null>(
 		null
@@ -61,6 +63,7 @@ export const CharactersContent = ({
 				await createCharacter(data);
 				toast.success("Character created!");
 			}
+			await refreshCharacters(); // Update character dropdown context
 			router.refresh();
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : "An error occurred");
@@ -78,6 +81,7 @@ export const CharactersContent = ({
 					? "Character set off hiatus!"
 					: "Character set on hiatus!"
 			);
+			await refreshCharacters(); // Update character dropdown context
 			router.refresh();
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : "An error occurred");
@@ -96,6 +100,7 @@ export const CharactersContent = ({
 		try {
 			await deleteCharacter(character.characterId);
 			toast.success("Character untracked!");
+			await refreshCharacters(); // Update character dropdown context
 			router.refresh();
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : "An error occurred");

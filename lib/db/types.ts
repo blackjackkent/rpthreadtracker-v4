@@ -22,6 +22,7 @@ export interface ThreadWithCharacter {
 		CharacterId: number;
 		CharacterName: string | null;
 		UrlIdentifier: string | null;
+		IsOnHiatus: boolean;
 	};
 	ThreadTags: ThreadTagData[];
 }

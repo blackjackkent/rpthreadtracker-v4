@@ -55,6 +55,11 @@ export const ThreadsContentWrapper = ({
 			</div>
 		);
 	}
+	console.log(
+		threadsArray.filter(
+			(t) => t.characterUrlIdentifier === "tblrthreadtracker-test"
+		)
+	);
 
 	return (
 		<ThreadsContent

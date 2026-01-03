@@ -53,11 +53,14 @@ export const ThreadsContent = ({
 	const [threadToEdit, setThreadToEdit] = useState<ThreadStatusWithDetails | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const { refreshSingleThread } = useThreadStatus();
+	const { refreshSingleThread, characters } = useThreadStatus();
 
 	// Apply filters to threads
 	const filteredThreads = useMemo(() => {
 		let result = threads;
+
+		// Filter out threads for characters on hiatus
+		result = result.filter((thread) => !thread.characterIsOnHiatus);
 
 		// Apply page-specific filter (Your Turn, Their Turn, etc.)
 		if (filterFunction) {
@@ -72,15 +75,15 @@ export const ThreadsContent = ({
 		return result;
 	}, [threads, filterFunction, characterFilter]);
 
-	// Extract unique characters for filter dropdown
-	const characters = useMemo(() => {
+	// Extract unique characters for filter dropdown (only non-hiatus characters with threads on this page)
+	const charactersWithThreads = useMemo(() => {
 		const charMap = new Map<
 			number,
 			{ id: number; name: string; urlIdentifier: string }
 		>();
 
 		threads.forEach((thread) => {
-			if (thread.characterId) {
+			if (thread.characterId && !thread.characterIsOnHiatus) {
 				charMap.set(thread.characterId, {
 					id: thread.characterId,
 					name: thread.characterName,
@@ -275,7 +278,7 @@ export const ThreadsContent = ({
 						className="px-3 py-1.5 text-sm border border-border rounded bg-surface text-text"
 					>
 						<option value="all">All Characters</option>
-						{characters.map((char) => (
+						{charactersWithThreads.map((char) => (
 							<option key={char.id} value={char.id}>
 								{char.name || char.urlIdentifier}
 							</option>
@@ -340,6 +343,7 @@ export const ThreadsContent = ({
 
 			{/* Thread Modal */}
 			<UpsertThreadModal
+				key={isModalOpen ? "add-thread" : "thread-closed"}
 				isOpen={isModalOpen}
 				onClose={handleCloseModal}
 				onSubmit={handleSubmitThread}

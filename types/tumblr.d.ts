@@ -51,6 +51,7 @@ export interface ThreadStatusWithDetails extends ThreadStatusResponse {
 	isArchived: boolean;
 	description: string | null;
 	characterId: number;
+	characterIsOnHiatus: boolean;
 
 	// Tags from ThreadTags table
 	tags?: ThreadTag[];

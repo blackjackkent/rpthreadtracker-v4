@@ -259,40 +259,45 @@ export async function refreshThreadStatusesInChunks(
 	// Flatten all results
 	const allStatuses = chunkResults.flat();
 
-	// Build thread lookup map for merging
-	const threadMap = new Map<number, ThreadWithCharacter>();
-	for (const thread of activeThreads) {
-		threadMap.set(thread.ThreadId, thread);
-	}
-
-	// Build thread statuses map with merged details
-	const threadStatusesMap = new Map<number, ThreadStatusWithDetails>();
+	// Build status lookup map
+	const statusMap = new Map<number, ThreadStatusResponse>();
 	for (const status of allStatuses) {
 		if (status.threadId) {
-			const thread = threadMap.get(status.threadId);
-			if (thread) {
-				// Merge status with thread details
-				const mergedStatus: ThreadStatusWithDetails = {
-					...status,
-					// Database fields
-					userTitle: thread.UserTitle,
-					characterName: thread.Characters.CharacterName || "",
-					characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
-					partnerUrlIdentifier: thread.PartnerUrlIdentifier,
-					dateMarkedQueued: thread.DateMarkedQueued,
-					isArchived: thread.IsArchived,
-					description: thread.Description,
-					characterId: thread.Characters.CharacterId,
-					// Tags (will need to be fetched separately if needed)
-					tags: thread.ThreadTags?.map((tag) => ({
-						tagId: tag.TagID,
-						tagText: tag.TagText,
-						threadId: tag.ThreadID || 0,
-					})),
-				};
-				threadStatusesMap.set(status.threadId, mergedStatus);
-			}
+			statusMap.set(status.threadId, status);
 		}
+	}
+
+	// Build thread statuses map - loop through all threads
+	const threadStatusesMap = new Map<number, ThreadStatusWithDetails>();
+	for (const thread of activeThreads) {
+		const status = statusMap.get(thread.ThreadId);
+
+		const mergedStatus: ThreadStatusWithDetails = {
+			// Tumblr status (if available, otherwise defaults)
+			threadId: thread.ThreadId,
+			postId: thread.PostId || "",
+			lastPostDate: status?.lastPostDate ?? null,
+			lastPosterUrlIdentifier: status?.lastPosterUrlIdentifier ?? "",
+			lastPostUrl: status?.lastPostUrl ?? "",
+			isCallingCharactersTurn: status?.isCallingCharactersTurn ?? true, // Default to "Your Turn" if no status
+			isQueued: status?.isQueued ?? false,
+			// Database fields
+			userTitle: thread.UserTitle,
+			characterName: thread.Characters.CharacterName || "",
+			characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
+			partnerUrlIdentifier: thread.PartnerUrlIdentifier,
+			dateMarkedQueued: thread.DateMarkedQueued,
+			isArchived: thread.IsArchived,
+			description: thread.Description,
+			characterId: thread.Characters.CharacterId,
+			characterIsOnHiatus: thread.Characters.IsOnHiatus,
+			tags: thread.ThreadTags?.map((tag) => ({
+				tagId: tag.TagID,
+				tagText: tag.TagText,
+				threadId: tag.ThreadID || 0,
+			})),
+		};
+		threadStatusesMap.set(thread.ThreadId, mergedStatus);
 	}
 
 	// Calculate dashboard stats
@@ -346,6 +351,7 @@ export async function refreshSingleThreadStatus(
 				isArchived: thread.IsArchived,
 				description: thread.Description,
 				characterId: thread.Characters.CharacterId,
+				characterIsOnHiatus: thread.Characters.IsOnHiatus,
 				tags: thread.ThreadTags?.map((tag) => ({
 					tagId: tag.TagID,
 					tagText: tag.TagText,
@@ -393,6 +399,7 @@ export async function refreshSingleThreadStatus(
 			isArchived: thread.IsArchived,
 			description: thread.Description,
 			characterId: thread.Characters.CharacterId,
+			characterIsOnHiatus: thread.Characters.IsOnHiatus,
 			tags: thread.ThreadTags?.map((tag) => ({
 				tagId: tag.TagID,
 				tagText: tag.TagText,

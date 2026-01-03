@@ -35,6 +35,7 @@ export async function getActiveThreadsForUser(
 					CharacterId: true,
 					CharacterName: true,
 					UrlIdentifier: true,
+					IsOnHiatus: true,
 				},
 			},
 			ThreadTags: {
@@ -91,6 +92,7 @@ export async function getArchivedThreadsForUser(
 					CharacterId: true,
 					CharacterName: true,
 					UrlIdentifier: true,
+					IsOnHiatus: true,
 				},
 			},
 			ThreadTags: {

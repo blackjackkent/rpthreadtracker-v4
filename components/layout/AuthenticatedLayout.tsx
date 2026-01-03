@@ -26,23 +26,7 @@ const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 	const [isCharacterLoading, setIsCharacterLoading] = useState(false);
 	const [isThreadLoading, setIsThreadLoading] = useState(false);
 
-	const { threadStatuses, refreshSingleThread } = useThreadStatus();
-
-	// Extract unique characters from thread statuses
-	const characters = Array.from(
-		new Map(
-			Array.from(threadStatuses.values())
-				.filter((thread) => thread.characterId && thread.characterUrlIdentifier)
-				.map((thread) => [
-					thread.characterId,
-					{
-						id: thread.characterId!,
-						name: thread.characterName || "",
-						urlIdentifier: thread.characterUrlIdentifier!,
-					},
-				])
-		).values()
-	).sort((a, b) => a.name.localeCompare(b.name));
+	const { refreshSingleThread, refreshCharacters, characters } = useThreadStatus();
 
 	const handleAddCharacter = async (data: {
 		characterName?: string;
@@ -52,6 +36,7 @@ const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 		setIsCharacterLoading(true);
 		try {
 			await createCharacter(data);
+			await refreshCharacters(); // Refresh character list in context
 			toast.success("Character created!");
 			router.refresh();
 		} catch (error) {

@@ -210,7 +210,7 @@ export const createThreadColumns = (
 					{/* Edit button */}
 					<button
 						onClick={() => actions.onEdit(thread)}
-						className="text-primary hover:text-primary-dark"
+						className="text-primary hover:text-primary-dark cursor-pointer"
 						title="Edit thread"
 					>
 						<FontAwesomeIcon icon={faEdit} className="w-4 h-4" />
@@ -220,7 +220,7 @@ export const createThreadColumns = (
 					{isArchivedPage ? (
 						<button
 							onClick={() => actions.onUnarchive(threadId)}
-							className="text-primary hover:text-primary-dark"
+							className="text-primary hover:text-primary-dark cursor-pointer"
 							title="Unarchive thread"
 						>
 							<FontAwesomeIcon icon={faBoxOpen} className="w-4 h-4" />
@@ -228,7 +228,7 @@ export const createThreadColumns = (
 					) : (
 						<button
 							onClick={() => actions.onArchive(threadId)}
-							className="text-primary hover:text-primary-dark"
+							className="text-primary hover:text-primary-dark cursor-pointer"
 							title="Archive thread"
 						>
 							<FontAwesomeIcon icon={faBoxArchive} className="w-4 h-4" />
@@ -239,7 +239,7 @@ export const createThreadColumns = (
 					{!isArchivedPage && (
 						<button
 							onClick={() => actions.onToggleQueue(threadId)}
-							className="text-primary hover:text-primary-dark"
+							className="text-primary hover:text-primary-dark cursor-pointer"
 							title={thread.isQueued ? "Unqueue thread" : "Queue thread"}
 						>
 							<FontAwesomeIcon icon={faClock} className="w-4 h-4" />
@@ -249,7 +249,7 @@ export const createThreadColumns = (
 					{/* Untrack button */}
 					<button
 						onClick={() => actions.onUntrack(threadId)}
-						className="text-red-500 hover:text-red-600"
+						className="text-red-500 hover:text-red-600 cursor-pointer"
 						title="Untrack thread"
 					>
 						<FontAwesomeIcon icon={faTrash} className="w-4 h-4" />

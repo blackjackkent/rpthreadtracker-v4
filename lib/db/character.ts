@@ -38,6 +38,32 @@ export async function getCharactersWithThreadCounts(userId: string) {
 }
 
 /**
+ * Get all active characters for a user (simple list for dropdowns)
+ */
+export async function getActiveCharacters(userId: string) {
+	const characters = await prisma.characters.findMany({
+		where: {
+			UserId: userId,
+			IsOnHiatus: false,
+		},
+		select: {
+			CharacterId: true,
+			CharacterName: true,
+			UrlIdentifier: true,
+		},
+		orderBy: {
+			CharacterName: "asc",
+		},
+	});
+
+	return characters.map((char) => ({
+		id: char.CharacterId,
+		name: char.CharacterName || "",
+		urlIdentifier: char.UrlIdentifier,
+	}));
+}
+
+/**
  * Get all characters for a user (including those on hiatus) for management page
  */
 export async function getAllCharactersForManagement(userId: string) {

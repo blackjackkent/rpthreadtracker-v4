@@ -32,10 +32,6 @@ export async function createThread(data: {
 	} = data;
 
 	// Validate required fields
-	if (!postId) {
-		throw new Error("Post ID is required");
-	}
-
 	if (!characterId) {
 		throw new Error("Character is required");
 	}
@@ -65,7 +61,7 @@ export async function createThread(data: {
 	const newThread = await prisma.threads.create({
 		data: {
 			CharacterId: characterId,
-			PostId: postId,
+			PostId: postId || null,
 			UserTitle: userTitle || null,
 			PartnerUrlIdentifier: partnerUrlIdentifier || null,
 			Description: description || null,

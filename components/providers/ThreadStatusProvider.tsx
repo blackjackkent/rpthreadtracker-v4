@@ -17,10 +17,17 @@ import {
 } from "@/lib/thread-status-service";
 import { toast } from "react-toastify";
 
+interface Character {
+	id: number;
+	name: string;
+	urlIdentifier: string;
+}
+
 interface ThreadStatusContextValue {
 	// Thread status data
 	threadStatuses: Map<number, ThreadStatusWithDetails>;
 	dashboardStats: DashboardStats | null;
+	characters: Character[];
 
 	// Refresh state
 	isRefreshing: boolean;
@@ -30,6 +37,7 @@ interface ThreadStatusContextValue {
 	// Methods
 	refreshThreadStatuses: () => Promise<void>;
 	refreshSingleThread: (threadId: number) => Promise<void>;
+	refreshCharacters: () => Promise<void>;
 	getThreadStatus: (threadId: number) => ThreadStatusWithDetails | null;
 }
 
@@ -60,6 +68,7 @@ export function ThreadStatusProvider({
 	const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
 		null
 	);
+	const [characters, setCharacters] = useState<Character[]>([]);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [progress, setProgress] = useState<RefreshProgress | null>(null);
 	const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
@@ -88,34 +97,37 @@ export function ThreadStatusProvider({
 		}
 	}, [userId]);
 
-	const refreshSingleThread = useCallback(async (threadId: number) => {
-		try {
-			const updatedThread = await refreshSingleThreadStatus(threadId);
+	const refreshSingleThread = useCallback(
+		async (threadId: number) => {
+			try {
+				const updatedThread = await refreshSingleThreadStatus(threadId);
 
-			if (updatedThread) {
-				// Update or add the thread in the map
-				setThreadStatuses((prev) => {
-					const newMap = new Map(prev);
-					newMap.set(threadId, updatedThread);
-					return newMap;
-				});
+				if (updatedThread) {
+					// Update or add the thread in the map
+					setThreadStatuses((prev) => {
+						const newMap = new Map(prev);
+						newMap.set(threadId, updatedThread);
+						return newMap;
+					});
 
-				// Recalculate dashboard stats from updated thread map
-				setDashboardStats(() => {
-					const updatedMap = new Map(threadStatuses);
-					updatedMap.set(threadId, updatedThread);
+					// Recalculate dashboard stats from updated thread map
+					setDashboardStats(() => {
+						const updatedMap = new Map(threadStatuses);
+						updatedMap.set(threadId, updatedThread);
 
-					// Convert map values to array for calculateStats
-					const allStatuses = Array.from(updatedMap.values());
+						// Convert map values to array for calculateStats
+						const allStatuses = Array.from(updatedMap.values());
 
-					return calculateStats(allStatuses, updatedMap.size);
-				});
+						return calculateStats(allStatuses, updatedMap.size);
+					});
+				}
+			} catch (error) {
+				console.error("Error refreshing single thread:", error);
+				toast.error("Failed to refresh thread data.");
 			}
-		} catch (error) {
-			console.error("Error refreshing single thread:", error);
-			toast.error("Failed to refresh thread data.");
-		}
-	}, [threadStatuses]);
+		},
+		[threadStatuses]
+	);
 
 	const getThreadStatus = useCallback(
 		(threadId: number): ThreadStatusWithDetails | null => {
@@ -124,6 +136,20 @@ export function ThreadStatusProvider({
 		[threadStatuses]
 	);
 
+	const refreshCharacters = useCallback(async () => {
+		try {
+			const response = await fetch("/api/characters");
+			if (!response.ok) {
+				throw new Error("Failed to fetch characters");
+			}
+			const data = await response.json();
+			setCharacters(data);
+		} catch (error) {
+			console.error("Error fetching characters:", error);
+			toast.error("Failed to load characters");
+		}
+	}, []);
+
 	// Auto-fetch on initial mount
 	useEffect(() => {
 		if (!lastRefreshed && !isRefreshing) {
@@ -131,14 +157,21 @@ export function ThreadStatusProvider({
 		}
 	}, [lastRefreshed, isRefreshing, refreshThreadStatuses]);
 
+	// Fetch characters on initial mount
+	useEffect(() => {
+		refreshCharacters();
+	}, [refreshCharacters]);
+
 	const value: ThreadStatusContextValue = {
 		threadStatuses,
 		dashboardStats,
+		characters,
 		isRefreshing,
 		progress,
 		lastRefreshed,
 		refreshThreadStatuses,
 		refreshSingleThread,
+		refreshCharacters,
 		getThreadStatus,
 	};
 

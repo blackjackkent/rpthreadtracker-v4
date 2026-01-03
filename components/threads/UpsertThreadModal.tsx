@@ -10,8 +10,8 @@ import { MultipleValueTextInput } from "@/components/ui/MultipleValueTextInput";
 import type { ThreadStatusWithDetails } from "@/types/tumblr";
 
 const threadFormSchema = z.object({
-	characterId: z.number().min(1, "Character is required"),
-	postId: z.string().min(1, "Post ID is required"),
+	characterId: z.number().min(1, "Please select a character"),
+	postId: z.string().optional().or(z.literal("")),
 	userTitle: z.string().optional(),
 	partnerUrlIdentifier: z
 		.string()
@@ -115,7 +115,7 @@ export const UpsertThreadModal = ({
 		try {
 			await onSubmit({
 				characterId: data.characterId,
-				postId: data.postId.trim(),
+				postId: data.postId?.trim() || "",
 				userTitle: data.userTitle?.trim() || undefined,
 				partnerUrlIdentifier: data.partnerUrlIdentifier?.trim() || undefined,
 				description: data.description?.trim() || undefined,
@@ -170,7 +170,14 @@ export const UpsertThreadModal = ({
 							</label>
 							<select
 								id="characterId"
-								{...register("characterId", { valueAsNumber: true })}
+								{...register("characterId", {
+									setValueAs: (value) => {
+										// Convert empty string to 0, otherwise parse as number
+										const num = value === "" ? 0 : Number(value);
+										// If it's NaN, return 0
+										return isNaN(num) ? 0 : num;
+									},
+								})}
 								className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
 								disabled={isLoading || !!threadToEdit}
 							>
@@ -194,14 +201,14 @@ export const UpsertThreadModal = ({
 								htmlFor="postId"
 								className="block text-sm font-medium mb-1"
 							>
-								Post ID <span className="text-red-500">*</span>
+								Post ID
 							</label>
 							<input
 								type="text"
 								id="postId"
 								{...register("postId")}
 								className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-								placeholder="123456789"
+								placeholder="123456789 (leave blank if you haven't started yet)"
 								disabled={isLoading || !!threadToEdit}
 							/>
 							{errors.postId && (
@@ -211,11 +218,12 @@ export const UpsertThreadModal = ({
 							)}
 							<p className="mt-1 text-xs text-text-muted">
 								<span>
-									This must be a post from your blog. The post ID is the part of
-									the URL after &quot;.tumblr.com/post/&quot;. For instance, if
-									the post is at the URL{" "}
+									The post ID is the part of the URL after
+									&quot;.tumblr.com/post/&quot;. For instance, if the post is at{" "}
 									<strong>http://myawesomeblog.tumblr.com/post/12345</strong>,
-									you would enter <strong>12345</strong> in this field.
+									you would enter <strong>12345</strong>. Leave blank if you
+									haven&apos;t started the thread yet (it will be marked as your
+									turn).
 								</span>
 							</p>
 						</div>
