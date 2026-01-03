@@ -30,6 +30,7 @@
 		"react": "19.2.0",
 		"react-dom": "19.2.0",
 		"react-hook-form": "^7.66.1",
+		"react-multivalue-text-input": "file:../react-multivalue-text-input",
 		"react-toastify": "^11.0.5",
 		"tumblr.js": "^5.0.1",
 		"zod": "^4.1.12"

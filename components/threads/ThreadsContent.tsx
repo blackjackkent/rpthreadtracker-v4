@@ -9,11 +9,26 @@ import {
 	faClock,
 	faTrash,
 } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { ThreadsTable } from "./ThreadsTable";
 import { createThreadColumns } from "./columns";
+import { UpsertThreadModal } from "./UpsertThreadModal";
 import type { ThreadFilterFunction } from "./filters";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
+import {
+	createThread,
+	updateThread,
+	archiveThread,
+	unarchiveThread,
+	toggleThreadQueued,
+	deleteThread,
+	bulkArchiveThreads,
+	bulkUnarchiveThreads,
+	bulkToggleThreadsQueued,
+	bulkDeleteThreads,
+} from "@/app/actions/thread";
 
 interface ThreadsContentProps {
 	threads: ThreadStatusWithDetails[];
@@ -34,6 +49,11 @@ export const ThreadsContent = ({
 }: ThreadsContentProps) => {
 	const [selectedThreadIds, setSelectedThreadIds] = useState<number[]>([]);
 	const [characterFilter, setCharacterFilter] = useState<number | "all">("all");
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [threadToEdit, setThreadToEdit] = useState<ThreadStatusWithDetails | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
+
+	const { refreshSingleThread } = useThreadStatus();
 
 	// Apply filters to threads
 	const filteredThreads = useMemo(() => {
@@ -74,49 +94,146 @@ export const ThreadsContent = ({
 		);
 	}, [threads]);
 
+	// Modal handlers
+	const handleOpenModal = (thread?: ThreadStatusWithDetails) => {
+		setThreadToEdit(thread || null);
+		setIsModalOpen(true);
+	};
+
+	const handleCloseModal = () => {
+		setIsModalOpen(false);
+		setThreadToEdit(null);
+	};
+
+	const handleSubmitThread = async (data: {
+		characterId: number;
+		postId: string;
+		userTitle?: string;
+		partnerUrlIdentifier?: string;
+		description?: string;
+		tags?: string[];
+	}) => {
+		setIsLoading(true);
+		try {
+			if (threadToEdit?.threadId) {
+				// Update existing thread
+				await updateThread({
+					threadId: threadToEdit.threadId,
+					userTitle: data.userTitle,
+					partnerUrlIdentifier: data.partnerUrlIdentifier,
+					description: data.description,
+					tags: data.tags,
+				});
+				// Refresh Tumblr status for updated thread
+				await refreshSingleThread(threadToEdit.threadId);
+				toast.success("Thread updated successfully");
+			} else {
+				// Create new thread
+				const result = await createThread(data);
+				// Refresh Tumblr status for new thread
+				await refreshSingleThread(result.threadId);
+				toast.success("Thread tracked successfully");
+			}
+		} catch (error) {
+			console.error("Error saving thread:", error);
+			throw error; // Let modal handle the error
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	// Column actions
 	const columnActions = {
 		onEdit: (thread: ThreadStatusWithDetails) => {
-			console.log("Edit thread:", thread.threadId);
-			// TODO: Open edit modal
+			handleOpenModal(thread);
 		},
-		onArchive: (threadId: number) => {
-			console.log("Archive thread:", threadId);
-			// TODO: Call archive server action
+		onArchive: async (threadId: number) => {
+			try {
+				await archiveThread(threadId);
+				toast.success("Thread archived");
+			} catch (error) {
+				console.error("Error archiving thread:", error);
+				toast.error("Failed to archive thread");
+			}
 		},
-		onUnarchive: (threadId: number) => {
-			console.log("Unarchive thread:", threadId);
-			// TODO: Call unarchive server action
+		onUnarchive: async (threadId: number) => {
+			try {
+				await unarchiveThread(threadId);
+				// Refresh Tumblr status when unarchiving
+				await refreshSingleThread(threadId);
+				toast.success("Thread unarchived");
+			} catch (error) {
+				console.error("Error unarchiving thread:", error);
+				toast.error("Failed to unarchive thread");
+			}
 		},
-		onToggleQueue: (threadId: number) => {
-			console.log("Toggle queue:", threadId);
-			// TODO: Call toggle queue server action
+		onToggleQueue: async (threadId: number) => {
+			try {
+				await toggleThreadQueued(threadId);
+				toast.success("Thread queue status updated");
+			} catch (error) {
+				console.error("Error toggling queue:", error);
+				toast.error("Failed to update queue status");
+			}
 		},
-		onUntrack: (threadId: number) => {
-			console.log("Untrack thread:", threadId);
-			// TODO: Show confirmation dialog, call delete server action
+		onUntrack: async (threadId: number) => {
+			if (window.confirm("Are you sure you want to untrack this thread? This action cannot be undone.")) {
+				try {
+					await deleteThread(threadId);
+					toast.success("Thread untracked");
+				} catch (error) {
+					console.error("Error deleting thread:", error);
+					toast.error("Failed to untrack thread");
+				}
+			}
 		},
 	};
 
 	// Bulk actions
-	const handleBulkArchive = () => {
-		console.log("Bulk archive:", selectedThreadIds);
-		// TODO: Call bulk archive server action
+	const handleBulkArchive = async () => {
+		try {
+			await bulkArchiveThreads(selectedThreadIds);
+			toast.success(`${selectedThreadIds.length} thread(s) archived`);
+			setSelectedThreadIds([]);
+		} catch (error) {
+			console.error("Error bulk archiving:", error);
+			toast.error("Failed to archive threads");
+		}
 	};
 
-	const handleBulkUnarchive = () => {
-		console.log("Bulk unarchive:", selectedThreadIds);
-		// TODO: Call bulk unarchive server action
+	const handleBulkUnarchive = async () => {
+		try {
+			await bulkUnarchiveThreads(selectedThreadIds);
+			toast.success(`${selectedThreadIds.length} thread(s) unarchived`);
+			setSelectedThreadIds([]);
+		} catch (error) {
+			console.error("Error bulk unarchiving:", error);
+			toast.error("Failed to unarchive threads");
+		}
 	};
 
-	const handleBulkToggleQueue = () => {
-		console.log("Bulk toggle queue:", selectedThreadIds);
-		// TODO: Call bulk toggle queue server action
+	const handleBulkToggleQueue = async () => {
+		try {
+			await bulkToggleThreadsQueued(selectedThreadIds);
+			toast.success(`Queue status updated for ${selectedThreadIds.length} thread(s)`);
+			setSelectedThreadIds([]);
+		} catch (error) {
+			console.error("Error bulk toggle queue:", error);
+			toast.error("Failed to update queue status");
+		}
 	};
 
-	const handleBulkUntrack = () => {
-		console.log("Bulk untrack:", selectedThreadIds);
-		// TODO: Show confirmation dialog, call bulk delete server action
+	const handleBulkUntrack = async () => {
+		if (window.confirm(`Are you sure you want to untrack ${selectedThreadIds.length} thread(s)? This action cannot be undone.`)) {
+			try {
+				await bulkDeleteThreads(selectedThreadIds);
+				toast.success(`${selectedThreadIds.length} thread(s) untracked`);
+				setSelectedThreadIds([]);
+			} catch (error) {
+				console.error("Error bulk deleting:", error);
+				toast.error("Failed to untrack threads");
+			}
+		}
 	};
 
 	const columns = createThreadColumns(columnActions, isArchived) as ColumnDef<ThreadStatusWithDetails>[];
@@ -130,7 +247,10 @@ export const ThreadsContent = ({
 					<p className="text-text-muted mt-1">{pageDescription}</p>
 				</div>
 				{showAddButton && (
-					<button className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors inline-flex items-center gap-2">
+					<button
+						onClick={() => handleOpenModal()}
+						className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors inline-flex items-center gap-2"
+					>
 						<FontAwesomeIcon icon={faPlus} className="w-4 h-4" />
 						Track New Thread
 					</button>
@@ -216,6 +336,16 @@ export const ThreadsContent = ({
 				columns={columns}
 				onRowSelectionChange={setSelectedThreadIds}
 				initialPageSize={10} // TODO: Get from ProfileSettingsProvider when implemented
+			/>
+
+			{/* Thread Modal */}
+			<UpsertThreadModal
+				isOpen={isModalOpen}
+				onClose={handleCloseModal}
+				onSubmit={handleSubmitThread}
+				threadToEdit={threadToEdit}
+				characters={characters}
+				isLoading={isLoading}
 			/>
 		</div>
 	);

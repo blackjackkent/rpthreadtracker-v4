@@ -47,13 +47,13 @@ body {
 
 /* App layout structure */
 .app {
-	@apply flex flex-col min-h-screen;
+	@apply flex flex-col h-screen overflow-hidden;
 }
 
 .app-body {
-	@apply flex flex-1 overflow-x-hidden;
+	@apply flex flex-1 overflow-hidden;
 }
 
 .main {
-	@apply flex-1 min-w-0;
+	@apply flex-1 min-w-0 overflow-y-auto;
 }

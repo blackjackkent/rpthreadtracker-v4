@@ -8,9 +8,10 @@ interface HeaderProps {
 	user: User;
 	onSidebarToggle: () => void;
 	onAddCharacter: () => void;
+	onAddThread: () => void;
 }
 
-export const Header = ({ user, onSidebarToggle, onAddCharacter }: HeaderProps) => {
+export const Header = ({ user, onSidebarToggle, onAddCharacter, onAddThread }: HeaderProps) => {
 	return (
 		<header className="bg-primary text-white border-b border-primary-dark sticky top-0 z-50">
 			<div className="h-12 flex items-center px-3 justify-between">
@@ -20,7 +21,7 @@ export const Header = ({ user, onSidebarToggle, onAddCharacter }: HeaderProps) =
 				{/* Right side - Add menu, refresh button, and profile dropdown */}
 				<div className="flex items-center gap-1.5">
 					{/* Add Menu Dropdown */}
-					<AddMenu onAddCharacter={onAddCharacter} />
+					<AddMenu onAddCharacter={onAddCharacter} onAddThread={onAddThread} />
 
 					{/* Refresh Tumblr Data Button */}
 					<RefreshButton />

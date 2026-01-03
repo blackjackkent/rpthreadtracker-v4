@@ -141,7 +141,7 @@ function threadToRequest(thread: ThreadWithCharacter): ThreadStatusRequest {
 /**
  * Helper: Calculate dashboard stats from thread statuses
  */
-function calculateStats(
+export function calculateStats(
 	allStatuses: ThreadStatusResponse[],
 	totalThreadCount: number
 ): DashboardStats {
@@ -302,4 +302,107 @@ export async function refreshThreadStatusesInChunks(
 		threadStatuses: threadStatusesMap,
 		dashboardStats,
 	};
+}
+
+/**
+ * Fetch status for a single thread
+ * Used after creating/updating a thread to get fresh Tumblr data
+ * @param threadId - The thread ID to refresh
+ * @returns Thread status with details
+ */
+export async function refreshSingleThreadStatus(
+	threadId: number
+): Promise<ThreadStatusWithDetails | null> {
+	try {
+		// Fetch the thread from the database
+		const response = await fetch(`/api/threads/active`, {
+			cache: "no-store",
+		});
+
+		if (!response.ok) {
+			throw new Error("Failed to fetch active threads");
+		}
+
+		const activeThreads: ThreadWithCharacter[] = await response.json();
+
+		// Find the specific thread
+		const thread = activeThreads.find((t) => t.ThreadId === threadId);
+
+		if (!thread) {
+			console.error("Thread not found:", threadId);
+			return null;
+		}
+
+		// If thread doesn't have PostId, return basic data without Tumblr status
+		if (!thread.PostId || !thread.Characters.UrlIdentifier) {
+			return {
+				threadId: thread.ThreadId,
+				postId: thread.PostId || "",
+				userTitle: thread.UserTitle,
+				characterName: thread.Characters.CharacterName || "",
+				characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
+				partnerUrlIdentifier: thread.PartnerUrlIdentifier,
+				dateMarkedQueued: thread.DateMarkedQueued,
+				isArchived: thread.IsArchived,
+				description: thread.Description,
+				characterId: thread.Characters.CharacterId,
+				tags: thread.ThreadTags?.map((tag) => ({
+					tagId: tag.TagID,
+					tagText: tag.TagText,
+					threadId: tag.ThreadID || 0,
+				})),
+				// No Tumblr data
+				lastPostDate: null,
+				lastPosterUrlIdentifier: "",
+				lastPostUrl: "",
+				isCallingCharactersTurn: false,
+				isQueued: false,
+			};
+		}
+
+		// Fetch Tumblr status for this thread
+		const threadRequest: ThreadStatusRequest = threadToRequest(thread);
+
+		const statusResponse = await fetch("/api/thread", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify([threadRequest]),
+			cache: "no-store",
+		});
+
+		if (!statusResponse.ok) {
+			throw new Error("Failed to fetch thread status from Tumblr");
+		}
+
+		const statuses: ThreadStatusResponse[] = await statusResponse.json();
+		const status = statuses[0];
+
+		if (!status) {
+			throw new Error("No status returned from API");
+		}
+
+		// Merge status with thread details
+		const mergedStatus: ThreadStatusWithDetails = {
+			...status,
+			// Database fields
+			userTitle: thread.UserTitle,
+			characterName: thread.Characters.CharacterName || "",
+			characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
+			partnerUrlIdentifier: thread.PartnerUrlIdentifier,
+			dateMarkedQueued: thread.DateMarkedQueued,
+			isArchived: thread.IsArchived,
+			description: thread.Description,
+			characterId: thread.Characters.CharacterId,
+			tags: thread.ThreadTags?.map((tag) => ({
+				tagId: tag.TagID,
+				tagText: tag.TagText,
+				threadId: tag.ThreadID || 0,
+			})),
+		};
+
+		return mergedStatus;
+	} catch (error) {
+		console.error("Error refreshing single thread status:", error);
+		return null;
+	}
 }

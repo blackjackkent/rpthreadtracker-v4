@@ -6,14 +6,20 @@ import { useState } from "react";
 
 interface AddMenuProps {
 	onAddCharacter: () => void;
+	onAddThread: () => void;
 }
 
-export const AddMenu = ({ onAddCharacter }: AddMenuProps) => {
+export const AddMenu = ({ onAddCharacter, onAddThread }: AddMenuProps) => {
 	const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
 	const handleAddCharacter = () => {
 		setIsAddMenuOpen(false);
 		onAddCharacter();
+	};
+
+	const handleAddThread = () => {
+		setIsAddMenuOpen(false);
+		onAddThread();
 	};
 
 	return (
@@ -28,14 +34,14 @@ export const AddMenu = ({ onAddCharacter }: AddMenuProps) => {
 			{isAddMenuOpen && (
 				<div className="absolute right-0 mt-2 w-48 bg-surface border border-border rounded shadow-lg">
 					<button
-						onClick={() => setIsAddMenuOpen(false)}
-						className="w-full text-left px-4 py-2 hover:bg-background transition-colors"
+						onClick={handleAddThread}
+						className="w-full text-left px-4 py-2 text-text hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
 					>
 						Track New Thread
 					</button>
 					<button
 						onClick={handleAddCharacter}
-						className="w-full text-left px-4 py-2 hover:bg-background transition-colors"
+						className="w-full text-left px-4 py-2 text-text hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
 					>
 						Add Character
 					</button>

@@ -9,9 +9,9 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen }: SidebarProps) => {
 	return (
 		<aside
-			className={`bg-sidebar-light border-r border-sidebar-border transition-all duration-300 ${
+			className={`bg-sidebar-light border-r border-sidebar-border transition-all duration-300 overflow-y-auto ${
 				isOpen ? "w-48" : "w-0 md:w-14"
-			} overflow-hidden`}
+			}`}
 		>
 			<nav className="p-3">
 				<ul className="space-y-1">

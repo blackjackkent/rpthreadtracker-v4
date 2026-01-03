@@ -1,75 +1,134 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { User } from "next-auth";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Header } from "./header/Header";
 import { Sidebar } from "./sidebar/Sidebar";
 import { Footer } from "./footer/Footer";
-import { ThreadStatusProvider } from "@/components/providers/ThreadStatusProvider";
+import { ThreadStatusProvider, useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 import { UpsertCharacterModal } from "@/components/characters/UpsertCharacterModal";
+import { UpsertThreadModal } from "@/components/threads/UpsertThreadModal";
 import { createCharacter } from "@/app/actions/character";
+import { createThread } from "@/app/actions/thread";
 
 interface AuthenticatedLayoutProps {
 	children: ReactNode;
 	user: User;
 }
 
-export const AuthenticatedLayout = ({
-	children,
-	user,
-}: AuthenticatedLayoutProps) => {
+const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 	const router = useRouter();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const [isAddCharacterModalOpen, setIsAddCharacterModalOpen] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
+	const [isAddThreadModalOpen, setIsAddThreadModalOpen] = useState(false);
+	const [isCharacterLoading, setIsCharacterLoading] = useState(false);
+	const [isThreadLoading, setIsThreadLoading] = useState(false);
+
+	const { threadStatuses, refreshSingleThread } = useThreadStatus();
+
+	// Extract unique characters from thread statuses
+	const characters = Array.from(
+		new Map(
+			Array.from(threadStatuses.values())
+				.filter((thread) => thread.characterId && thread.characterUrlIdentifier)
+				.map((thread) => [
+					thread.characterId,
+					{
+						id: thread.characterId!,
+						name: thread.characterName || "",
+						urlIdentifier: thread.characterUrlIdentifier!,
+					},
+				])
+		).values()
+	).sort((a, b) => a.name.localeCompare(b.name));
 
 	const handleAddCharacter = async (data: {
 		characterName?: string;
 		urlIdentifier: string;
 		platformId?: number;
 	}) => {
-		setIsLoading(true);
+		setIsCharacterLoading(true);
 		try {
 			await createCharacter(data);
 			toast.success("Character created!");
 			router.refresh();
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : "An error occurred");
-			throw error; // Re-throw so modal can handle it
+			throw error;
 		} finally {
-			setIsLoading(false);
+			setIsCharacterLoading(false);
+		}
+	};
+
+	const handleAddThread = async (data: {
+		characterId: number;
+		postId: string;
+		userTitle?: string;
+		partnerUrlIdentifier?: string;
+		description?: string;
+		tags?: string[];
+	}) => {
+		setIsThreadLoading(true);
+		try {
+			const result = await createThread(data);
+			await refreshSingleThread(result.threadId);
+			toast.success("Thread tracked successfully");
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "An error occurred");
+			throw error;
+		} finally {
+			setIsThreadLoading(false);
 		}
 	};
 
 	return (
-		<ThreadStatusProvider userId={user.id}>
-			<div className="app">
-				<Header
-					user={user}
-					onSidebarToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-					onAddCharacter={() => setIsAddCharacterModalOpen(true)}
-				/>
+		<div className="app">
+			<Header
+				user={user}
+				onSidebarToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+				onAddCharacter={() => setIsAddCharacterModalOpen(true)}
+				onAddThread={() => setIsAddThreadModalOpen(true)}
+			/>
 
-				<div className="app-body">
-					<Sidebar isOpen={isSidebarOpen} />
+			<div className="app-body">
+				<Sidebar isOpen={isSidebarOpen} />
 
-					<main className="main">
-						<div className="container mx-auto p-4">{children}</div>
-					</main>
-				</div>
-
-				<Footer />
-
-				<UpsertCharacterModal
-					key={isAddCharacterModalOpen ? "add-character" : "closed"}
-					isOpen={isAddCharacterModalOpen}
-					onClose={() => setIsAddCharacterModalOpen(false)}
-					onSubmit={handleAddCharacter}
-					isLoading={isLoading}
-				/>
+				<main className="main">
+					<div className="container mx-auto p-4">{children}</div>
+				</main>
 			</div>
+
+			<Footer />
+
+			<UpsertCharacterModal
+				key={isAddCharacterModalOpen ? "add-character" : "character-closed"}
+				isOpen={isAddCharacterModalOpen}
+				onClose={() => setIsAddCharacterModalOpen(false)}
+				onSubmit={handleAddCharacter}
+				isLoading={isCharacterLoading}
+			/>
+
+			<UpsertThreadModal
+				key={isAddThreadModalOpen ? "add-thread" : "thread-closed"}
+				isOpen={isAddThreadModalOpen}
+				onClose={() => setIsAddThreadModalOpen(false)}
+				onSubmit={handleAddThread}
+				characters={characters}
+				isLoading={isThreadLoading}
+			/>
+		</div>
+	);
+};
+
+export const AuthenticatedLayout = ({
+	children,
+	user,
+}: AuthenticatedLayoutProps) => {
+	return (
+		<ThreadStatusProvider userId={user.id}>
+			<LayoutContent user={user}>{children}</LayoutContent>
 		</ThreadStatusProvider>
 	);
 };

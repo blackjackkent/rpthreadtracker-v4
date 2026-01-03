@@ -10,6 +10,8 @@ import React, {
 import type { ThreadStatusWithDetails } from "@/types/tumblr";
 import {
 	refreshThreadStatusesInChunks,
+	refreshSingleThreadStatus,
+	calculateStats,
 	type DashboardStats,
 	type RefreshProgress,
 } from "@/lib/thread-status-service";
@@ -27,6 +29,7 @@ interface ThreadStatusContextValue {
 
 	// Methods
 	refreshThreadStatuses: () => Promise<void>;
+	refreshSingleThread: (threadId: number) => Promise<void>;
 	getThreadStatus: (threadId: number) => ThreadStatusWithDetails | null;
 }
 
@@ -85,6 +88,35 @@ export function ThreadStatusProvider({
 		}
 	}, [userId]);
 
+	const refreshSingleThread = useCallback(async (threadId: number) => {
+		try {
+			const updatedThread = await refreshSingleThreadStatus(threadId);
+
+			if (updatedThread) {
+				// Update or add the thread in the map
+				setThreadStatuses((prev) => {
+					const newMap = new Map(prev);
+					newMap.set(threadId, updatedThread);
+					return newMap;
+				});
+
+				// Recalculate dashboard stats from updated thread map
+				setDashboardStats(() => {
+					const updatedMap = new Map(threadStatuses);
+					updatedMap.set(threadId, updatedThread);
+
+					// Convert map values to array for calculateStats
+					const allStatuses = Array.from(updatedMap.values());
+
+					return calculateStats(allStatuses, updatedMap.size);
+				});
+			}
+		} catch (error) {
+			console.error("Error refreshing single thread:", error);
+			toast.error("Failed to refresh thread data.");
+		}
+	}, [threadStatuses]);
+
 	const getThreadStatus = useCallback(
 		(threadId: number): ThreadStatusWithDetails | null => {
 			return threadStatuses.get(threadId) || null;
@@ -106,6 +138,7 @@ export function ThreadStatusProvider({
 		progress,
 		lastRefreshed,
 		refreshThreadStatuses,
+		refreshSingleThread,
 		getThreadStatus,
 	};
 
