@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
 	faPlus,
@@ -36,6 +37,7 @@ interface ThreadsContentProps {
 	pageDescription: string;
 	showAddButton?: boolean;
 	isArchived?: boolean;
+	isAllThreadsPage?: boolean;
 	filterFunction?: ThreadFilterFunction;
 }
 
@@ -45,8 +47,10 @@ export const ThreadsContent = ({
 	pageDescription,
 	showAddButton = false,
 	isArchived = false,
+	isAllThreadsPage = false,
 	filterFunction,
 }: ThreadsContentProps) => {
+	const router = useRouter();
 	const [selectedThreadIds, setSelectedThreadIds] = useState<number[]>([]);
 	const [characterFilter, setCharacterFilter] = useState<number | "all">("all");
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -153,6 +157,7 @@ export const ThreadsContent = ({
 		onArchive: async (threadId: number) => {
 			try {
 				await archiveThread(threadId);
+				router.refresh();
 				toast.success("Thread archived");
 			} catch (error) {
 				console.error("Error archiving thread:", error);
@@ -164,6 +169,7 @@ export const ThreadsContent = ({
 				await unarchiveThread(threadId);
 				// Refresh Tumblr status when unarchiving
 				await refreshSingleThread(threadId);
+				router.refresh();
 				toast.success("Thread unarchived");
 			} catch (error) {
 				console.error("Error unarchiving thread:", error);
@@ -173,6 +179,8 @@ export const ThreadsContent = ({
 		onToggleQueue: async (threadId: number) => {
 			try {
 				await toggleThreadQueued(threadId);
+				await refreshSingleThread(threadId);
+				router.refresh();
 				toast.success("Thread queue status updated");
 			} catch (error) {
 				console.error("Error toggling queue:", error);
@@ -183,6 +191,7 @@ export const ThreadsContent = ({
 			if (window.confirm("Are you sure you want to untrack this thread? This action cannot be undone.")) {
 				try {
 					await deleteThread(threadId);
+					router.refresh();
 					toast.success("Thread untracked");
 				} catch (error) {
 					console.error("Error deleting thread:", error);
@@ -196,6 +205,7 @@ export const ThreadsContent = ({
 	const handleBulkArchive = async () => {
 		try {
 			await bulkArchiveThreads(selectedThreadIds);
+			router.refresh();
 			toast.success(`${selectedThreadIds.length} thread(s) archived`);
 			setSelectedThreadIds([]);
 		} catch (error) {
@@ -207,6 +217,7 @@ export const ThreadsContent = ({
 	const handleBulkUnarchive = async () => {
 		try {
 			await bulkUnarchiveThreads(selectedThreadIds);
+			router.refresh();
 			toast.success(`${selectedThreadIds.length} thread(s) unarchived`);
 			setSelectedThreadIds([]);
 		} catch (error) {
@@ -218,6 +229,7 @@ export const ThreadsContent = ({
 	const handleBulkToggleQueue = async () => {
 		try {
 			await bulkToggleThreadsQueued(selectedThreadIds);
+			router.refresh();
 			toast.success(`Queue status updated for ${selectedThreadIds.length} thread(s)`);
 			setSelectedThreadIds([]);
 		} catch (error) {
@@ -230,6 +242,7 @@ export const ThreadsContent = ({
 		if (window.confirm(`Are you sure you want to untrack ${selectedThreadIds.length} thread(s)? This action cannot be undone.`)) {
 			try {
 				await bulkDeleteThreads(selectedThreadIds);
+				router.refresh();
 				toast.success(`${selectedThreadIds.length} thread(s) untracked`);
 				setSelectedThreadIds([]);
 			} catch (error) {
@@ -239,7 +252,11 @@ export const ThreadsContent = ({
 		}
 	};
 
-	const columns = createThreadColumns(columnActions, isArchived) as ColumnDef<ThreadStatusWithDetails>[];
+	const columns = createThreadColumns(
+		columnActions,
+		isArchived,
+		!isAllThreadsPage // Hide toggle queue on All Threads page
+	) as ColumnDef<ThreadStatusWithDetails>[];
 
 	return (
 		<div className="space-y-6 p-6">
@@ -311,14 +328,16 @@ export const ThreadsContent = ({
 									<FontAwesomeIcon icon={faBoxArchive} className="w-3 h-3" />
 									Archive
 								</button>
-								<button
-									onClick={handleBulkToggleQueue}
-									className="px-3 py-1.5 text-sm bg-primary hover:bg-primary-dark text-white rounded transition-colors inline-flex items-center gap-1.5"
-									title="Toggle queue for selected threads"
-								>
-									<FontAwesomeIcon icon={faClock} className="w-3 h-3" />
-									Toggle Queue
-								</button>
+								{!isAllThreadsPage && (
+									<button
+										onClick={handleBulkToggleQueue}
+										className="px-3 py-1.5 text-sm bg-primary hover:bg-primary-dark text-white rounded transition-colors inline-flex items-center gap-1.5"
+										title="Toggle queue for selected threads"
+									>
+										<FontAwesomeIcon icon={faClock} className="w-3 h-3" />
+										Toggle Queue
+									</button>
+								)}
 							</>
 						)}
 						<button

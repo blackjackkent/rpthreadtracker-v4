@@ -26,7 +26,8 @@ interface ColumnActions {
 
 export const createThreadColumns = (
 	actions: ColumnActions,
-	isArchivedPage: boolean = false
+	isArchivedPage: boolean = false,
+	showToggleQueue: boolean = true
 ) => [
 	// Checkbox column for row selection
 	columnHelper.display({
@@ -235,8 +236,8 @@ export const createThreadColumns = (
 						</button>
 					)}
 
-					{/* Toggle Queue button (not shown for archived threads) */}
-					{!isArchivedPage && (
+					{/* Toggle Queue button (not shown for archived threads or All Threads page) */}
+					{!isArchivedPage && showToggleQueue && (
 						<button
 							onClick={() => actions.onToggleQueue(threadId)}
 							className="text-primary hover:text-primary-dark cursor-pointer"

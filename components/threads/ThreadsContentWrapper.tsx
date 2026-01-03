@@ -68,6 +68,7 @@ export const ThreadsContentWrapper = ({
 			pageDescription={pageDescription}
 			showAddButton={showAddButton}
 			isArchived={isArchived}
+			isAllThreadsPage={filterType === "all"}
 			filterFunction={filterFunction}
 		/>
 	);
