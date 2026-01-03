@@ -240,8 +240,19 @@ export const createThreadColumns = (
 					{!isArchivedPage && showToggleQueue && (
 						<button
 							onClick={() => actions.onToggleQueue(threadId)}
-							className="text-primary hover:text-primary-dark cursor-pointer"
-							title={thread.isQueued ? "Unqueue thread" : "Queue thread"}
+							disabled={!thread.lastPostDate}
+							className={
+								!thread.lastPostDate
+									? "text-text-muted cursor-not-allowed opacity-50"
+									: "text-primary hover:text-primary-dark cursor-pointer"
+							}
+							title={
+								!thread.lastPostDate
+									? "Cannot queue - post not found on Tumblr"
+									: thread.isQueued
+										? "Unqueue thread"
+										: "Queue thread"
+							}
 						>
 							<FontAwesomeIcon icon={faClock} className="w-4 h-4" />
 						</button>

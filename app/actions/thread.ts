@@ -122,10 +122,7 @@ export async function updateThread(data: {
 		},
 	});
 
-	if (
-		!existingThread ||
-		existingThread.Characters.UserId !== session.user.id
-	) {
+	if (!existingThread || existingThread.Characters.UserId !== session.user.id) {
 		throw new Error("Thread not found or unauthorized");
 	}
 
@@ -205,10 +202,7 @@ export async function archiveThread(threadId: number) {
 		},
 	});
 
-	if (
-		!existingThread ||
-		existingThread.Characters.UserId !== session.user.id
-	) {
+	if (!existingThread || existingThread.Characters.UserId !== session.user.id) {
 		throw new Error("Thread not found or unauthorized");
 	}
 
@@ -244,10 +238,7 @@ export async function unarchiveThread(threadId: number) {
 		},
 	});
 
-	if (
-		!existingThread ||
-		existingThread.Characters.UserId !== session.user.id
-	) {
+	if (!existingThread || existingThread.Characters.UserId !== session.user.id) {
 		throw new Error("Thread not found or unauthorized");
 	}
 
@@ -283,18 +274,17 @@ export async function toggleThreadQueued(threadId: number) {
 		},
 	});
 
-	if (
-		!existingThread ||
-		existingThread.Characters.UserId !== session.user.id
-	) {
+	if (!existingThread || existingThread.Characters.UserId !== session.user.id) {
 		throw new Error("Thread not found or unauthorized");
 	}
 
 	// Toggle queued status
+	const newValue = existingThread.DateMarkedQueued ? null : new Date();
+
 	await prisma.threads.update({
 		where: { ThreadId: threadId },
 		data: {
-			DateMarkedQueued: existingThread.DateMarkedQueued ? null : new Date(),
+			DateMarkedQueued: newValue,
 		},
 	});
 
@@ -322,10 +312,7 @@ export async function deleteThread(threadId: number) {
 		},
 	});
 
-	if (
-		!existingThread ||
-		existingThread.Characters.UserId !== session.user.id
-	) {
+	if (!existingThread || existingThread.Characters.UserId !== session.user.id) {
 		throw new Error("Thread not found or unauthorized");
 	}
 

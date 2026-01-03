@@ -54,7 +54,8 @@ export const ThreadsContent = ({
 	const [selectedThreadIds, setSelectedThreadIds] = useState<number[]>([]);
 	const [characterFilter, setCharacterFilter] = useState<number | "all">("all");
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [threadToEdit, setThreadToEdit] = useState<ThreadStatusWithDetails | null>(null);
+	const [threadToEdit, setThreadToEdit] =
+		useState<ThreadStatusWithDetails | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const { refreshSingleThread, characters } = useThreadStatus();
@@ -73,7 +74,9 @@ export const ThreadsContent = ({
 
 		// Apply character filter
 		if (characterFilter !== "all") {
-			result = result.filter((thread) => thread.characterId === characterFilter);
+			result = result.filter(
+				(thread) => thread.characterId === characterFilter
+			);
 		}
 
 		return result;
@@ -188,7 +191,11 @@ export const ThreadsContent = ({
 			}
 		},
 		onUntrack: async (threadId: number) => {
-			if (window.confirm("Are you sure you want to untrack this thread? This action cannot be undone.")) {
+			if (
+				window.confirm(
+					"Are you sure you want to untrack this thread? This action cannot be undone."
+				)
+			) {
 				try {
 					await deleteThread(threadId);
 					router.refresh();
@@ -230,7 +237,9 @@ export const ThreadsContent = ({
 		try {
 			await bulkToggleThreadsQueued(selectedThreadIds);
 			router.refresh();
-			toast.success(`Queue status updated for ${selectedThreadIds.length} thread(s)`);
+			toast.success(
+				`Queue status updated for ${selectedThreadIds.length} thread(s)`
+			);
 			setSelectedThreadIds([]);
 		} catch (error) {
 			console.error("Error bulk toggle queue:", error);
@@ -239,7 +248,11 @@ export const ThreadsContent = ({
 	};
 
 	const handleBulkUntrack = async () => {
-		if (window.confirm(`Are you sure you want to untrack ${selectedThreadIds.length} thread(s)? This action cannot be undone.`)) {
+		if (
+			window.confirm(
+				`Are you sure you want to untrack ${selectedThreadIds.length} thread(s)? This action cannot be undone.`
+			)
+		) {
 			try {
 				await bulkDeleteThreads(selectedThreadIds);
 				router.refresh();
@@ -328,16 +341,34 @@ export const ThreadsContent = ({
 									<FontAwesomeIcon icon={faBoxArchive} className="w-3 h-3" />
 									Archive
 								</button>
-								{!isAllThreadsPage && (
-									<button
-										onClick={handleBulkToggleQueue}
-										className="px-3 py-1.5 text-sm bg-primary hover:bg-primary-dark text-white rounded transition-colors inline-flex items-center gap-1.5"
-										title="Toggle queue for selected threads"
-									>
-										<FontAwesomeIcon icon={faClock} className="w-3 h-3" />
-										Toggle Queue
-									</button>
-								)}
+								{!isAllThreadsPage && (() => {
+									// Check if any selected threads have no valid Tumblr post
+									const selectedThreadsWithNoPost = filteredThreads
+										.filter((t) =>
+											t.threadId && selectedThreadIds.includes(t.threadId)
+										)
+										.some((t) => !t.lastPostDate);
+
+									return (
+										<button
+											onClick={handleBulkToggleQueue}
+											disabled={selectedThreadsWithNoPost}
+											className={
+												selectedThreadsWithNoPost
+													? "px-3 py-1.5 text-sm bg-text-muted text-white rounded opacity-50 cursor-not-allowed inline-flex items-center gap-1.5"
+													: "px-3 py-1.5 text-sm bg-primary hover:bg-primary-dark text-white rounded transition-colors inline-flex items-center gap-1.5"
+											}
+											title={
+												selectedThreadsWithNoPost
+													? "Cannot queue - some selected threads not found on Tumblr"
+													: "Toggle queue for selected threads"
+											}
+										>
+											<FontAwesomeIcon icon={faClock} className="w-3 h-3" />
+											Toggle Queue
+										</button>
+									);
+								})()}
 							</>
 						)}
 						<button

@@ -81,6 +81,7 @@ export const UpsertThreadModal = ({
 		},
 	});
 
+	// eslint-disable-next-line react-hooks/incompatible-library
 	const description = watch("description");
 
 	// Update description length

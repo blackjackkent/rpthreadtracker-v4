@@ -108,7 +108,8 @@ export function calculateThreadStatus(
 				: request.dateMarkedQueued;
 
 		// Thread is queued if marked queued AFTER the last post
-		isQueued = queuedDate > lastPostDate;
+		// If lastPostDate is null (post not found), treat as queued if dateMarkedQueued is set
+		isQueued = lastPostDate === null || queuedDate > lastPostDate;
 	}
 
 	return {

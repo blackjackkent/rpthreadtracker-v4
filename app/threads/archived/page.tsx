@@ -25,6 +25,7 @@ export default async function ArchivedPage() {
 			characterId: thread.Characters.CharacterId,
 			characterName: thread.Characters.CharacterName || "",
 			characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
+			characterIsOnHiatus: thread.Characters.IsOnHiatus,
 
 			// Tumblr status fields (not available for archived threads)
 			lastPostDate: null,

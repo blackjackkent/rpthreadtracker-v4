@@ -1,13 +1,16 @@
 "use client";
 
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState } from "react";
 import { User } from "next-auth";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Header } from "./header/Header";
 import { Sidebar } from "./sidebar/Sidebar";
 import { Footer } from "./footer/Footer";
-import { ThreadStatusProvider, useThreadStatus } from "@/components/providers/ThreadStatusProvider";
+import {
+	ThreadStatusProvider,
+	useThreadStatus,
+} from "@/components/providers/ThreadStatusProvider";
 import { UpsertCharacterModal } from "@/components/characters/UpsertCharacterModal";
 import { UpsertThreadModal } from "@/components/threads/UpsertThreadModal";
 import { createCharacter } from "@/app/actions/character";
@@ -26,7 +29,8 @@ const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 	const [isCharacterLoading, setIsCharacterLoading] = useState(false);
 	const [isThreadLoading, setIsThreadLoading] = useState(false);
 
-	const { refreshSingleThread, refreshCharacters, characters } = useThreadStatus();
+	const { refreshSingleThread, refreshCharacters, characters } =
+		useThreadStatus();
 
 	const handleAddCharacter = async (data: {
 		characterName?: string;
