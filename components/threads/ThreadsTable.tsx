@@ -12,12 +12,6 @@ import {
 	flexRender,
 	RowSelectionState,
 } from "@tanstack/react-table";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-	faSort,
-	faSortUp,
-	faSortDown,
-} from "@fortawesome/free-solid-svg-icons";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { ThreadExpandedRow } from "./ThreadExpandedRow";
 
@@ -83,52 +77,43 @@ export const ThreadsTable = ({
 					<thead className="bg-surface">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => (
-									<th
-										key={header.id}
-										className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider"
-										style={{
-											width:
-												header.getSize() !== 150 ? header.getSize() : undefined,
-										}}
-									>
-										{header.isPlaceholder ? null : (
-											<div
-												className={
-													header.column.getCanSort()
-														? "flex items-center gap-2 cursor-pointer select-none"
-														: ""
-												}
-												onClick={header.column.getToggleSortingHandler()}
-											>
-												{flexRender(
-													header.column.columnDef.header,
-													header.getContext()
-												)}
-												{header.column.getCanSort() && (
-													<span className="text-text-muted">
-														{header.column.getIsSorted() === "desc" ? (
-															<FontAwesomeIcon
-																icon={faSortDown}
-																className="w-3 h-3"
-															/>
-														) : header.column.getIsSorted() === "asc" ? (
-															<FontAwesomeIcon
-																icon={faSortUp}
-																className="w-3 h-3"
-															/>
-														) : (
-															<FontAwesomeIcon
-																icon={faSort}
-																className="w-3 h-3"
-															/>
-														)}
-													</span>
-												)}
-											</div>
-										)}
-									</th>
-								))}
+								{headerGroup.headers.map((header) => {
+									const sortDirection = header.column.getIsSorted();
+									return (
+										<th
+											key={header.id}
+											className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider relative"
+											style={{
+												width:
+													header.getSize() !== 150 ? header.getSize() : undefined,
+											}}
+										>
+											{/* Sorting indicator bar - top for asc, bottom for desc */}
+											{sortDirection === "asc" && (
+												<div className="absolute top-0 left-0 right-0 h-0.5 bg-primary" />
+											)}
+											{sortDirection === "desc" && (
+												<div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+											)}
+
+											{header.isPlaceholder ? null : (
+												<div
+													className={
+														header.column.getCanSort()
+															? "cursor-pointer select-none"
+															: ""
+													}
+													onClick={header.column.getToggleSortingHandler()}
+												>
+													{flexRender(
+														header.column.columnDef.header,
+														header.getContext()
+													)}
+												</div>
+											)}
+										</th>
+									);
+								})}
 							</tr>
 						))}
 					</thead>
