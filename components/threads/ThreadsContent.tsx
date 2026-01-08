@@ -276,7 +276,7 @@ export const ThreadsContent = ({
 				{showAddButton && (
 					<button
 						onClick={() => handleOpenModal()}
-						className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors inline-flex items-center gap-2"
+						className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors inline-flex items-center gap-2 cursor-pointer"
 					>
 						<FontAwesomeIcon icon={faPlus} className="w-4 h-4" />
 						Track New Thread
@@ -331,34 +331,36 @@ export const ThreadsContent = ({
 									<FontAwesomeIcon icon={faBoxArchive} className="w-3 h-3" />
 									Archive
 								</button>
-								{!isAllThreadsPage && (() => {
-									// Check if any selected threads have no valid Tumblr post
-									const selectedThreadsWithNoPost = filteredThreads
-										.filter((t) =>
-											t.threadId && selectedThreadIds.includes(t.threadId)
-										)
-										.some((t) => !t.lastPostDate);
+								{!isAllThreadsPage &&
+									(() => {
+										// Check if any selected threads have no valid Tumblr post
+										const selectedThreadsWithNoPost = filteredThreads
+											.filter(
+												(t) =>
+													t.threadId && selectedThreadIds.includes(t.threadId)
+											)
+											.some((t) => !t.lastPostDate);
 
-									return (
-										<button
-											onClick={handleBulkToggleQueue}
-											disabled={selectedThreadsWithNoPost}
-											className={
-												selectedThreadsWithNoPost
-													? "px-3 py-1.5 text-sm bg-text-muted text-white rounded opacity-50 cursor-not-allowed inline-flex items-center gap-1.5"
-													: "px-3 py-1.5 text-sm bg-primary hover:bg-primary-dark text-white rounded transition-colors inline-flex items-center gap-1.5"
-											}
-											title={
-												selectedThreadsWithNoPost
-													? "Cannot queue - some selected threads not found on Tumblr"
-													: "Toggle queue for selected threads"
-											}
-										>
-											<FontAwesomeIcon icon={faClock} className="w-3 h-3" />
-											Toggle Queue
-										</button>
-									);
-								})()}
+										return (
+											<button
+												onClick={handleBulkToggleQueue}
+												disabled={selectedThreadsWithNoPost}
+												className={
+													selectedThreadsWithNoPost
+														? "px-3 py-1.5 text-sm bg-text-muted text-white rounded opacity-50 cursor-not-allowed inline-flex items-center gap-1.5"
+														: "px-3 py-1.5 text-sm bg-primary hover:bg-primary-dark text-white rounded transition-colors inline-flex items-center gap-1.5"
+												}
+												title={
+													selectedThreadsWithNoPost
+														? "Cannot queue - some selected threads not found on Tumblr"
+														: "Toggle queue for selected threads"
+												}
+											>
+												<FontAwesomeIcon icon={faClock} className="w-3 h-3" />
+												Toggle Queue
+											</button>
+										);
+									})()}
 							</>
 						)}
 						<button
@@ -386,14 +388,18 @@ export const ThreadsContent = ({
 			{/* Cards (Mobile/Tablet) */}
 			<div className="lg:hidden space-y-4">
 				{filteredThreads.length === 0 ? (
-					<div className="text-center py-12 text-text-muted">No threads found</div>
+					<div className="text-center py-12 text-text-muted">
+						No threads found
+					</div>
 				) : (
 					filteredThreads.map((thread) => (
 						<ThreadCard
 							key={thread.threadId}
 							thread={thread}
 							isSelected={
-								thread.threadId ? selectedThreadIds.includes(thread.threadId) : false
+								thread.threadId
+									? selectedThreadIds.includes(thread.threadId)
+									: false
 							}
 							onSelect={(threadId) => {
 								setSelectedThreadIds((prev) =>

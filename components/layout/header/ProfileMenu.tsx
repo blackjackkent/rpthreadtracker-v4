@@ -17,7 +17,7 @@ export const ProfileMenu = ({ user }: ProfileMenuProps) => {
 		<div className="relative">
 			<button
 				onClick={() => setIsProfileOpen(!isProfileOpen)}
-				className="p-1.5 hover:bg-primary-dark rounded transition-colors"
+				className="p-1.5 hover:bg-primary-dark rounded transition-colors cursor-pointer"
 				aria-label="User menu"
 			>
 				<FontAwesomeIcon icon={faUser} className="w-4 h-4" />
@@ -53,7 +53,7 @@ export const ProfileMenu = ({ user }: ProfileMenuProps) => {
 					</Link>
 					<button
 						onClick={() => signOut({ callbackUrl: "/login" })}
-						className="w-full text-left px-4 py-2 hover:bg-background transition-colors border-t border-border"
+						className="w-full text-left px-4 py-2 hover:bg-background transition-colors border-t border-border cursor-pointer"
 					>
 						Logout
 					</button>

@@ -26,7 +26,7 @@ export const AddMenu = ({ onAddCharacter, onAddThread }: AddMenuProps) => {
 		<div className="relative">
 			<button
 				onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-				className="p-1.5 hover:bg-primary-dark rounded transition-colors"
+				className="p-1.5 hover:bg-primary-dark rounded transition-colors cursor-pointer"
 				aria-label="Add menu"
 			>
 				<FontAwesomeIcon icon={faCirclePlus} className="w-4 h-4" />

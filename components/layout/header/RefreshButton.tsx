@@ -11,7 +11,7 @@ export function RefreshButton() {
 		<button
 			onClick={refreshThreadStatuses}
 			disabled={isRefreshing}
-			className="flex items-center gap-2 px-3 py-2 text-text hover:bg-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+			className="flex items-center gap-2 px-3 py-2 text-text hover:bg-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
 			title="Refresh Tumblr data"
 			data-testid="refresh-tumblr-button"
 		>
@@ -19,13 +19,6 @@ export function RefreshButton() {
 				icon={faSync}
 				className={isRefreshing ? "animate-spin" : ""}
 			/>
-			<span className="hidden sm:inline" data-testid="refresh-progress">
-				{isRefreshing
-					? progress
-						? `Refreshing... ${progress.current}/${progress.total}`
-						: "Refreshing..."
-					: "Refresh Tumblr Data"}
-			</span>
 		</button>
 	);
 }
