@@ -7,13 +7,31 @@ import {
 	getSortedRowModel,
 	getPaginationRowModel,
 	getExpandedRowModel,
+	getFilteredRowModel,
 	SortingState,
 	ColumnDef,
+	ColumnFiltersState,
 	flexRender,
 	RowSelectionState,
+	Table,
+	Column,
 } from "@tanstack/react-table";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { ThreadExpandedRow } from "./ThreadExpandedRow";
+
+// Type for filter component props
+interface FilterComponentProps {
+	column: Column<ThreadStatusWithDetails>;
+	table: Table<ThreadStatusWithDetails>;
+}
+
+// Extend ColumnMeta to include filterComponent
+declare module "@tanstack/react-table" {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	interface ColumnMeta<TData, TValue> {
+		filterComponent?: React.ComponentType<FilterComponentProps>;
+	}
+}
 
 interface ThreadsTableProps {
 	threads: ThreadStatusWithDetails[];
@@ -31,6 +49,7 @@ export const ThreadsTable = ({
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "lastPostDate", desc: true },
 	]);
+	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
 	// TanStack Table v8 works with React 19 but isn't optimized by React Compiler yet
@@ -40,9 +59,11 @@ export const ThreadsTable = ({
 		columns,
 		state: {
 			sorting,
+			columnFilters,
 			rowSelection,
 		},
 		onSortingChange: setSorting,
+		onColumnFiltersChange: setColumnFilters,
 		onRowSelectionChange: (updater) => {
 			setRowSelection(updater);
 			// Notify parent of selection changes
@@ -57,6 +78,7 @@ export const ThreadsTable = ({
 		},
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
 		getExpandedRowModel: getExpandedRowModel(),
 		enableRowSelection: true,
@@ -76,45 +98,63 @@ export const ThreadsTable = ({
 				<table className="min-w-full divide-y divide-border">
 					<thead className="bg-surface">
 						{table.getHeaderGroups().map((headerGroup) => (
-							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => {
-									const sortDirection = header.column.getIsSorted();
-									return (
-										<th
-											key={header.id}
-											className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider relative"
-											style={{
-												width:
-													header.getSize() !== 150 ? header.getSize() : undefined,
-											}}
-										>
-											{/* Sorting indicator bar - top for asc, bottom for desc */}
-											{sortDirection === "asc" && (
-												<div className="absolute top-0 left-0 right-0 h-0.5 bg-primary" />
-											)}
-											{sortDirection === "desc" && (
-												<div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-											)}
+							<Fragment key={headerGroup.id}>
+								{/* Column Headers */}
+								<tr>
+									{headerGroup.headers.map((header) => {
+										const sortDirection = header.column.getIsSorted();
+										return (
+											<th
+												key={header.id}
+												className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider relative"
+												style={{
+													width:
+														header.getSize() !== 150 ? header.getSize() : undefined,
+												}}
+											>
+												{/* Sorting indicator bar - top for asc, bottom for desc */}
+												{sortDirection === "asc" && (
+													<div className="absolute top-0 left-0 right-0 h-0.5 bg-primary" />
+												)}
+												{sortDirection === "desc" && (
+													<div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+												)}
 
-											{header.isPlaceholder ? null : (
-												<div
-													className={
-														header.column.getCanSort()
-															? "cursor-pointer select-none"
-															: ""
-													}
-													onClick={header.column.getToggleSortingHandler()}
-												>
-													{flexRender(
-														header.column.columnDef.header,
-														header.getContext()
-													)}
-												</div>
-											)}
-										</th>
-									);
-								})}
-							</tr>
+												{header.isPlaceholder ? null : (
+													<div
+														className={
+															header.column.getCanSort()
+																? "cursor-pointer select-none"
+																: ""
+														}
+														onClick={header.column.getToggleSortingHandler()}
+													>
+														{flexRender(
+															header.column.columnDef.header,
+															header.getContext()
+														)}
+													</div>
+												)}
+											</th>
+										);
+									})}
+								</tr>
+
+								{/* Filter Row */}
+								<tr>
+									{headerGroup.headers.map((header) => {
+										const FilterComponent =
+											header.column.columnDef.meta?.filterComponent;
+										return (
+											<th key={header.id} className="px-4 py-2">
+												{header.column.getCanFilter() && FilterComponent ? (
+													<FilterComponent column={header.column} table={table} />
+												) : null}
+											</th>
+										);
+									})}
+								</tr>
+							</Fragment>
 						))}
 					</thead>
 					<tbody className="bg-surface divide-y divide-border">

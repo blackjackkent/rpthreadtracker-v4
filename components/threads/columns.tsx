@@ -13,6 +13,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { ThreadStatusBadge } from "./ThreadStatusBadge";
+import {
+	TextFilter,
+	CharacterFilter,
+	LastPosterFilter,
+	PartnerFilter,
+} from "./ColumnFilters";
 
 const columnHelper = createColumnHelper<ThreadStatusWithDetails>();
 
@@ -91,6 +97,15 @@ export const createThreadColumns = (
 			const titleB = rowB.original.userTitle || rowB.original.postId || "";
 			return titleA.localeCompare(titleB);
 		},
+		enableColumnFilter: true,
+		filterFn: (row, columnId, filterValue) => {
+			const title =
+				row.original.userTitle || row.original.postId || "Untitled Thread";
+			return title.toLowerCase().includes(filterValue.toLowerCase());
+		},
+		meta: {
+			filterComponent: TextFilter,
+		},
 	}),
 
 	// Character column
@@ -108,6 +123,13 @@ export const createThreadColumns = (
 				rowB.original.characterName || rowB.original.characterUrlIdentifier;
 			return nameA.localeCompare(nameB);
 		},
+		enableColumnFilter: true,
+		filterFn: (row, _columnId, filterValue) => {
+			return row.original.characterId === filterValue;
+		},
+		meta: {
+			filterComponent: CharacterFilter,
+		},
 	}),
 
 	// Partner column (Tracked Partner)
@@ -122,6 +144,14 @@ export const createThreadColumns = (
 			const partnerA = rowA.original.partnerUrlIdentifier || "";
 			const partnerB = rowB.original.partnerUrlIdentifier || "";
 			return partnerA.localeCompare(partnerB);
+		},
+		enableColumnFilter: true,
+		filterFn: (row, _columnId, filterValue) => {
+			const partner = row.original.partnerUrlIdentifier;
+			return partner === filterValue;
+		},
+		meta: {
+			filterComponent: PartnerFilter,
 		},
 	}),
 
@@ -153,6 +183,14 @@ export const createThreadColumns = (
 			const posterA = rowA.original.lastPosterUrlIdentifier || "";
 			const posterB = rowB.original.lastPosterUrlIdentifier || "";
 			return posterA.localeCompare(posterB);
+		},
+		enableColumnFilter: true,
+		filterFn: (row, _columnId, filterValue) => {
+			const poster = row.original.lastPosterUrlIdentifier;
+			return poster === filterValue;
+		},
+		meta: {
+			filterComponent: LastPosterFilter,
 		},
 	}),
 

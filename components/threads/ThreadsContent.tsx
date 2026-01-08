@@ -52,7 +52,7 @@ export const ThreadsContent = ({
 }: ThreadsContentProps) => {
 	const router = useRouter();
 	const [selectedThreadIds, setSelectedThreadIds] = useState<number[]>([]);
-	const [characterFilter, setCharacterFilter] = useState<number | "all">("all");
+	const [tagFilter, setTagFilter] = useState<string>("all");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [threadToEdit, setThreadToEdit] =
 		useState<ThreadStatusWithDetails | null>(null);
@@ -72,36 +72,29 @@ export const ThreadsContent = ({
 			result = result.filter(filterFunction);
 		}
 
-		// Apply character filter
-		if (characterFilter !== "all") {
-			result = result.filter(
-				(thread) => thread.characterId === characterFilter
+		// Apply tag filter
+		if (tagFilter !== "all") {
+			result = result.filter((thread) =>
+				thread.tags?.some((tag) => tag.tagText === tagFilter)
 			);
 		}
 
 		return result;
-	}, [threads, filterFunction, characterFilter]);
+	}, [threads, filterFunction, tagFilter]);
 
-	// Extract unique characters for filter dropdown (only non-hiatus characters with threads on this page)
-	const charactersWithThreads = useMemo(() => {
-		const charMap = new Map<
-			number,
-			{ id: number; name: string; urlIdentifier: string }
-		>();
+	// Extract unique tags for filter dropdown (only from threads on this page)
+	const uniqueTags = useMemo(() => {
+		const tagSet = new Set<string>();
 
 		threads.forEach((thread) => {
-			if (thread.characterId && !thread.characterIsOnHiatus) {
-				charMap.set(thread.characterId, {
-					id: thread.characterId,
-					name: thread.characterName,
-					urlIdentifier: thread.characterUrlIdentifier,
+			if (!thread.characterIsOnHiatus && thread.tags) {
+				thread.tags.forEach((tag) => {
+					tagSet.add(tag.tagText);
 				});
 			}
 		});
 
-		return Array.from(charMap.values()).sort((a, b) =>
-			a.name.localeCompare(b.name)
-		);
+		return Array.from(tagSet).sort();
 	}, [threads]);
 
 	// Modal handlers
@@ -292,25 +285,21 @@ export const ThreadsContent = ({
 
 			{/* Filters and Bulk Actions */}
 			<div className="flex items-center justify-between gap-4">
-				{/* Character Filter */}
+				{/* Tag Filter */}
 				<div className="flex items-center gap-2">
-					<label htmlFor="character-filter" className="text-sm text-text-muted">
-						Filter by character:
+					<label htmlFor="tag-filter" className="text-sm text-text-muted">
+						Filter by tag:
 					</label>
 					<select
-						id="character-filter"
-						value={characterFilter}
-						onChange={(e) =>
-							setCharacterFilter(
-								e.target.value === "all" ? "all" : Number(e.target.value)
-							)
-						}
+						id="tag-filter"
+						value={tagFilter}
+						onChange={(e) => setTagFilter(e.target.value)}
 						className="px-3 py-1.5 text-sm border border-border rounded bg-surface text-text"
 					>
-						<option value="all">All Characters</option>
-						{charactersWithThreads.map((char) => (
-							<option key={char.id} value={char.id}>
-								{char.name || char.urlIdentifier}
+						<option value="all">All Tags</option>
+						{uniqueTags.map((tag) => (
+							<option key={tag} value={tag}>
+								{tag}
 							</option>
 						))}
 					</select>
