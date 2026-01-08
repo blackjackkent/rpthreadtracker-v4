@@ -18,6 +18,7 @@ import {
 } from "@tanstack/react-table";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { ThreadExpandedRow } from "./ThreadExpandedRow";
+import { useProfileSettings } from "@/components/providers/ProfileSettingsProvider";
 
 // Type for filter component props
 interface FilterComponentProps {
@@ -38,15 +39,14 @@ interface ThreadsTableProps {
 	threads: ThreadStatusWithDetails[];
 	columns: ColumnDef<ThreadStatusWithDetails>[];
 	onRowSelectionChange?: (selectedThreadIds: number[]) => void;
-	initialPageSize?: number; // User's saved preference from ProfileSettings
 }
 
 export const ThreadsTable = ({
 	threads,
 	columns,
 	onRowSelectionChange,
-	initialPageSize = 10,
 }: ThreadsTableProps) => {
+	const { settings } = useProfileSettings();
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "lastPostDate", desc: true },
 	]);
@@ -87,7 +87,7 @@ export const ThreadsTable = ({
 		getRowCanExpand: () => true,
 		initialState: {
 			pagination: {
-				pageSize: initialPageSize,
+				pageSize: settings?.threadTablePageSize || 10,
 			},
 		},
 	});

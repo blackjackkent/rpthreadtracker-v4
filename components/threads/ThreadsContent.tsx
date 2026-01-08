@@ -381,7 +381,6 @@ export const ThreadsContent = ({
 					threads={filteredThreads}
 					columns={columns}
 					onRowSelectionChange={setSelectedThreadIds}
-					initialPageSize={10} // TODO: Get from ProfileSettingsProvider when implemented
 				/>
 			</div>
 

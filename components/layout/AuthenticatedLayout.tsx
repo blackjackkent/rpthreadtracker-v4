@@ -11,6 +11,7 @@ import {
 	ThreadStatusProvider,
 	useThreadStatus,
 } from "@/components/providers/ThreadStatusProvider";
+import { ProfileSettingsProvider } from "@/components/providers/ProfileSettingsProvider";
 import { UpsertCharacterModal } from "@/components/characters/UpsertCharacterModal";
 import { UpsertThreadModal } from "@/components/threads/UpsertThreadModal";
 import { createCharacter } from "@/app/actions/character";
@@ -133,8 +134,10 @@ export const AuthenticatedLayout = ({
 	user,
 }: AuthenticatedLayoutProps) => {
 	return (
-		<ThreadStatusProvider userId={user.id}>
-			<LayoutContent user={user}>{children}</LayoutContent>
-		</ThreadStatusProvider>
+		<ProfileSettingsProvider userId={user.id}>
+			<ThreadStatusProvider userId={user.id}>
+				<LayoutContent user={user}>{children}</LayoutContent>
+			</ThreadStatusProvider>
+		</ProfileSettingsProvider>
 	);
 };
