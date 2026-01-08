@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { User } from "next-auth";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -23,7 +23,8 @@ interface AuthenticatedLayoutProps {
 
 const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 	const router = useRouter();
-	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+	// Initialize sidebar state - will be set based on screen size in useEffect
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [isAddCharacterModalOpen, setIsAddCharacterModalOpen] = useState(false);
 	const [isAddThreadModalOpen, setIsAddThreadModalOpen] = useState(false);
 	const [isCharacterLoading, setIsCharacterLoading] = useState(false);
@@ -31,6 +32,22 @@ const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 
 	const { refreshSingleThread, refreshCharacters, characters } =
 		useThreadStatus();
+
+	// Set initial sidebar state based on screen size
+	useEffect(() => {
+		const checkScreenSize = () => {
+			// lg breakpoint is 1024px in Tailwind
+			const isLargeScreen = window.innerWidth >= 1024;
+			setIsSidebarOpen(isLargeScreen);
+		};
+
+		// Set initial state
+		checkScreenSize();
+
+		// Update on resize
+		window.addEventListener("resize", checkScreenSize);
+		return () => window.removeEventListener("resize", checkScreenSize);
+	}, []);
 
 	const handleAddCharacter = async (data: {
 		characterName?: string;
