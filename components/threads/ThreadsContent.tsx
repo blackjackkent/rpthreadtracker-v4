@@ -13,6 +13,7 @@ import {
 import { toast } from "react-toastify";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { ThreadsTable } from "./ThreadsTable";
+import { ThreadCard } from "./ThreadCard";
 import { createThreadColumns } from "./columns";
 import { UpsertThreadModal } from "./UpsertThreadModal";
 import type { ThreadFilterFunction } from "./filters";
@@ -372,13 +373,46 @@ export const ThreadsContent = ({
 				)}
 			</div>
 
-			{/* Table */}
-			<ThreadsTable
-				threads={filteredThreads}
-				columns={columns}
-				onRowSelectionChange={setSelectedThreadIds}
-				initialPageSize={10} // TODO: Get from ProfileSettingsProvider when implemented
-			/>
+			{/* Table (Desktop) */}
+			<div className="hidden lg:block">
+				<ThreadsTable
+					threads={filteredThreads}
+					columns={columns}
+					onRowSelectionChange={setSelectedThreadIds}
+					initialPageSize={10} // TODO: Get from ProfileSettingsProvider when implemented
+				/>
+			</div>
+
+			{/* Cards (Mobile/Tablet) */}
+			<div className="lg:hidden space-y-4">
+				{filteredThreads.length === 0 ? (
+					<div className="text-center py-12 text-text-muted">No threads found</div>
+				) : (
+					filteredThreads.map((thread) => (
+						<ThreadCard
+							key={thread.threadId}
+							thread={thread}
+							isSelected={
+								thread.threadId ? selectedThreadIds.includes(thread.threadId) : false
+							}
+							onSelect={(threadId) => {
+								setSelectedThreadIds((prev) =>
+									prev.includes(threadId)
+										? prev.filter((id) => id !== threadId)
+										: [...prev, threadId]
+								);
+							}}
+							onEdit={columnActions.onEdit}
+							onArchive={columnActions.onArchive}
+							onUnarchive={columnActions.onUnarchive}
+							onToggleQueue={columnActions.onToggleQueue}
+							onUntrack={columnActions.onUntrack}
+							isArchivedPage={isArchived}
+							showToggleQueue={!isAllThreadsPage}
+						/>
+					))
+				)}
+			</div>
 
 			{/* Thread Modal */}
 			<UpsertThreadModal

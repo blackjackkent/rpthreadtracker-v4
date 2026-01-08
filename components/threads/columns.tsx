@@ -132,7 +132,7 @@ export const createThreadColumns = (
 		},
 	}),
 
-	// Partner column (Tracked Partner)
+	// Partner column (Tracked Partner) - Hidden below 2xl breakpoint
 	columnHelper.accessor("partnerUrlIdentifier", {
 		header: "Partner",
 		cell: (info) => {
@@ -152,6 +152,7 @@ export const createThreadColumns = (
 		},
 		meta: {
 			filterComponent: PartnerFilter,
+			className: "hidden 2xl:table-cell",
 		},
 	}),
 
@@ -194,7 +195,7 @@ export const createThreadColumns = (
 		},
 	}),
 
-	// Status column
+	// Status column - Hidden below 2xl breakpoint
 	columnHelper.display({
 		id: "status",
 		header: "Status",
@@ -205,6 +206,9 @@ export const createThreadColumns = (
 				isCallingCharactersTurn={row.original.isCallingCharactersTurn}
 			/>
 		),
+		meta: {
+			className: "hidden 2xl:table-cell",
+		},
 	}),
 
 	// Last Post Date column (with time)

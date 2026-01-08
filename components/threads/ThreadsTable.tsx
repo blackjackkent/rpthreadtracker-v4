@@ -25,11 +25,12 @@ interface FilterComponentProps {
 	table: Table<ThreadStatusWithDetails>;
 }
 
-// Extend ColumnMeta to include filterComponent
+// Extend ColumnMeta to include filterComponent and className
 declare module "@tanstack/react-table" {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	interface ColumnMeta<TData, TValue> {
 		filterComponent?: React.ComponentType<FilterComponentProps>;
+		className?: string;
 	}
 }
 
@@ -103,10 +104,11 @@ export const ThreadsTable = ({
 								<tr>
 									{headerGroup.headers.map((header) => {
 										const sortDirection = header.column.getIsSorted();
+										const customClassName = header.column.columnDef.meta?.className;
 										return (
 											<th
 												key={header.id}
-												className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider relative"
+												className={`px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider relative ${customClassName || ""}`}
 												style={{
 													width:
 														header.getSize() !== 150 ? header.getSize() : undefined,
@@ -145,8 +147,12 @@ export const ThreadsTable = ({
 									{headerGroup.headers.map((header) => {
 										const FilterComponent =
 											header.column.columnDef.meta?.filterComponent;
+										const customClassName = header.column.columnDef.meta?.className;
 										return (
-											<th key={header.id} className="px-4 py-2">
+											<th
+												key={header.id}
+												className={`px-4 py-2 ${customClassName || ""}`}
+											>
 												{header.column.getCanFilter() && FilterComponent ? (
 													<FilterComponent column={header.column} table={table} />
 												) : null}
@@ -162,14 +168,20 @@ export const ThreadsTable = ({
 							<Fragment key={row.id}>
 								{/* Main row */}
 								<tr className="hover:bg-background/50">
-									{row.getVisibleCells().map((cell) => (
-										<td key={cell.id} className="px-4 py-3 text-sm text-text">
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext()
-											)}
-										</td>
-									))}
+									{row.getVisibleCells().map((cell) => {
+										const customClassName = cell.column.columnDef.meta?.className;
+										return (
+											<td
+												key={cell.id}
+												className={`px-4 py-3 text-sm text-text ${customClassName || ""}`}
+											>
+												{flexRender(
+													cell.column.columnDef.cell,
+													cell.getContext()
+												)}
+											</td>
+										);
+									})}
 								</tr>
 
 								{/* Expanded row for description/tags */}
