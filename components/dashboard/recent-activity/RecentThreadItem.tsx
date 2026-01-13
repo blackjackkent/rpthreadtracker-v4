@@ -2,12 +2,22 @@
 
 import type { ThreadStatusWithDetails } from "@/types/tumblr";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import {
+	deleteThread,
+	archiveThread,
+	toggleThreadQueued,
+} from "@/app/actions/thread";
+import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 
 interface RecentThreadItemProps {
 	thread: ThreadStatusWithDetails;
 }
 
 export function RecentThreadItem({ thread }: RecentThreadItemProps) {
+	const router = useRouter();
+	const { refreshSingleThread } = useThreadStatus();
 	const [isUntracking, setIsUntracking] = useState(false);
 	const [isArchiving, setIsArchiving] = useState(false);
 	const [isQueuing, setIsQueuing] = useState(false);
@@ -26,43 +36,50 @@ export function RecentThreadItem({ thread }: RecentThreadItemProps) {
 	};
 
 	const handleUntrack = async () => {
-		if (!confirm("Are you sure you want to untrack this thread?")) return;
+		if (!thread.threadId) return;
+		if (!confirm("Are you sure you want to untrack this thread? This action cannot be undone.")) return;
 
 		setIsUntracking(true);
 		try {
-			// TODO: Implement untrack mutation
-			console.log("Untracking thread:", thread.threadId);
+			await deleteThread(thread.threadId);
+			router.refresh();
+			toast.success("Thread untracked");
 		} catch (error) {
 			console.error("Error untracking thread:", error);
+			toast.error("Failed to untrack thread");
 		} finally {
 			setIsUntracking(false);
 		}
 	};
 
 	const handleArchive = async () => {
-		if (!confirm("Are you sure you want to archive this thread?")) return;
+		if (!thread.threadId) return;
 
 		setIsArchiving(true);
 		try {
-			// TODO: Implement archive mutation
-			console.log("Archiving thread:", thread.threadId);
+			await archiveThread(thread.threadId);
+			router.refresh();
+			toast.success("Thread archived");
 		} catch (error) {
 			console.error("Error archiving thread:", error);
+			toast.error("Failed to archive thread");
 		} finally {
 			setIsArchiving(false);
 		}
 	};
 
 	const handleMarkQueued = async () => {
-		if (!confirm("Are you sure you want to mark this thread as queued?"))
-			return;
+		if (!thread.threadId) return;
 
 		setIsQueuing(true);
 		try {
-			// TODO: Implement queue mutation
-			console.log("Marking thread queued:", thread.threadId);
+			await toggleThreadQueued(thread.threadId);
+			await refreshSingleThread(thread.threadId);
+			router.refresh();
+			toast.success("Thread marked as queued");
 		} catch (error) {
 			console.error("Error marking thread queued:", error);
+			toast.error("Failed to mark thread as queued");
 		} finally {
 			setIsQueuing(false);
 		}
