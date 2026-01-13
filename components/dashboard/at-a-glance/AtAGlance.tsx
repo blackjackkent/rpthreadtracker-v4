@@ -36,7 +36,8 @@ export const AtAGlance = ({
 		setIsTogglingVisibility(true);
 		try {
 			await updateSettings({
-				showDashboardThreadDistribution: !settings.showDashboardThreadDistribution,
+				showDashboardThreadDistribution:
+					!settings.showDashboardThreadDistribution,
 			});
 		} catch (error) {
 			console.error("Failed to toggle dashboard visibility:", error);
@@ -59,7 +60,7 @@ export const AtAGlance = ({
 					type="button"
 					onClick={handleToggleVisibility}
 					disabled={isTogglingVisibility}
-					className="p-2 text-text-muted hover:text-text transition-colors disabled:opacity-50"
+					className="p-2 text-text-muted hover:text-text transition-colors disabled:opacity-50 cursor-pointer"
 					title={showDistribution ? "Hide stats" : "Show stats"}
 				>
 					<FontAwesomeIcon
