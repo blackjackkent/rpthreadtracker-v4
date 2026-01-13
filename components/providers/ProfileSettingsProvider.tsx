@@ -20,6 +20,7 @@ interface ProfileSettingsContextValue {
 	settings: ProfileSettings | null;
 	isLoading: boolean;
 	updatePageSize: (pageSize: number) => Promise<void>;
+	updateSettings: (updates: Partial<ProfileSettings>) => Promise<void>;
 }
 
 const ProfileSettingsContext = createContext<
@@ -75,9 +76,27 @@ export const ProfileSettingsProvider = ({
 		}
 	};
 
+	const updateSettings = async (updates: Partial<ProfileSettings>) => {
+		try {
+			const response = await fetch("/api/profile-settings", {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(updates),
+			});
+
+			if (response.ok) {
+				const updatedSettings = await response.json();
+				setSettings(updatedSettings);
+			}
+		} catch (error) {
+			console.error("Failed to update settings:", error);
+			throw error;
+		}
+	};
+
 	return (
 		<ProfileSettingsContext.Provider
-			value={{ settings, isLoading, updatePageSize }}
+			value={{ settings, isLoading, updatePageSize, updateSettings }}
 		>
 			{children}
 		</ProfileSettingsContext.Provider>

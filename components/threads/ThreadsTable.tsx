@@ -46,7 +46,7 @@ export const ThreadsTable = ({
 	columns,
 	onRowSelectionChange,
 }: ThreadsTableProps) => {
-	const { settings } = useProfileSettings();
+	const { settings, updatePageSize } = useProfileSettings();
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "lastPostDate", desc: true },
 	]);
@@ -222,7 +222,15 @@ export const ThreadsTable = ({
 					</span>
 					<select
 						value={table.getState().pagination.pageSize}
-						onChange={(e) => table.setPageSize(Number(e.target.value))}
+						onChange={async (e) => {
+							const newSize = Number(e.target.value);
+							table.setPageSize(newSize);
+							try {
+								await updatePageSize(newSize);
+							} catch (error) {
+								console.error("Failed to save page size preference:", error);
+							}
+						}}
 						className="px-2 py-1 text-sm border border-border rounded bg-surface text-text"
 					>
 						{[10, 25, 50, 100].map((pageSize) => (
