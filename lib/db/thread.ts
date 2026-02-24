@@ -110,6 +110,50 @@ export async function getArchivedThreadsForUser(
 }
 
 /**
+ * Get threads for a user for export, with optional filters
+ */
+export async function getAllThreadsForExport(
+	userId: string,
+	includeArchived: boolean,
+	includeHiatused: boolean
+): Promise<ThreadWithCharacter[]> {
+	return prisma.threads.findMany({
+		where: {
+			Characters: {
+				UserId: userId,
+				...(includeHiatused ? {} : { IsOnHiatus: false }),
+			},
+			...(includeArchived ? {} : { IsArchived: false }),
+		},
+		select: {
+			ThreadId: true,
+			PostId: true,
+			UserTitle: true,
+			PartnerUrlIdentifier: true,
+			DateMarkedQueued: true,
+			IsArchived: true,
+			Description: true,
+			Characters: {
+				select: {
+					CharacterId: true,
+					CharacterName: true,
+					UrlIdentifier: true,
+					IsOnHiatus: true,
+				},
+			},
+			ThreadTags: {
+				select: {
+					TagID: true,
+					TagText: true,
+					ThreadID: true,
+				},
+			},
+		},
+		orderBy: [{ IsArchived: "asc" }, { UserTitle: "asc" }],
+	});
+}
+
+/**
  * Get a single thread by ID (for editing)
  */
 export async function getThreadById(threadId: number) {
