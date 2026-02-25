@@ -211,7 +211,7 @@ export const ThreadCard = ({
 							thread.tags.map((tag) => (
 								<span
 									key={tag.tagId}
-									className="inline-block px-2 py-1 text-xs bg-primary/20 text-primary border border-primary/30 rounded"
+									className="inline-block px-2 py-1 text-xs bg-primary/20 text-tag-text border border-primary/30 rounded"
 								>
 									#{tag.tagText}
 								</span>

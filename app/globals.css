@@ -5,6 +5,7 @@
 	--color-primary: #418ce4;
 	--color-primary-dark: #3a7dcc;
 	--color-primary-light: #95c6ff;
+	--color-tag-text: #95c6ff; /* bright in dark mode */
 
 	/* Dark theme colors (default) */
 	--color-background: #333333;
@@ -30,6 +31,7 @@
 	--color-border: #dee2e6;
 	--color-text: #23282c;
 	--color-text-muted: #6c757d;
+	--color-tag-text: #1a6abf; /* darker in light mode for contrast */
 }
 
 html,

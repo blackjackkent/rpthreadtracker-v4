@@ -318,7 +318,7 @@ export const UpsertThreadModal = ({
 								values={tags}
 								className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
 								labelClassName="block text-sm font-medium mb-1"
-								itemClassName="inline-flex items-center gap-1 px-2 py-1 my-2 bg-primary/20 text-primary border border-primary/30 rounded text-sm"
+								itemClassName="inline-flex items-center gap-1 px-2 py-1 my-2 bg-primary/20 text-tag-text border border-primary/30 rounded text-sm"
 								deleteButton={
 									<span className="text-text-muted hover:text-text">
 										<FontAwesomeIcon icon={faTimes} className="w-3 h-3" />
