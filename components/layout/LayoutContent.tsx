@@ -15,14 +15,15 @@ export const LayoutContent = ({ children }: LayoutContentProps) => {
 	const pathname = usePathname();
 
 	const isLoginPage = pathname === "/login";
+	const isPublicPage = pathname.startsWith("/public");
 
 	useEffect(() => {
-		if (status === "unauthenticated" && !isLoginPage) {
+		if (status === "unauthenticated" && !isLoginPage && !isPublicPage) {
 			router.push("/login");
 		}
-	}, [status, router, isLoginPage]);
+	}, [status, router, isLoginPage, isPublicPage]);
 
-	if (status === "loading") {
+	if (status === "loading" && !isPublicPage) {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
 				<div className="text-text-muted">Loading...</div>
@@ -30,8 +31,8 @@ export const LayoutContent = ({ children }: LayoutContentProps) => {
 		);
 	}
 
-	// Login page doesn't need the authenticated layout
-	if (isLoginPage) {
+	// Login and public pages don't need the authenticated layout
+	if (isLoginPage || isPublicPage) {
 		return <>{children}</>;
 	}
 

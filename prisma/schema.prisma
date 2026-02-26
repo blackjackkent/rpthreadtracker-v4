@@ -124,3 +124,21 @@ model ThreadTags {
   ThreadID Int?
   Threads  Threads? @relation(fields: [ThreadID], references: [ThreadId], onDelete: Cascade, onUpdate: NoAction, map: "FK_dbo.ThreadTags_dbo.Threads_ThreadId")
 }
+
+model PublicViews {
+  Id               String  @id(map: "PK__PublicVi__3214EC07ADAC6EEB") @db.UniqueIdentifier
+  UserId           String  @db.NVarChar(128)
+  Name             String  @db.NVarChar(256)
+  Slug             String  @db.VarChar(256)
+  IncludeMyTurn    Boolean
+  IncludeTheirTurn Boolean
+  IncludeQueued    Boolean
+  IncludeArchived  Boolean
+  Columns          String  @db.NVarChar(Max)
+  SortKey          String  @db.VarChar(50)
+  SortDescending   Boolean
+  CharacterIds     String? @db.NVarChar(Max)
+  Tags             String? @db.NVarChar(Max)
+
+  @@unique([UserId, Slug], map: "UQ_PublicViews_UserId_Slug")
+}
