@@ -33,24 +33,25 @@ model AspNetUserRoles {
 }
 
 model AspNetUsers {
-  Id                   String             @id(map: "PK_dbo.AspNetUsers") @db.NVarChar(128)
+  Id                   String                @id(map: "PK_dbo.AspNetUsers") @db.NVarChar(128)
   AccessFailedCount    Int
-  ConcurrencyStamp     String?            @db.NVarChar(Max)
-  Email                String?            @db.NVarChar(256)
+  ConcurrencyStamp     String?               @db.NVarChar(Max)
+  Email                String?               @db.NVarChar(256)
   EmailConfirmed       Boolean
   LockoutEnabled       Boolean
-  LockoutEnd           DateTime?          @db.DateTimeOffset
-  NormalizedEmail      String?            @db.NVarChar(256)
-  NormalizedUserName   String?            @db.NVarChar(256)
-  PasswordHash         String?            @db.NVarChar(Max)
-  PhoneNumber          String?            @db.NVarChar(Max)
+  LockoutEnd           DateTime?             @db.DateTimeOffset
+  NormalizedEmail      String?               @db.NVarChar(256)
+  NormalizedUserName   String?               @db.NVarChar(256)
+  PasswordHash         String?               @db.NVarChar(Max)
+  PhoneNumber          String?               @db.NVarChar(Max)
   PhoneNumberConfirmed Boolean
-  SecurityStamp        String?            @db.NVarChar(Max)
+  SecurityStamp        String?               @db.NVarChar(Max)
   TwoFactorEnabled     Boolean
-  UserName             String?            @db.NVarChar(256)
+  UserName             String?               @db.NVarChar(256)
   AspNetUserClaims     AspNetUserClaims[]
   AspNetUserRoles      AspNetUserRoles[]
   Characters           Characters[]
+  PasswordResetTokens  PasswordResetTokens[]
   ProfileSettings      ProfileSettings[]
   RefreshTokens        RefreshTokens[]
 }
@@ -141,4 +142,13 @@ model PublicViews {
   Tags             String? @db.NVarChar(Max)
 
   @@unique([UserId, Slug], map: "UQ_PublicViews_UserId_Slug")
+}
+
+model PasswordResetTokens {
+  Id          String      @id(map: "PK__Password__3214EC0710F0A6F2") @db.NVarChar(128)
+  UserId      String      @db.NVarChar(128)
+  Token       String      @db.NVarChar(Max)
+  ExpiresUtc  DateTime    @db.DateTime
+  UsedUtc     DateTime?   @db.DateTime
+  AspNetUsers AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_PasswordResetTokens_AspNetUsers")
 }

@@ -16,14 +16,17 @@ export const LayoutContent = ({ children }: LayoutContentProps) => {
 
 	const isLoginPage = pathname === "/login";
 	const isPublicPage = pathname.startsWith("/public");
+	const isAuthPage =
+		pathname.startsWith("/forgot-password") ||
+		pathname.startsWith("/reset-password");
 
 	useEffect(() => {
-		if (status === "unauthenticated" && !isLoginPage && !isPublicPage) {
+		if (status === "unauthenticated" && !isLoginPage && !isPublicPage && !isAuthPage) {
 			router.push("/login");
 		}
-	}, [status, router, isLoginPage, isPublicPage]);
+	}, [status, router, isLoginPage, isPublicPage, isAuthPage]);
 
-	if (status === "loading" && !isPublicPage) {
+	if (status === "loading" && !isPublicPage && !isAuthPage) {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
 				<div className="text-text-muted">Loading...</div>
@@ -31,8 +34,8 @@ export const LayoutContent = ({ children }: LayoutContentProps) => {
 		);
 	}
 
-	// Login and public pages don't need the authenticated layout
-	if (isLoginPage || isPublicPage) {
+	// Login, public, and unauthenticated auth pages don't need the authenticated layout
+	if (isLoginPage || isPublicPage || isAuthPage) {
 		return <>{children}</>;
 	}
 
