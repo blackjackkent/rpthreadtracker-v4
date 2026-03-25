@@ -51,6 +51,7 @@ model AspNetUsers {
   AspNetUserClaims     AspNetUserClaims[]
   AspNetUserRoles      AspNetUserRoles[]
   Characters           Characters[]
+  EmailChangeTokens    EmailChangeTokens[]
   PasswordResetTokens  PasswordResetTokens[]
   ProfileSettings      ProfileSettings[]
   RefreshTokens        RefreshTokens[]
@@ -151,4 +152,14 @@ model PasswordResetTokens {
   ExpiresUtc  DateTime    @db.DateTime
   UsedUtc     DateTime?   @db.DateTime
   AspNetUsers AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_PasswordResetTokens_AspNetUsers")
+}
+
+model EmailChangeTokens {
+  Id          String      @id(map: "PK__EmailCha__3214EC07304D8410") @db.NVarChar(128)
+  UserId      String      @db.NVarChar(128)
+  NewEmail    String      @db.NVarChar(256)
+  Token       String      @db.NVarChar(Max)
+  ExpiresUtc  DateTime    @db.DateTime
+  UsedUtc     DateTime?   @db.DateTime
+  AspNetUsers AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_EmailChangeTokens_AspNetUsers")
 }

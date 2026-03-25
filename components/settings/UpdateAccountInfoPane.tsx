@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSpinner, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import { updateAccountInfo } from "@/app/actions/settings";
+import { updateAccountInfo, requestEmailChange } from "@/app/actions/settings";
 
 interface UpdateAccountInfoPaneProps {
 	user: {
@@ -17,105 +17,140 @@ interface UpdateAccountInfoPaneProps {
 
 export const UpdateAccountInfoPane = ({ user }: UpdateAccountInfoPaneProps) => {
 	const { update } = useSession();
+
 	const [username, setUsername] = useState(user.userName);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [error, setError] = useState("");
+	const [usernameError, setUsernameError] = useState("");
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const [newEmail, setNewEmail] = useState("");
+	const [isSendingVerification, setIsSendingVerification] = useState(false);
+	const [emailError, setEmailError] = useState("");
+
+	const handleUsernameSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError("");
+		setUsernameError("");
 
 		const trimmed = username.trim();
-		if (!trimmed) {
-			setError("Username is required");
-			return;
-		}
-		if (trimmed.length < 3) {
-			setError("Username must be at least 3 characters");
-			return;
-		}
+		if (!trimmed) { setUsernameError("Username is required"); return; }
+		if (trimmed.length < 3) { setUsernameError("Username must be at least 3 characters"); return; }
 
 		setIsSubmitting(true);
 		try {
 			const { newUsername } = await updateAccountInfo(trimmed);
-			// Refresh the NextAuth session so the new username is reflected immediately
 			await update({ name: newUsername });
-			toast.success("Account info updated.");
+			toast.success("Username updated.");
 		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Failed to update account info"
-			);
+			setUsernameError(err instanceof Error ? err.message : "Failed to update username");
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
+	const handleEmailChange = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setEmailError("");
+
+		const trimmed = newEmail.trim();
+		if (!trimmed) { setEmailError("Email is required"); return; }
+
+		setIsSendingVerification(true);
+		try {
+			await requestEmailChange(trimmed);
+			toast.success(`Verification email sent to ${trimmed}. Click the link to confirm the change.`);
+			setNewEmail("");
+		} catch (err) {
+			setEmailError(err instanceof Error ? err.message : "Failed to send verification email");
+		} finally {
+			setIsSendingVerification(false);
+		}
+	};
+
 	return (
-		<div className="bg-surface border border-border rounded-lg shadow-sm">
-			<div className="px-6 py-4 border-b border-border">
-				<h2 className="text-lg font-semibold">Account Info</h2>
-			</div>
-			<form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
-				{error && (
-					<div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded text-sm">
-						{error}
+		<div className="space-y-6">
+			{/* Username */}
+			<div className="bg-surface border border-border rounded-lg shadow-sm">
+				<div className="px-6 py-4 border-b border-border">
+					<h2 className="text-lg font-semibold">Username</h2>
+				</div>
+				<form onSubmit={handleUsernameSubmit} className="px-6 py-4 space-y-4">
+					{usernameError && (
+						<div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded text-sm">
+							{usernameError}
+						</div>
+					)}
+					<div>
+						<label className="block text-sm font-medium mb-1">Username</label>
+						<input
+							type="text"
+							value={username}
+							onChange={(e) => { setUsernameError(""); setUsername(e.target.value); }}
+							disabled={isSubmitting}
+							className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+						/>
 					</div>
-				)}
+					<div className="pt-2">
+						<button
+							type="submit"
+							disabled={isSubmitting}
+							className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							{isSubmitting ? (
+								<><FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin mr-1.5" />Saving...</>
+							) : "Save Username"}
+						</button>
+					</div>
+				</form>
+			</div>
 
-				{/* Username */}
-				<div>
-					<label className="block text-sm font-medium mb-1">
-						Username
-					</label>
-					<input
-						type="text"
-						value={username}
-						onChange={(e) => {
-							setError("");
-							setUsername(e.target.value);
-						}}
-						disabled={isSubmitting}
-						className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-					/>
+			{/* Email */}
+			<div className="bg-surface border border-border rounded-lg shadow-sm">
+				<div className="px-6 py-4 border-b border-border">
+					<h2 className="text-lg font-semibold">Email Address</h2>
 				</div>
-
-				{/* Email — disabled, coming soon */}
-				<div>
-					<label className="block text-sm font-medium mb-1">
-						Email
-					</label>
-					<input
-						type="email"
-						value={user.email}
-						disabled
-						className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm opacity-60 cursor-not-allowed"
-					/>
-					<p className="mt-1 text-xs text-text-muted flex items-center gap-1">
-						<FontAwesomeIcon icon={faInfoCircle} className="w-3 h-3 shrink-0" />
-						Email updates require email verification, which is coming soon.
-					</p>
-				</div>
-
-				<div className="pt-2">
-					<button
-						type="submit"
-						disabled={isSubmitting}
-						className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{isSubmitting ? (
-							<>
-								<FontAwesomeIcon
-									icon={faSpinner}
-									className="w-3.5 h-3.5 animate-spin mr-1.5"
-								/>
-								Saving...
-							</>
-						) : (
-							"Save Changes"
+				<div className="px-6 py-4 space-y-4">
+					<div>
+						<label className="block text-sm font-medium mb-1">Current email</label>
+						<input
+							type="email"
+							value={user.email}
+							disabled
+							className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm opacity-60 cursor-not-allowed"
+						/>
+					</div>
+					<form onSubmit={handleEmailChange} className="space-y-4">
+						{emailError && (
+							<div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded text-sm">
+								{emailError}
+							</div>
 						)}
-					</button>
+						<div>
+							<label className="block text-sm font-medium mb-1">New email address</label>
+							<input
+								type="email"
+								value={newEmail}
+								onChange={(e) => { setEmailError(""); setNewEmail(e.target.value); }}
+								disabled={isSendingVerification}
+								placeholder="new@example.com"
+								className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+							/>
+							<p className="mt-1 text-xs text-text-muted">
+								A verification link will be sent to the new address. Your email won&apos;t change until you click it.
+							</p>
+						</div>
+						<div>
+							<button
+								type="submit"
+								disabled={isSendingVerification || !newEmail.trim()}
+								className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{isSendingVerification ? (
+									<><FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin mr-1.5" />Sending...</>
+								) : "Send Verification Email"}
+							</button>
+						</div>
+					</form>
 				</div>
-			</form>
+			</div>
 		</div>
 	);
 };

@@ -53,6 +53,19 @@ export async function updateUsername(
 	});
 }
 
+export async function updateUserEmail(
+	userId: string,
+	newEmail: string
+): Promise<void> {
+	await prisma.aspNetUsers.update({
+		where: { Id: userId },
+		data: {
+			Email: newEmail,
+			NormalizedEmail: newEmail.toUpperCase(),
+		},
+	});
+}
+
 export async function deleteUser(userId: string): Promise<void> {
 	// Delete PublicViews first (no FK cascade defined to AspNetUsers)
 	await prisma.publicViews.deleteMany({ where: { UserId: userId } });
