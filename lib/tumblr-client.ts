@@ -60,6 +60,38 @@ export async function getTumblrPost(
 	}
 }
 
+export interface NewsPost {
+	postId: string;
+	postTitle: string;
+	postUrl: string;
+	postDate: Date;
+}
+
+/**
+ * Fetch the 5 most recent news posts from the tracker news blog
+ */
+export async function getNewsPosts(): Promise<NewsPost[]> {
+	try {
+		const response = (await client.blogPosts("tblrthreadtracker", {
+			tag: "news",
+			limit: 5,
+			type: "text",
+		})) as TumblrBlogPostsResponse;
+
+		if (!response?.posts) return [];
+
+		return response.posts.map((post) => ({
+			postId: String(post.id),
+			postTitle: post.title || "RPThreadTracker News",
+			postUrl: post.post_url,
+			postDate: new Date(post.timestamp * 1000),
+		}));
+	} catch (error) {
+		console.error("Error fetching news posts:", error);
+		return [];
+	}
+}
+
 /**
  * Retry logic with exponential backoff
  * Handles rate limiting (429 errors)

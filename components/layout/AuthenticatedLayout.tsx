@@ -7,15 +7,20 @@ import { toast } from "react-toastify";
 import { Header } from "./header/Header";
 import { Sidebar } from "./sidebar/Sidebar";
 import { Footer } from "./footer/Footer";
+import { NewsSidebar } from "./news/NewsSidebar";
 import {
 	ThreadStatusProvider,
 	useThreadStatus,
 } from "@/components/providers/ThreadStatusProvider";
-import { ProfileSettingsProvider } from "@/components/providers/ProfileSettingsProvider";
+import {
+	ProfileSettingsProvider,
+	useProfileSettings,
+} from "@/components/providers/ProfileSettingsProvider";
 import { UpsertCharacterModal } from "@/components/characters/UpsertCharacterModal";
 import { UpsertThreadModal } from "@/components/threads/UpsertThreadModal";
 import { createCharacter } from "@/app/actions/character";
 import { createThread } from "@/app/actions/thread";
+import type { NewsPost } from "@/lib/tumblr-client";
 
 interface AuthenticatedLayoutProps {
 	children: ReactNode;
@@ -24,12 +29,15 @@ interface AuthenticatedLayoutProps {
 
 const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 	const router = useRouter();
-	// Initialize sidebar state - will be set based on screen size in useEffect
+	const { settings } = useProfileSettings();
+
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [isAddCharacterModalOpen, setIsAddCharacterModalOpen] = useState(false);
 	const [isAddThreadModalOpen, setIsAddThreadModalOpen] = useState(false);
 	const [isCharacterLoading, setIsCharacterLoading] = useState(false);
 	const [isThreadLoading, setIsThreadLoading] = useState(false);
+	const [isNewsOpen, setIsNewsOpen] = useState(false);
+	const [news, setNews] = useState<NewsPost[]>([]);
 
 	const { refreshSingleThread, refreshCharacters, characters } =
 		useThreadStatus();
@@ -37,18 +45,30 @@ const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 	// Set initial sidebar state based on screen size
 	useEffect(() => {
 		const checkScreenSize = () => {
-			// lg breakpoint is 1024px in Tailwind
 			const isLargeScreen = window.innerWidth >= 1024;
 			setIsSidebarOpen(isLargeScreen);
 		};
 
-		// Set initial state
 		checkScreenSize();
-
-		// Update on resize
 		window.addEventListener("resize", checkScreenSize);
 		return () => window.removeEventListener("resize", checkScreenSize);
 	}, []);
+
+	// Fetch news on mount
+	useEffect(() => {
+		fetch("/api/news")
+			.then((res) => res.json())
+			.then((data: NewsPost[]) => setNews(data))
+			.catch(() => setNews([]));
+	}, []);
+
+	// Compute unread count from news + lastNewsReadDate
+	const unreadNewsCount = news.filter((post) => {
+		const lastRead = settings?.lastNewsReadDate
+			? new Date(settings.lastNewsReadDate)
+			: null;
+		return !lastRead || new Date(post.postDate) > lastRead;
+	}).length;
 
 	const handleAddCharacter = async (data: {
 		characterName?: string;
@@ -58,7 +78,7 @@ const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 		setIsCharacterLoading(true);
 		try {
 			await createCharacter(data);
-			await refreshCharacters(); // Refresh character list in context
+			await refreshCharacters();
 			toast.success("Character created!");
 			router.refresh();
 		} catch (error) {
@@ -97,6 +117,8 @@ const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 				onSidebarToggle={() => setIsSidebarOpen(!isSidebarOpen)}
 				onAddCharacter={() => setIsAddCharacterModalOpen(true)}
 				onAddThread={() => setIsAddThreadModalOpen(true)}
+				onNewsToggle={() => setIsNewsOpen((prev) => !prev)}
+				unreadNewsCount={unreadNewsCount}
 			/>
 
 			<div className="app-body">
@@ -108,6 +130,12 @@ const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 			</div>
 
 			<Footer />
+
+			<NewsSidebar
+				isOpen={isNewsOpen}
+				onClose={() => setIsNewsOpen(false)}
+				news={news}
+			/>
 
 			<UpsertCharacterModal
 				key={isAddCharacterModalOpen ? "add-character" : "character-closed"}
