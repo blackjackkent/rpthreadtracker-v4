@@ -19,7 +19,9 @@ export const LayoutContent = ({ children }: LayoutContentProps) => {
 	const isAuthPage =
 		pathname.startsWith("/forgot-password") ||
 		pathname.startsWith("/reset-password") ||
-		pathname.startsWith("/verify-email");
+		pathname.startsWith("/verify-email") ||
+		pathname.startsWith("/quick-add") ||
+		pathname.startsWith("/register");
 
 	useEffect(() => {
 		if (status === "unauthenticated" && !isLoginPage && !isPublicPage && !isAuthPage) {

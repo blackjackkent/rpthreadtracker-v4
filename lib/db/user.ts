@@ -1,4 +1,40 @@
 import { prisma } from "./db";
+import { randomUUID } from "crypto";
+
+export async function createUser(
+	username: string,
+	email: string,
+	passwordHash: string
+): Promise<string> {
+	const id = randomUUID();
+	await prisma.$transaction([
+		prisma.aspNetUsers.create({
+			data: {
+				Id: id,
+				UserName: username,
+				NormalizedUserName: username.toUpperCase(),
+				Email: email,
+				NormalizedEmail: email.toUpperCase(),
+				PasswordHash: passwordHash,
+				EmailConfirmed: true,
+				LockoutEnabled: false,
+				PhoneNumberConfirmed: false,
+				TwoFactorEnabled: false,
+				AccessFailedCount: 0,
+			},
+		}),
+		prisma.profileSettings.create({
+			data: {
+				UserId: id,
+				ShowDashboardThreadDistribution: true,
+				UseInvertedTheme: false,
+				AllowMarkQueued: true,
+				ThreadTablePageSize: 10,
+			},
+		}),
+	]);
+	return id;
+}
 
 export async function getUserByEmail(email: string) {
 	return prisma.aspNetUsers.findFirst({

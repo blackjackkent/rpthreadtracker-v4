@@ -1,6 +1,6 @@
 "use server";
 
-import { getUserByEmail } from "@/lib/db/user";
+import { getUserByEmail, getUserByUsername, createUser } from "@/lib/db/user";
 import {
 	createPasswordResetToken,
 	validatePasswordResetToken,
@@ -22,6 +22,27 @@ export async function requestPasswordReset(email: string): Promise<void> {
 
 	const rawToken = await createPasswordResetToken(user.Id);
 	await sendPasswordResetEmail(user.Email, rawToken);
+}
+
+export async function registerUser(
+	username: string,
+	email: string,
+	password: string,
+	confirmPassword: string
+): Promise<void> {
+	if (!username?.trim()) throw new Error("Username is required");
+	if (!email?.trim()) throw new Error("Email is required");
+	if (!password || password.length < 6)
+		throw new Error("Password must be at least 6 characters");
+	if (password !== confirmPassword) throw new Error("Passwords do not match");
+
+	const existingEmail = await getUserByEmail(email.trim());
+	const existingUsername = await getUserByUsername(username.trim());
+	if (existingEmail || existingUsername)
+		throw new Error("An account with that username or email already exists");
+
+	const passwordHash = await hashPasswordBcrypt(password);
+	await createUser(username.trim(), email.trim(), passwordHash);
 }
 
 export async function resetPassword(
