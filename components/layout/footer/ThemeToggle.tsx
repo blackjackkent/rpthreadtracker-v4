@@ -24,7 +24,7 @@ export const ThemeToggle = () => {
 				Switch to{" "}
 				<button
 					type="button"
-					className="hover:text-primary transition-colors underline"
+					className="hover:text-primary transition-colors underline cursor-pointer"
 					disabled
 				>
 					theme
@@ -39,7 +39,7 @@ export const ThemeToggle = () => {
 			<button
 				type="button"
 				onClick={toggleTheme}
-				className="hover:text-primary transition-colors underline"
+				className="hover:text-primary transition-colors underline cursor-pointer"
 			>
 				{theme === "dark" ? "light theme" : "dark theme"}
 			</button>

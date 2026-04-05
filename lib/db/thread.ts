@@ -19,6 +19,7 @@ export async function getActiveThreadsForUser(
 		where: {
 			Characters: {
 				UserId: userId,
+				IsOnHiatus: false,
 			},
 			IsArchived: false,
 		},

@@ -94,6 +94,7 @@ export interface TumblrPost {
 	// Text post specific fields
 	title?: string;
 	body?: string;
+	summary?: string; // First ~150 chars of body, present on all post types
 }
 
 // Tumblr API Response

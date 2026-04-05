@@ -82,7 +82,7 @@ export async function getNewsPosts(): Promise<NewsPost[]> {
 
 		return response.posts.map((post) => ({
 			postId: String(post.id),
-			postTitle: post.title || "RPThreadTracker News",
+			postTitle: post.title || post.summary || "RPThreadTracker News",
 			postUrl: post.post_url,
 			postDate: new Date(post.timestamp * 1000),
 		}));

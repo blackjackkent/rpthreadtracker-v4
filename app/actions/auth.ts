@@ -28,7 +28,7 @@ export async function registerUser(
 	username: string,
 	email: string,
 	password: string,
-	confirmPassword: string
+	confirmPassword: string,
 ): Promise<void> {
 	if (!username?.trim()) throw new Error("Username is required");
 	if (!email?.trim()) throw new Error("Email is required");
@@ -48,7 +48,7 @@ export async function registerUser(
 export async function resetPassword(
 	rawToken: string,
 	newPassword: string,
-	confirmPassword: string
+	confirmPassword: string,
 ): Promise<void> {
 	if (!newPassword || newPassword.length < 6)
 		throw new Error("Password must be at least 6 characters");

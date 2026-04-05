@@ -152,8 +152,7 @@ export function calculateStats(
 	for (const status of allStatuses) {
 		if (status.isQueued) {
 			queuedCount++;
-		}
-		if (status.isCallingCharactersTurn) {
+		} else if (status.isCallingCharactersTurn) {
 			yourTurnCount++;
 		} else {
 			theirTurnCount++;
@@ -176,7 +175,7 @@ export function calculateStats(
  * @returns Thread statuses map and dashboard stats
  */
 export async function refreshThreadStatusesInChunks(
-	userId: string,
+	_userId: string,
 	onProgress?: (progress: RefreshProgress) => void
 ): Promise<RefreshResult> {
 	// Fetch active threads from API (uses session authentication)
@@ -300,8 +299,11 @@ export async function refreshThreadStatusesInChunks(
 		threadStatusesMap.set(thread.ThreadId, mergedStatus);
 	}
 
-	// Calculate dashboard stats
-	const dashboardStats = calculateStats(allStatuses, activeThreadsCount);
+	// Calculate dashboard stats from the full merged map (includes no-PostId threads with defaults)
+	const dashboardStats = calculateStats(
+		Array.from(threadStatusesMap.values()),
+		activeThreadsCount
+	);
 
 	return {
 		threadStatuses: threadStatusesMap,
