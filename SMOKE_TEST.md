@@ -22,14 +22,14 @@
 
 ### 1.2 Registration
 
-- [ ] Navigate to `/register` while logged out — page renders
-- [ ] Submit empty form — validation errors on all fields
-- [ ] Submit mismatched passwords — error shown
-- [ ] Submit password under 6 characters — error shown
-- [ ] Submit an email already in use — error shown
-- [ ] Submit a username already in use — error shown
-- [ ] Submit valid new credentials — auto-signs in, redirects to `/`
-- [ ] "Sign in" link on register page navigates to `/login`
+- [x] Navigate to `/register` while logged out — page renders
+- [x] Submit empty form — validation errors on all fields
+- [x] Submit mismatched passwords — error shown
+- [x] Submit password under 6 characters — error shown
+- [x] Submit an email already in use — error shown
+- [x] Submit a username already in use — error shown
+- [x] Submit valid new credentials — auto-signs in, redirects to `/`
+- [x] "Sign in" link on register page navigates to `/login`
 
 ### 1.3 Forgot Password
 
