@@ -37,6 +37,7 @@ interface ThreadStatusContextValue {
 	// Methods
 	refreshThreadStatuses: () => Promise<void>;
 	refreshSingleThread: (threadId: number) => Promise<void>;
+	removeThread: (threadId: number) => void;
 	refreshCharacters: () => Promise<void>;
 	getThreadStatus: (threadId: number) => ThreadStatusWithDetails | null;
 }
@@ -129,6 +130,14 @@ export function ThreadStatusProvider({
 		[threadStatuses]
 	);
 
+	const removeThread = useCallback((threadId: number) => {
+		setThreadStatuses((prev) => {
+			const newMap = new Map(prev);
+			newMap.delete(threadId);
+			return newMap;
+		});
+	}, []);
+
 	const getThreadStatus = useCallback(
 		(threadId: number): ThreadStatusWithDetails | null => {
 			return threadStatuses.get(threadId) || null;
@@ -171,6 +180,7 @@ export function ThreadStatusProvider({
 		lastRefreshed,
 		refreshThreadStatuses,
 		refreshSingleThread,
+		removeThread,
 		refreshCharacters,
 		getThreadStatus,
 	};

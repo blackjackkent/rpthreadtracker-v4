@@ -8,42 +8,31 @@ import { faUsers } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 
 export function YourCharacters() {
-	const { threadStatuses } = useThreadStatus();
+	const { threadStatuses, characters: allCharacters } = useThreadStatus();
 
-	// Group threads by character and count them
+	// Count active threads per character
 	const characters = useMemo(() => {
-		const characterMap = new Map<
-			string,
-			{
-				characterName: string;
-				characterUrlIdentifier: string;
-				threadCount: number;
-			}
-		>();
-
+		const threadCountByCharId = new Map<number, number>();
 		for (const thread of threadStatuses.values()) {
-			const key = thread.characterUrlIdentifier;
-			if (key) {
-				const existing = characterMap.get(key);
-				if (existing) {
-					existing.threadCount++;
-				} else {
-					characterMap.set(key, {
-						characterName: thread.characterName,
-						characterUrlIdentifier: thread.characterUrlIdentifier,
-						threadCount: 1,
-					});
-				}
+			if (!thread.isArchived) {
+				const count = threadCountByCharId.get(thread.characterId) ?? 0;
+				threadCountByCharId.set(thread.characterId, count + 1);
 			}
 		}
 
-		// Convert to array and sort by name
-		return Array.from(characterMap.values()).sort((a, b) =>
-			(a.characterName || a.characterUrlIdentifier).localeCompare(
-				b.characterName || b.characterUrlIdentifier
-			)
-		);
-	}, [threadStatuses]);
+		// Use the full character list as source of truth so zero-thread characters appear
+		return [...allCharacters]
+			.map((char) => ({
+				characterName: char.name,
+				characterUrlIdentifier: char.urlIdentifier,
+				threadCount: threadCountByCharId.get(char.id) ?? 0,
+			}))
+			.sort((a, b) =>
+				(a.characterName || a.characterUrlIdentifier).localeCompare(
+					b.characterName || b.characterUrlIdentifier
+				)
+			);
+	}, [threadStatuses, allCharacters]);
 
 	if (characters.length === 0) {
 		return (

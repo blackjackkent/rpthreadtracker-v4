@@ -1,6 +1,7 @@
 # RPThreadTracker v4 — Manual Smoke Test Plan
 
 ## Prerequisites
+
 - Dev server running at `http://localhost:3000`
 - At least one test account with existing threads in the database
 - A fresh test account (or use registration flow to create one)
@@ -11,13 +12,16 @@
 ## 1. Authentication
 
 ### 1.1 Login
-- [ ] Navigate to `/login` — page renders, no redirect loop
-- [ ] Submit empty form — validation errors appear on both fields
-- [ ] Submit wrong credentials — error banner appears, no crash
-- [ ] Submit valid credentials — redirects to `/` (dashboard)
-- [ ] After login, navigating to `/login` redirects back to `/`
+
+- [x] Navigate to `/login` — page renders, no redirect loop
+- [x] Navigate to `/` while logged out - login page renders, no redirect loop
+- [x] Submit empty form — validation errors appear on both fields
+- [x] Submit wrong credentials — error banner appears, no crash
+- [x] Submit valid credentials — redirects to `/` (dashboard)
+- [x] After login, navigating to `/login` redirects back to `/`
 
 ### 1.2 Registration
+
 - [ ] Navigate to `/register` while logged out — page renders
 - [ ] Submit empty form — validation errors on all fields
 - [ ] Submit mismatched passwords — error shown
@@ -28,6 +32,7 @@
 - [ ] "Sign in" link on register page navigates to `/login`
 
 ### 1.3 Forgot Password
+
 - [ ] `/login` page has "Forgot your password?" link
 - [ ] Navigate to `/forgot-password` while logged out — page renders
 - [ ] Submit unknown email — success message shown (same as real email)
@@ -40,6 +45,7 @@
 - [ ] Attempt to reuse the same reset link — "invalid or expired" error
 
 ### 1.4 Email Change (Settings)
+
 - [ ] In Settings → Account Info: enter a new email address, click "Send Verification Email"
 - [ ] Success toast shown; email arrives at new address
 - [ ] Click verification link — `/verify-email/[token]` auto-verifies, shows success
@@ -47,6 +53,7 @@
 - [ ] Attempt to reuse the verification link — error shown
 
 ### 1.5 Logout
+
 - [ ] Profile menu → Logout — redirects to `/login`
 - [ ] After logout, navigating to `/` redirects to `/login`
 
@@ -55,6 +62,7 @@
 ## 2. Layout & Navigation
 
 ### 2.1 Sidebar
+
 - [ ] On desktop (≥1024px): sidebar open by default
 - [ ] Hamburger button in header toggles sidebar open/closed
 - [ ] On mobile (<1024px): sidebar closed by default, toggle works
@@ -62,6 +70,7 @@
 - [ ] Active page link is visually highlighted
 
 ### 2.2 Header
+
 - [ ] Logo visible; clicking it navigates to `/`
 - [ ] "Add" menu dropdown: "Track New Thread" opens thread modal, "Add Character" opens character modal
 - [ ] News button visible with correct unread count badge (or no badge if all read)
@@ -69,6 +78,7 @@
 - [ ] Refresh button triggers Tumblr data refresh (progress shown)
 
 ### 2.3 Theme
+
 - [ ] Footer theme toggle switches between dark and light modes
 - [ ] Theme persists across page navigation
 - [ ] Theme persists after browser refresh
@@ -115,6 +125,7 @@
 ## 6. Thread Management
 
 ### 6.1 All Threads (`/threads/all`)
+
 - [ ] Page loads; all non-archived threads shown
 - [ ] Status badges (Your Turn / Their Turn / Queued) display correctly
 - [ ] Character filter dropdown filters table correctly
@@ -129,22 +140,27 @@
 - [ ] **Bulk actions**: select multiple → Archive, Unarchive, Untrack all work
 
 ### 6.2 Your Turn (`/threads/your-turn`)
+
 - [ ] Only shows threads where it's your turn
 - [ ] "Mark Queued" button visible; disabled for threads without a valid Tumblr post
 - [ ] Bulk "Toggle Queue" works
 
 ### 6.3 Their Turn (`/threads/their-turn`)
+
 - [ ] Only shows threads where it's their turn
 
 ### 6.4 Queued (`/threads/queued`)
+
 - [ ] Only shows queued threads
 - [ ] "Unqueue" action works
 
 ### 6.5 Archived (`/threads/archived`)
+
 - [ ] Only shows archived threads
 - [ ] "Unarchive" single and bulk actions work; thread returns to active views
 
 ### 6.6 Track New Thread (modal)
+
 - [ ] Opens from header "Add" menu and from "Track New Thread" on thread pages
 - [ ] Character dropdown populated; required validation works
 - [ ] Post ID field required
@@ -156,16 +172,19 @@
 ## 7. Tools (`/tools`)
 
 ### 7.1 Export to Excel
+
 - [ ] "Export" button triggers `.xlsx` download
 - [ ] File contains threads organized by character sheet
 - [ ] "Include archived" toggle includes/excludes archived threads in export
 
 ### 7.2 Manage Tags
+
 - [ ] Tag list loads with counts
 - [ ] Rename: select tag(s), enter new name, confirm — all renamed threads update
 - [ ] Delete: select tag(s), confirm — removed from all threads
 
 ### 7.3 Manage Public Views
+
 - [ ] Public views list loads
 - [ ] **Create**: modal opens; fill all fields; slug availability check on blur; save creates view and appears in list
 - [ ] **Edit**: opens pre-filled modal; changes save correctly
@@ -173,6 +192,7 @@
 - [ ] **Delete**: inline confirm, then removes from list
 
 ### 7.4 Browser Extensions
+
 - [ ] Tab renders with download links and instructions (static content)
 
 ---
@@ -191,17 +211,20 @@
 ## 9. Settings (`/settings`)
 
 ### 9.1 Change Password
+
 - [ ] Submit empty form — validation errors
 - [ ] Wrong current password — error shown
 - [ ] Mismatched new passwords — error shown
 - [ ] Valid submission — success toast; can log in with new password
 
 ### 9.2 Account Info
+
 - [ ] Username field editable; save updates username (sidebar/header reflect new name without full reload)
 - [ ] Email field shows current email (disabled); separate input for new email
 - [ ] "Send Verification Email" — success toast, email arrives
 
 ### 9.3 Delete Account
+
 - [ ] "Delete Account" button shows inline confirmation
 - [ ] Cancel dismisses prompt
 - [ ] Confirm — signs out, redirects to `/login`; attempting to log in with deleted credentials fails
@@ -240,6 +263,7 @@
 ---
 
 ## Test Data Notes
+
 - Test with a user that has **0 threads** to verify all empty states
 - Test with a user that has threads in **all status categories** (your turn, their turn, queued, archived)
 - Test with a Tumblr post that **no longer exists** to verify graceful null handling (no post date, queue button disabled)

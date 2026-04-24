@@ -1,91 +1,62 @@
-import { defineConfig, devices } from '@playwright/test';
-import * as dotenv from 'dotenv';
-import * as path from 'path';
+import { defineConfig, devices } from "@playwright/test";
+import * as dotenv from "dotenv";
+import * as path from "path";
 
-// Load test environment variables
-// Try .env.test.local first (CI/specific test config), fall back to .env.local (local dev)
-dotenv.config({ path: path.resolve(__dirname, '.env.test.local') });
-dotenv.config({ path: path.resolve(__dirname, '.env.local') });
+// .env.test.local wins over .env.local — put TEST_DATABASE_URL etc. there
+dotenv.config({ path: path.resolve(__dirname, ".env.test.local") });
+dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+const testDbUrl = process.env.TEST_DATABASE_URL;
+
 export default defineConfig({
-  testDir: './tests/e2e',
+	testDir: "./tests/e2e",
 
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+	fullyParallel: true,
+	forbidOnly: !!process.env.CI,
+	retries: process.env.CI ? 2 : 0,
+	workers: process.env.CI ? 1 : undefined,
 
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
+	reporter: "html",
 
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+	use: {
+		baseURL: "http://localhost:3000",
+		trace: "on-first-retry",
+		screenshot: "only-on-failure",
+		video: "retain-on-failure",
+	},
 
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+	globalSetup: "./tests/global-setup.ts",
+	globalTeardown: "./tests/global-teardown.ts",
 
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+	projects: [
+		{
+			name: "setup",
+			testMatch: /.*\.setup\.ts/,
+		},
+		{
+			name: "chromium",
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: "tests/.auth/user.json",
+			},
+			dependencies: ["setup"],
+		},
+	],
 
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
-
-    /* Screenshot on failure */
-    screenshot: 'only-on-failure',
-
-    /* Video on retry */
-    video: 'retain-on-failure',
-  },
-
-  /* Configure projects for major browsers */
-  projects: [
-    // Setup project for authentication
-    {
-      name: 'setup',
-      testMatch: /.*\.setup\.ts/,
-    },
-
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // Use prepared auth state
-        storageState: 'tests/.auth/user.json',
-      },
-      dependencies: ['setup'],
-    },
-
-    // Uncomment to test on other browsers
-    // {
-    //   name: 'firefox',
-    //   use: {
-    //     ...devices['Desktop Firefox'],
-    //     storageState: 'tests/.auth/user.json',
-    //   },
-    //   dependencies: ['setup'],
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: {
-    //     ...devices['Desktop Safari'],
-    //     storageState: 'tests/.auth/user.json',
-    //   },
-    //   dependencies: ['setup'],
-    // },
-  ],
-
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000, // 2 minutes to start
-  },
+	webServer: {
+		command: "npm run dev",
+		url: "http://localhost:3000",
+		reuseExistingServer: !process.env.CI,
+		timeout: 120000,
+		// Override DATABASE_URL so the dev server hits the test DB
+		env: {
+			...(testDbUrl ? { DATABASE_URL: testDbUrl } : {}),
+			NEXTAUTH_URL: "http://localhost:3000",
+			// Dummy Tumblr vars — real calls are mocked via page.route()
+			TUMBLR_CONSUMER_KEY: process.env.TUMBLR_CONSUMER_KEY ?? "test",
+			TUMBLR_CONSUMER_SECRET: process.env.TUMBLR_CONSUMER_SECRET ?? "test",
+			TUMBLR_OAUTH_TOKEN: process.env.TUMBLR_OAUTH_TOKEN ?? "test",
+			TUMBLR_OAUTH_SECRET: process.env.TUMBLR_OAUTH_SECRET ?? "test",
+		},
+	},
 });

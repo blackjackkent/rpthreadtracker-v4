@@ -17,7 +17,7 @@ interface RecentThreadItemProps {
 
 export function RecentThreadItem({ thread }: RecentThreadItemProps) {
 	const router = useRouter();
-	const { refreshSingleThread } = useThreadStatus();
+	const { refreshSingleThread, removeThread } = useThreadStatus();
 	const [isUntracking, setIsUntracking] = useState(false);
 	const [isArchiving, setIsArchiving] = useState(false);
 	const [isQueuing, setIsQueuing] = useState(false);
@@ -42,6 +42,7 @@ export function RecentThreadItem({ thread }: RecentThreadItemProps) {
 		setIsUntracking(true);
 		try {
 			await deleteThread(thread.threadId);
+			removeThread(thread.threadId);
 			router.refresh();
 			toast.success("Thread untracked");
 		} catch (error) {
@@ -58,6 +59,7 @@ export function RecentThreadItem({ thread }: RecentThreadItemProps) {
 		setIsArchiving(true);
 		try {
 			await archiveThread(thread.threadId);
+			removeThread(thread.threadId);
 			router.refresh();
 			toast.success("Thread archived");
 		} catch (error) {
