@@ -9,6 +9,7 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen }: SidebarProps) => {
 	return (
 		<aside
+			aria-label="Main navigation"
 			className={`bg-sidebar-light border-r border-sidebar-border transition-all duration-300 overflow-y-auto ${
 				isOpen ? "w-48" : "w-0 md:w-14"
 			}`}

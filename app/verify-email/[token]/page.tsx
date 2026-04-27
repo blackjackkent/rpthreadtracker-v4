@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { verifyEmailChange } from "@/app/actions/settings";
 
@@ -12,8 +12,12 @@ export default function VerifyEmailPage({ params }: VerifyEmailPageProps) {
 	const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 	const [newEmail, setNewEmail] = useState("");
 	const [error, setError] = useState("");
+	const hasVerified = useRef(false);
 
 	useEffect(() => {
+		if (hasVerified.current) return;
+		hasVerified.current = true;
+
 		params.then(({ token }) =>
 			verifyEmailChange(token)
 				.then(({ newEmail }) => {

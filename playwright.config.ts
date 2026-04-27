@@ -48,6 +48,9 @@ export default defineConfig({
 		url: "http://localhost:3000",
 		reuseExistingServer: !process.env.CI,
 		timeout: 120000,
+		// change to "pipe" if you want to see server logs in the terminal during tests
+		stdout: "ignore",
+		stderr: "ignore",
 		// Override DATABASE_URL so the dev server hits the test DB
 		env: {
 			...(testDbUrl ? { DATABASE_URL: testDbUrl } : {}),

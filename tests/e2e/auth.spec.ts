@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { TEST_USERNAME, TEST_EMAIL, TEST_PASSWORD } from "../fixtures/seed";
+import { mockExternalApis } from "../helpers/tumblr-mock";
+
+test.beforeEach(async ({ page }) => {
+	await mockExternalApis(page);
+});
 
 // 1.1 Login
 test.describe("Login", () => {
@@ -161,22 +166,39 @@ test.describe("Registration", () => {
 	});
 });
 
+// 1.5 Logout
+test.describe("Logout", () => {
+	test("profile menu logout redirects to /login", async ({ page }) => {
+		await page.goto("/");
+		await page.getByRole("button", { name: /user menu/i }).click();
+		await page.getByRole("button", { name: /logout/i }).click();
+		await page.waitForURL("/login", { timeout: 10000 });
+		await expect(page).toHaveURL("/login");
+	});
+});
+
 // 1.3 Forgot Password (email-independent cases)
 test.describe("Forgot Password", () => {
 	test.use({ storageState: { cookies: [], origins: [] } });
 
 	test("login page has forgot password link", async ({ page }) => {
 		await page.goto("/login");
-		await expect(page.getByRole("link", { name: /forgot your password/i })).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: /forgot your password/i }),
+		).toBeVisible();
 	});
 
 	test("forgot password page renders while logged out", async ({ page }) => {
 		await page.goto("/forgot-password");
 		await expect(page).toHaveURL("/forgot-password");
-		await expect(page.getByRole("heading", { name: /reset your password/i })).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: /reset your password/i }),
+		).toBeVisible();
 	});
 
-	test("unknown email shows success message (user enumeration safe)", async ({ page }) => {
+	test("unknown email shows success message (user enumeration safe)", async ({
+		page,
+	}) => {
 		await page.goto("/forgot-password");
 		await page.getByLabel(/email address/i).fill("nobody@example.com");
 		await page.getByRole("button", { name: /send reset link/i }).click();
@@ -197,7 +219,9 @@ test.describe("Forgot Password", () => {
 
 	test("invalid reset token shows error", async ({ page }) => {
 		await page.goto("/reset-password/not-a-real-token");
-		await page.getByLabel(/new password/i).fill("NewPassword123!");
+		await page
+			.getByRole("textbox", { name: "New password", exact: true })
+			.fill("NewPassword123!");
 		await page.getByLabel(/confirm new password/i).fill("NewPassword123!");
 		await page.getByRole("button", { name: /set new password/i }).click();
 		await expect(page.getByText(/invalid or has expired/i)).toBeVisible();

@@ -33,29 +33,29 @@
 
 ### 1.3 Forgot Password
 
-- [ ] `/login` page has "Forgot your password?" link
-- [ ] Navigate to `/forgot-password` while logged out — page renders
-- [ ] Submit unknown email — success message shown (same as real email)
-- [ ] Submit known email — email arrives, contains reset link
-- [ ] Click reset link — `/reset-password/[token]` renders
-- [ ] Submit mismatched passwords — error shown
-- [ ] Submit valid new password — redirects to `/login?reset=success`
-- [ ] Green success banner visible on login page
-- [ ] Log in with new password — succeeds
-- [ ] Attempt to reuse the same reset link — "invalid or expired" error
+- [x] `/login` page has "Forgot your password?" link
+- [x] Navigate to `/forgot-password` while logged out — page renders
+- [x] Submit unknown email — success message shown (same as real email)
+- [x] Submit known email — email arrives, contains reset link
+- [x] Click reset link — `/reset-password/[token]` renders
+- [x] Submit mismatched passwords — error shown
+- [x] Submit valid new password — redirects to `/login?reset=success`
+- [x] Green success banner visible on login page
+- [x] Log in with new password — succeeds
+- [x] Attempt to reuse the same reset link — "invalid or expired" error
 
 ### 1.4 Email Change (Settings)
 
-- [ ] In Settings → Account Info: enter a new email address, click "Send Verification Email"
-- [ ] Success toast shown; email arrives at new address
-- [ ] Click verification link — `/verify-email/[token]` auto-verifies, shows success
-- [ ] Log out and log back in — email in Account Info reflects the new address
-- [ ] Attempt to reuse the verification link — error shown
+- [x] In Settings → Account Info: enter a new email address, click "Send Verification Email"
+- [x] Success toast shown; email arrives at new address
+- [x] Click verification link — `/verify-email/[token]` auto-verifies, shows success
+- [x] Log out and log back in — email in Account Info reflects the new address
+- [x] Attempt to reuse the verification link — error shown
 
 ### 1.5 Logout
 
-- [ ] Profile menu → Logout — redirects to `/login`
-- [ ] After logout, navigating to `/` redirects to `/login`
+- [x] Profile menu → Logout — redirects to `/login`
+- [x] After logout, navigating to `/` redirects to `/login`
 
 ---
 
@@ -63,11 +63,11 @@
 
 ### 2.1 Sidebar
 
-- [ ] On desktop (≥1024px): sidebar open by default
-- [ ] Hamburger button in header toggles sidebar open/closed
-- [ ] On mobile (<1024px): sidebar closed by default, toggle works
-- [ ] All sidebar links navigate to the correct page
-- [ ] Active page link is visually highlighted
+- [x] On desktop (≥1024px): sidebar open by default
+- [x] Hamburger button in header toggles sidebar open/closed
+- [x] On mobile (<1024px): sidebar closed by default, toggle works
+- [x] All sidebar links navigate to the correct page
+- [x] Active page link is visually highlighted
 
 ### 2.2 Header
 
