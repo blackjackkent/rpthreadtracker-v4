@@ -71,11 +71,11 @@
 
 ### 2.2 Header
 
-- [ ] Logo visible; clicking it navigates to `/`
-- [ ] "Add" menu dropdown: "Track New Thread" opens thread modal, "Add Character" opens character modal
-- [ ] News button visible with correct unread count badge (or no badge if all read)
-- [ ] Profile dropdown: Settings, Tools, Help, Logout all navigate/function correctly
-- [ ] Refresh button triggers Tumblr data refresh (progress shown)
+- [x] Logo visible; clicking it navigates to `/`
+- [x] "Add" menu dropdown: "Track New Thread" opens thread modal, "Add Character" opens character modal
+- [x] News button visible with correct unread count badge (or no badge if all read)
+- [x] Profile dropdown: Settings, Tools, Help, Logout all navigate/function correctly
+- [x] Refresh button triggers Tumblr data refresh (progress shown)
 
 ### 2.3 Theme
 

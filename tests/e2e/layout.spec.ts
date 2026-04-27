@@ -5,6 +5,55 @@ test.beforeEach(async ({ page }) => {
 	await mockExternalApis(page);
 });
 
+// 2.2 Header
+test.describe("Header", () => {
+	test("logo is visible and navigates to dashboard", async ({ page }) => {
+		await page.goto("/threads/all");
+		await page.getByRole("link", { name: "RPTHREADTRACKER", exact: true }).click();
+		await expect(page).toHaveURL("/dashboard");
+	});
+
+	test("Add menu opens and Track New Thread opens thread modal", async ({ page }) => {
+		await page.goto("/");
+		await page.getByRole("button", { name: /add menu/i }).click();
+		await page.getByRole("button", { name: "Track New Thread" }).click();
+		await expect(page.getByRole("dialog")).toBeVisible();
+	});
+
+	test("Add menu opens and Add Character opens character modal", async ({ page }) => {
+		await page.goto("/");
+		await page.getByRole("button", { name: /add menu/i }).click();
+		await page.getByRole("button", { name: "Add Character" }).click();
+		await expect(page.getByRole("dialog")).toBeVisible();
+	});
+
+	test("profile dropdown Settings link navigates to /settings", async ({ page }) => {
+		await page.goto("/");
+		await page.getByRole("button", { name: /user menu/i }).click();
+		await page.getByRole("link", { name: /account settings/i }).click();
+		await expect(page).toHaveURL("/settings");
+	});
+
+	test("profile dropdown Tools link navigates to /tools", async ({ page }) => {
+		await page.goto("/");
+		await page.getByRole("button", { name: /user menu/i }).click();
+		await page.getByRole("link", { name: /tracker tools/i }).click();
+		await expect(page).toHaveURL("/tools");
+	});
+
+	test("profile dropdown Help link navigates to /help", async ({ page }) => {
+		await page.goto("/");
+		await page.getByRole("button", { name: /user menu/i }).click();
+		await page.getByRole("banner").getByRole("link", { name: "Help", exact: true }).click();
+		await expect(page).toHaveURL("/help");
+	});
+
+	test("news button is visible in header", async ({ page }) => {
+		await page.goto("/");
+		await expect(page.getByRole("button", { name: "News", exact: true })).toBeVisible();
+	});
+});
+
 // 2.1 Sidebar
 test.describe("Sidebar", () => {
 	test("sidebar is open by default on desktop", async ({ page }) => {

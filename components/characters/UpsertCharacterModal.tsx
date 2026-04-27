@@ -85,7 +85,7 @@ export const UpsertCharacterModal = ({
 			<div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
 
 			{/* Modal */}
-			<div className="relative bg-surface border border-border rounded-lg shadow-xl w-full max-w-md mx-4">
+			<div role="dialog" aria-modal="true" className="relative bg-surface border border-border rounded-lg shadow-xl w-full max-w-md mx-4">
 				{/* Header */}
 				<div className="flex items-center justify-between px-6 py-4 border-b border-border">
 					<h2 className="text-xl font-semibold">
