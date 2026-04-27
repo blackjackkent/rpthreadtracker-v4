@@ -79,21 +79,21 @@
 
 ### 2.3 Theme
 
-- [ ] Footer theme toggle switches between dark and light modes
-- [ ] Theme persists across page navigation
-- [ ] Theme persists after browser refresh
+- [x] Footer theme toggle switches between dark and light modes
+- [x] Theme persists across page navigation
+- [x] Theme persists after browser refresh
 
 ---
 
 ## 3. Dashboard
 
-- [ ] Page loads without error
-- [ ] **At a Glance**: all 4 stat cards show counts (Active, Your Turn, Their Turn, Queued); each links to the correct threads page
-- [ ] **Recent Activity**: shows up to 5 "Your Turn" threads; each has title, partner, date; "Untrack", "Archive", "Mark Queued" action buttons visible
-- [ ] **Your Characters**: shows character cards with thread counts; sorted alphabetically; "Manage Characters" link works
-- [ ] **Random Thread Generator**: "Generate" button picks a random Your Turn thread and displays title + link; multiple clicks produce different results (if multiple threads exist); "Awaiting Starter" shown if no post yet
-- [ ] **Support Card**: PayPal button visible (placeholder link — expected to not work yet)
-- [ ] Empty states shown correctly when user has no threads/characters
+- [x] Page loads without error
+- [x] **At a Glance**: all 4 stat cards show counts (Active, Your Turn, Their Turn, Queued); each links to the correct threads page
+- [x] **Recent Activity**: shows up to 5 "Your Turn" threads; each has title, partner, date; "Untrack", "Archive", "Mark Queued" action buttons visible
+- [x] **Your Characters**: shows character cards with thread counts; sorted alphabetically; "Manage Characters" link works
+- [x] **Random Thread Generator**: "Generate" button picks a random Your Turn thread and displays title + link; multiple clicks produce different results (if multiple threads exist); "Awaiting Starter" shown if no post yet
+- [x] **Support Card**: PayPal button visible
+- [x] Empty states shown correctly when user has no threads/characters
 
 ---
 

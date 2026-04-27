@@ -119,9 +119,7 @@ function ExpandedRow({ thread }: { thread: PublicViewThread }) {
 
 const columnHelper = createColumnHelper<PublicViewThread>();
 
-function buildColumns(
-	enabledColumns: string[]
-): ColumnDef<PublicViewThread>[] {
+function buildColumns(enabledColumns: string[]): ColumnDef<PublicViewThread>[] {
 	const cols: ColumnDef<PublicViewThread>[] = [];
 
 	// Expander
@@ -142,7 +140,7 @@ function buildColumns(
 				</button>
 			),
 			size: 40,
-		}) as ColumnDef<PublicViewThread>
+		}) as ColumnDef<PublicViewThread>,
 	);
 
 	if (enabledColumns.includes("threadTitle")) {
@@ -165,19 +163,16 @@ function buildColumns(
 								className="ml-2 text-primary hover:text-primary-light"
 								onClick={(e) => e.stopPropagation()}
 							>
-								<FontAwesomeIcon
-									icon={faExternalLinkAlt}
-									className="w-3 h-3"
-								/>
+								<FontAwesomeIcon icon={faExternalLinkAlt} className="w-3 h-3" />
 							</a>
 						)}
 					</div>
 				),
 				sortingFn: (a, b) =>
 					(a.original.userTitle || "").localeCompare(
-						b.original.userTitle || ""
+						b.original.userTitle || "",
 					),
-			}) as ColumnDef<PublicViewThread>
+			}) as ColumnDef<PublicViewThread>,
 		);
 	}
 
@@ -192,10 +187,12 @@ function buildColumns(
 					</span>
 				),
 				sortingFn: (a, b) =>
-					(a.original.characterName || a.original.characterUrlIdentifier).localeCompare(
-						b.original.characterName || b.original.characterUrlIdentifier
+					(
+						a.original.characterName || a.original.characterUrlIdentifier
+					).localeCompare(
+						b.original.characterName || b.original.characterUrlIdentifier,
 					),
-			}) as ColumnDef<PublicViewThread>
+			}) as ColumnDef<PublicViewThread>,
 		);
 	}
 
@@ -211,9 +208,9 @@ function buildColumns(
 				),
 				sortingFn: (a, b) =>
 					(a.original.partnerUrlIdentifier || "").localeCompare(
-						b.original.partnerUrlIdentifier || ""
+						b.original.partnerUrlIdentifier || "",
 					),
-			}) as ColumnDef<PublicViewThread>
+			}) as ColumnDef<PublicViewThread>,
 		);
 	}
 
@@ -236,7 +233,7 @@ function buildColumns(
 						: 0;
 					return dateA - dateB;
 				},
-			}) as ColumnDef<PublicViewThread>
+			}) as ColumnDef<PublicViewThread>,
 		);
 	}
 
@@ -247,7 +244,7 @@ function buildColumns(
 				header: "Status",
 				cell: ({ row }) => <StatusBadge thread={row.original} />,
 				enableSorting: false,
-			}) as ColumnDef<PublicViewThread>
+			}) as ColumnDef<PublicViewThread>,
 		);
 	}
 
@@ -268,10 +265,14 @@ export const PublicViewContent = ({
 		const opts: { value: string; label: string }[] = [
 			{ value: "all", label: "Show All" },
 		];
-		if (view.includeMyTurn) opts.push({ value: "myTurn", label: "Show Only My Turn" });
-		if (view.includeTheirTurn) opts.push({ value: "theirTurn", label: "Show Only Partner's Turn" });
-		if (view.includeQueued) opts.push({ value: "queued", label: "Show Only Queued" });
-		if (view.includeArchived) opts.push({ value: "archived", label: "Show Only Archived" });
+		if (view.includeMyTurn)
+			opts.push({ value: "myTurn", label: "Show Only My Turn" });
+		if (view.includeTheirTurn)
+			opts.push({ value: "theirTurn", label: "Show Only Partner's Turn" });
+		if (view.includeQueued)
+			opts.push({ value: "queued", label: "Show Only Queued" });
+		if (view.includeArchived)
+			opts.push({ value: "archived", label: "Show Only Archived" });
 		return opts;
 	}, [view]);
 
@@ -281,10 +282,7 @@ export const PublicViewContent = ({
 		return threads.filter((t) => getThreadStatus(t) === statusFilter);
 	}, [threads, statusFilter]);
 
-	const columns = useMemo(
-		() => buildColumns(view.columns),
-		[view.columns]
-	);
+	const columns = useMemo(() => buildColumns(view.columns), [view.columns]);
 
 	// TanStack Table v8 works with React 19 but isn't optimized by React Compiler yet
 	// eslint-disable-next-line react-hooks/incompatible-library
@@ -362,7 +360,7 @@ export const PublicViewContent = ({
 												>
 													{flexRender(
 														header.column.columnDef.header,
-														header.getContext()
+														header.getContext(),
 													)}
 												</div>
 											)}
@@ -377,13 +375,10 @@ export const PublicViewContent = ({
 							<Fragment key={row.id}>
 								<tr className="hover:bg-background/50">
 									{row.getVisibleCells().map((cell) => (
-										<td
-											key={cell.id}
-											className="px-4 py-3 text-sm text-text"
-										>
+										<td key={cell.id} className="px-4 py-3 text-sm text-text">
 											{flexRender(
 												cell.column.columnDef.cell,
-												cell.getContext()
+												cell.getContext(),
 											)}
 										</td>
 									))}
@@ -434,14 +429,14 @@ export const PublicViewContent = ({
 					<button
 						onClick={() => table.previousPage()}
 						disabled={!table.getCanPreviousPage()}
-						className="px-3 py-1 text-sm border border-border rounded bg-surface text-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background"
+						className="px-3 py-1 text-sm border cursor-pointer border-border rounded bg-surface text-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background"
 					>
 						Previous
 					</button>
 					<button
 						onClick={() => table.nextPage()}
 						disabled={!table.getCanNextPage()}
-						className="px-3 py-1 text-sm border border-border rounded bg-surface text-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background"
+						className="px-3 py-1 text-sm border cursor-pointer border-border rounded bg-surface text-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background"
 					>
 						Next
 					</button>

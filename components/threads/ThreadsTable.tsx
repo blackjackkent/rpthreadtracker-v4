@@ -104,14 +104,17 @@ export const ThreadsTable = ({
 								<tr>
 									{headerGroup.headers.map((header) => {
 										const sortDirection = header.column.getIsSorted();
-										const customClassName = header.column.columnDef.meta?.className;
+										const customClassName =
+											header.column.columnDef.meta?.className;
 										return (
 											<th
 												key={header.id}
 												className={`px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider relative ${customClassName || ""}`}
 												style={{
 													width:
-														header.getSize() !== 150 ? header.getSize() : undefined,
+														header.getSize() !== 150
+															? header.getSize()
+															: undefined,
 												}}
 											>
 												{/* Sorting indicator bar - top for asc, bottom for desc */}
@@ -133,7 +136,7 @@ export const ThreadsTable = ({
 													>
 														{flexRender(
 															header.column.columnDef.header,
-															header.getContext()
+															header.getContext(),
 														)}
 													</div>
 												)}
@@ -147,14 +150,18 @@ export const ThreadsTable = ({
 									{headerGroup.headers.map((header) => {
 										const FilterComponent =
 											header.column.columnDef.meta?.filterComponent;
-										const customClassName = header.column.columnDef.meta?.className;
+										const customClassName =
+											header.column.columnDef.meta?.className;
 										return (
 											<th
 												key={header.id}
 												className={`px-4 py-2 ${customClassName || ""}`}
 											>
 												{header.column.getCanFilter() && FilterComponent ? (
-													<FilterComponent column={header.column} table={table} />
+													<FilterComponent
+														column={header.column}
+														table={table}
+													/>
 												) : null}
 											</th>
 										);
@@ -169,7 +176,8 @@ export const ThreadsTable = ({
 								{/* Main row */}
 								<tr className="hover:bg-background/50">
 									{row.getVisibleCells().map((cell) => {
-										const customClassName = cell.column.columnDef.meta?.className;
+										const customClassName =
+											cell.column.columnDef.meta?.className;
 										return (
 											<td
 												key={cell.id}
@@ -177,7 +185,7 @@ export const ThreadsTable = ({
 											>
 												{flexRender(
 													cell.column.columnDef.cell,
-													cell.getContext()
+													cell.getContext(),
 												)}
 											</td>
 										);
@@ -245,14 +253,14 @@ export const ThreadsTable = ({
 					<button
 						onClick={() => table.previousPage()}
 						disabled={!table.getCanPreviousPage()}
-						className="px-3 py-1 text-sm border border-border rounded bg-surface text-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background"
+						className="px-3 py-1 text-sm border cursor-pointer border-border rounded bg-surface text-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background"
 					>
 						Previous
 					</button>
 					<button
 						onClick={() => table.nextPage()}
 						disabled={!table.getCanNextPage()}
-						className="px-3 py-1 text-sm border border-border rounded bg-surface text-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background"
+						className="px-3 py-1 text-sm border cursor-pointer border-border rounded bg-surface text-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background"
 					>
 						Next
 					</button>
