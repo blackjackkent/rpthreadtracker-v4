@@ -41,6 +41,7 @@ export const NewsSidebar = ({ isOpen, onClose, news }: NewsSidebarProps) => {
 
 			{/* Panel */}
 			<aside
+				aria-label="News sidebar"
 				className={`fixed top-0 right-0 z-50 h-full w-80 bg-surface border-l border-border shadow-xl flex flex-col transition-transform duration-300 ${
 					isOpen ? "translate-x-0" : "translate-x-full"
 				}`}

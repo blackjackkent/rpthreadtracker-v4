@@ -101,6 +101,31 @@ export async function mockNewsApi(page: Page) {
 }
 
 /**
+ * Intercepts GET /api/news and returns two fake news items.
+ * Use in news sidebar tests that need actual content.
+ */
+export async function mockNewsApiWithItems(page: Page) {
+	await page.route("/api/news", async (route) => {
+		await route.fulfill({
+			json: [
+				{
+					postId: "news-1",
+					postTitle: "Test News Item One",
+					postDate: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1 hour ago
+					postUrl: "https://tblrthreadtracker.tumblr.com/post/1",
+				},
+				{
+					postId: "news-2",
+					postTitle: "Test News Item Two",
+					postDate: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+					postUrl: "https://tblrthreadtracker.tumblr.com/post/2",
+				},
+			],
+		});
+	});
+}
+
+/**
  * Sets up all external API mocks. Call in beforeEach.
  */
 export async function mockExternalApis(page: Page) {
