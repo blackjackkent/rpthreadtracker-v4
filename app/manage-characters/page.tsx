@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
+
+export const metadata: Metadata = { title: "Manage Characters" };
 import { getAllCharactersForManagement } from "@/lib/db/character";
 import { CharactersContent } from "@/components/characters/CharactersContent";
 

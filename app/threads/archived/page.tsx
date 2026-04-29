@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
+
+export const metadata: Metadata = { title: "Archived" };
 import { getArchivedThreadsForUser } from "@/lib/db/thread";
 import { ThreadsContent } from "@/components/threads/ThreadsContent";
 import { ThreadStatusWithDetails } from "@/types/tumblr";

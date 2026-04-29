@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = { title: "Tools" };
 import { ToolsContent } from "@/components/tools/ToolsContent";
 
 export const dynamic = "force-dynamic";

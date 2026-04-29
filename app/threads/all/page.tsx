@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { ThreadsContentWrapper } from "@/components/threads/ThreadsContentWrapper";
 
+export const metadata: Metadata = { title: "All Threads" };
 export const dynamic = "force-dynamic";
 
 export default function AllThreadsPage() {

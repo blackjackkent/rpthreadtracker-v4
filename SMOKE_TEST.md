@@ -99,14 +99,14 @@
 
 ## 4. News Sidebar
 
-- [ ] News button in header shows unread badge count on first visit (if news exists)
-- [ ] Clicking news button opens right sidebar
-- [ ] News items display title (linked), date, and "New" badge on unread items
-- [ ] After opening, badge count resets to 0
-- [ ] After reopening, no "New" badges (all marked read)
-- [ ] Clicking backdrop closes the sidebar
-- [ ] Clicking × button closes the sidebar
-- [ ] News item links open in new tab
+- [x] News button in header shows unread badge count on first visit (if news exists)
+- [x] Clicking news button opens right sidebar
+- [x] News items display title (linked), date, and "New" badge on unread items
+- [x] After opening, badge count resets to 0
+- [x] After reopening, no "New" badges (all marked read)
+- [x] Clicking backdrop closes the sidebar
+- [x] Clicking × button closes the sidebar
+- [x] News item links open in new tab
 
 ---
 

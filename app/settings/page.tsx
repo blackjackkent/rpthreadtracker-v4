@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+
+export const metadata: Metadata = { title: "Settings" };
 import { getUserById } from "@/lib/db/user";
 import { SettingsContent } from "@/components/settings/SettingsContent";
 
