@@ -112,13 +112,13 @@
 
 ## 5. Character Management (`/manage-characters`)
 
-- [ ] Page loads with list of characters in sortable table
-- [ ] Sort by character name, status, thread count — works correctly
-- [ ] **Create**: "Add Character" (header or page button) opens modal; submit empty form shows validation; valid submission creates character and appears in table
-- [ ] **Edit**: pencil icon opens modal pre-filled; change name and save — updates in table
-- [ ] **Hiatus toggle**: archive icon puts character on hiatus (strikethrough, muted); box-open icon removes hiatus
-- [ ] **Delete**: trash icon shows confirmation prompt; confirming deletes the character and removes from table; cancelling does nothing
-- [ ] Thread count column shows correct count; hiatus characters show "-"
+- [x] Page loads with list of characters in sortable table
+- [x] Sort by character name, status, thread count — works correctly
+- [x] **Create**: "Add Character" (header or page button) opens modal; submit empty form shows validation; valid submission creates character and appears in table
+- [x] **Edit**: pencil icon opens modal pre-filled; change name and save — updates in table
+- [x] **Hiatus toggle**: archive icon puts character on hiatus (strikethrough, muted); box-open icon removes hiatus
+- [x] **Delete**: trash icon shows confirmation prompt; confirming deletes the character and removes from table; cancelling does nothing
+- [x] Thread count column shows correct count; hiatus characters show "-"
 
 ---
 
