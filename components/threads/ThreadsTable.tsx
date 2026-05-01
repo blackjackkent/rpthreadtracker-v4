@@ -85,6 +85,7 @@ export const ThreadsTable = ({
 		enableRowSelection: true,
 		getRowId: (row) => String(row.threadId),
 		getRowCanExpand: () => true,
+		autoResetPageIndex: false,
 		initialState: {
 			pagination: {
 				pageSize: settings?.threadTablePageSize || 10,

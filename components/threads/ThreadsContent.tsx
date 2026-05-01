@@ -59,7 +59,7 @@ export const ThreadsContent = ({
 		useState<ThreadStatusWithDetails | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const { refreshSingleThread, characters } = useThreadStatus();
+	const { refreshSingleThread, removeThread, characters } = useThreadStatus();
 
 	// Apply filters to threads
 	const filteredThreads = useMemo(() => {
@@ -134,8 +134,8 @@ export const ThreadsContent = ({
 			} else {
 				// Create new thread
 				const result = await createThread(data);
-				// Refresh Tumblr status for new thread
 				await refreshSingleThread(result.threadId);
+				router.refresh();
 				toast.success("Thread tracked successfully");
 			}
 		} catch (error) {
@@ -154,6 +154,7 @@ export const ThreadsContent = ({
 		onArchive: async (threadId: number) => {
 			try {
 				await archiveThread(threadId);
+				removeThread(threadId);
 				router.refresh();
 				toast.success("Thread archived");
 			} catch (error) {
@@ -192,6 +193,7 @@ export const ThreadsContent = ({
 			) {
 				try {
 					await deleteThread(threadId);
+					removeThread(threadId);
 					router.refresh();
 					toast.success("Thread untracked");
 				} catch (error) {
@@ -206,6 +208,7 @@ export const ThreadsContent = ({
 	const handleBulkArchive = async () => {
 		try {
 			await bulkArchiveThreads(selectedThreadIds);
+			selectedThreadIds.forEach(removeThread);
 			router.refresh();
 			toast.success(`${selectedThreadIds.length} thread(s) archived`);
 			setSelectedThreadIds([]);
@@ -218,6 +221,7 @@ export const ThreadsContent = ({
 	const handleBulkUnarchive = async () => {
 		try {
 			await bulkUnarchiveThreads(selectedThreadIds);
+			await Promise.all(selectedThreadIds.map(refreshSingleThread));
 			router.refresh();
 			toast.success(`${selectedThreadIds.length} thread(s) unarchived`);
 			setSelectedThreadIds([]);
@@ -230,6 +234,7 @@ export const ThreadsContent = ({
 	const handleBulkToggleQueue = async () => {
 		try {
 			await bulkToggleThreadsQueued(selectedThreadIds);
+			await Promise.all(selectedThreadIds.map(refreshSingleThread));
 			router.refresh();
 			toast.success(
 				`Queue status updated for ${selectedThreadIds.length} thread(s)`
@@ -249,6 +254,7 @@ export const ThreadsContent = ({
 		) {
 			try {
 				await bulkDeleteThreads(selectedThreadIds);
+				selectedThreadIds.forEach(removeThread);
 				router.refresh();
 				toast.success(`${selectedThreadIds.length} thread(s) untracked`);
 				setSelectedThreadIds([]);

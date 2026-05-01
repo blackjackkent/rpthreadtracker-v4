@@ -33,7 +33,7 @@ interface ColumnActions {
 export const createThreadColumns = (
 	actions: ColumnActions,
 	isArchivedPage: boolean = false,
-	showToggleQueue: boolean = true
+	showToggleQueue: boolean = true,
 ) => [
 	// Checkbox column for row selection
 	columnHelper.display({
@@ -106,6 +106,7 @@ export const createThreadColumns = (
 		meta: {
 			filterComponent: TextFilter,
 		},
+		size: 200,
 	}),
 
 	// Character column

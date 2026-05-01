@@ -126,18 +126,19 @@
 
 ### 6.1 All Threads (`/threads/all`)
 
-- [ ] Page loads; all non-archived threads shown
-- [ ] Status badges (Your Turn / Their Turn / Queued) display correctly
-- [ ] Character filter dropdown filters table correctly
-- [ ] Column filter inputs (title, partner, last poster) filter correctly
-- [ ] Tag filter works
-- [ ] Sorting columns works; custom sort indicator (primary-colored bar) appears
-- [ ] Pagination controls work; page size selector works
-- [ ] Expandable row shows description and tags
-- [ ] Row checkbox selects thread; header checkbox selects all
-- [ ] **Single actions**: Edit (opens pre-filled modal), Archive, Untrack — each works and refreshes table
-- [ ] "Mark Queued" button is hidden on All Threads page
-- [ ] **Bulk actions**: select multiple → Archive, Unarchive, Untrack all work
+- [x] Page loads; all non-archived threads shown
+- [x] Status badges (Your Turn / Their Turn / Queued) display correctly
+- [x] Character filter dropdown filters table correctly
+- [x] Column filter inputs (title, partner, last poster) filter correctly
+- [x] Tag filter works
+- [x] Sorting columns works; custom sort indicator (primary-colored bar) appears
+- [x] Pagination controls work; page size selector works
+- [x] Page size preference is stored across page reloads
+- [x] Expandable row shows description and tags
+- [x] Row checkbox selects thread; header checkbox selects all
+- [x] **Single actions**: Edit (opens pre-filled modal), Archive, Untrack — each works and refreshes table
+- [x] "Mark Queued" button is hidden on All Threads page
+- [x] **Bulk actions**: select multiple → Archive, Unarchive, Untrack all work
 
 ### 6.2 Your Turn (`/threads/your-turn`)
 
