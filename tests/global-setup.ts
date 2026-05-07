@@ -150,6 +150,19 @@ async function globalSetup() {
 			},
 		});
 
+		// Queued thread where a new post arrived after the queue date
+		// (should drop out of Queued and back into Your Turn)
+		await prisma.threads.create({
+			data: {
+				CharacterId: activeChar.CharacterId,
+				PostId: POST_IDS.queuedButPosted,
+				UserTitle: "Queued But Posted Thread",
+				PartnerUrlIdentifier: "partner5",
+				IsArchived: false,
+				DateMarkedQueued: new Date("2024-01-01"),
+			},
+		});
+
 		// Hiatus character thread (should not appear in active views)
 		await prisma.threads.create({
 			data: {

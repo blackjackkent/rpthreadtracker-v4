@@ -142,23 +142,24 @@
 
 ### 6.2 Your Turn (`/threads/your-turn`)
 
-- [ ] Only shows threads where it's your turn
-- [ ] "Mark Queued" button visible; disabled for threads without a valid Tumblr post
-- [ ] Bulk "Toggle Queue" works
+- [x] Only shows threads where it's your turn
+- [x] "Mark Queued" button visible; disabled for threads without a valid Tumblr post
+- [x] Bulk "Toggle Queue" works
+- [x] Thread with a marked-queued date prior to the most recent post moves back into yourturn/theirturn cycle.
 
 ### 6.3 Their Turn (`/threads/their-turn`)
 
-- [ ] Only shows threads where it's their turn
+- [x] Only shows threads where it's their turn
 
 ### 6.4 Queued (`/threads/queued`)
 
-- [ ] Only shows queued threads
-- [ ] "Unqueue" action works
+- [x] Only shows queued threads
+- [x] "Unqueue" action works
 
 ### 6.5 Archived (`/threads/archived`)
 
-- [ ] Only shows archived threads
-- [ ] "Unarchive" single and bulk actions work; thread returns to active views
+- [x] Only shows archived threads
+- [x] "Unarchive" single and bulk actions work; thread returns to active views
 
 ### 6.6 Track New Thread (modal)
 

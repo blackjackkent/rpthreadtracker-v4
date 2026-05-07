@@ -26,8 +26,6 @@ interface TumblrStatusResponse {
 function mockStatusForPost(
 	req: TumblrStatusRequest
 ): TumblrStatusResponse {
-	const isQueued = req.dateMarkedQueued != null;
-
 	const statusByPostId: Record<string, Partial<TumblrStatusResponse>> = {
 		[POST_IDS.yourTurn]: {
 			isCallingCharactersTurn: true,
@@ -53,6 +51,12 @@ function mockStatusForPost(
 			lastPostDate: "2024-01-01T00:00:00.000Z",
 			lastPostUrl: `https://${req.characterUrlIdentifier}.tumblr.com/post/${req.postId}`,
 		},
+		[POST_IDS.queuedButPosted]: {
+			isCallingCharactersTurn: true,
+			lastPosterUrlIdentifier: req.partnerUrlIdentifier ?? "partner",
+			lastPostDate: "2024-06-01T00:00:00.000Z",
+			lastPostUrl: `https://${req.characterUrlIdentifier}.tumblr.com/post/${req.postId}`,
+		},
 		[POST_IDS.hiatus]: {
 			isCallingCharactersTurn: true,
 			lastPosterUrlIdentifier: req.partnerUrlIdentifier ?? "partner",
@@ -70,7 +74,12 @@ function mockStatusForPost(
 		lastPosterUrlIdentifier: known?.lastPosterUrlIdentifier ?? "",
 		lastPostUrl: known?.lastPostUrl ?? "",
 		isCallingCharactersTurn: known?.isCallingCharactersTurn ?? true,
-		isQueued,
+		isQueued: (() => {
+			if (!req.dateMarkedQueued) return false;
+			const lastPostDate = known?.lastPostDate;
+			if (!lastPostDate) return true;
+			return new Date(req.dateMarkedQueued) > new Date(lastPostDate);
+		})(),
 	};
 }
 
