@@ -81,28 +81,27 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// Process all threads in parallel
-		const results = await Promise.all(
-			body.map(async (threadRequest) => {
-				try {
-					// Fetch post from Tumblr with retry logic
-					const post = await getTumblrPostWithRetry(
-						threadRequest.characterUrlIdentifier,
-						threadRequest.postId
-					);
-
-					// Calculate thread status
-					return calculateThreadStatus(threadRequest, post);
-				} catch (error) {
-					console.error(
-						`Error processing thread ${threadRequest.postId}:`,
-						error
-					);
-					// Return a default "character's turn" response for failed requests
-					return calculateThreadStatus(threadRequest, null);
-				}
-			})
-		);
+		// Process threads with staggered delays to avoid Tumblr rate limits
+		const results: Awaited<ReturnType<typeof calculateThreadStatus>>[] = [];
+		for (let i = 0; i < body.length; i++) {
+			const threadRequest = body[i];
+			if (i > 0) {
+				await new Promise((resolve) => setTimeout(resolve, 150));
+			}
+			try {
+				const post = await getTumblrPostWithRetry(
+					threadRequest.characterUrlIdentifier,
+					threadRequest.postId
+				);
+				results.push(calculateThreadStatus(threadRequest, post));
+			} catch (error) {
+				console.error(
+					`Error processing thread ${threadRequest.postId}:`,
+					error
+				);
+				results.push(calculateThreadStatus(threadRequest, null));
+			}
+		}
 
 		return NextResponse.json(results);
 	} catch (error) {

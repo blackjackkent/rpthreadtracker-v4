@@ -219,7 +219,7 @@ export async function refreshThreadStatusesInChunks(
 	// Track completed chunks for progress
 	let completedCount = 0;
 
-	// Process all chunks in parallel
+	// Process all chunks in parallel (server-side staggers individual Tumblr API calls)
 	const chunkPromises = chunks.map(async (chunk) => {
 		const chunkRequests = chunk.map(threadToRequest);
 
@@ -237,7 +237,6 @@ export async function refreshThreadStatusesInChunks(
 
 			const chunkStatuses: ThreadStatusResponse[] = await response.json();
 
-			// Update progress
 			completedCount += chunk.length;
 			if (onProgress) {
 				onProgress({
@@ -248,7 +247,7 @@ export async function refreshThreadStatusesInChunks(
 			return chunkStatuses;
 		} catch (error) {
 			console.error("Error fetching chunk:", error);
-			throw error; // Re-throw to propagate the error up
+			throw error;
 		}
 	});
 

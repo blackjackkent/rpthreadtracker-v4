@@ -3,6 +3,7 @@ import { Logo } from "./Logo";
 import { AddMenu } from "./AddMenu";
 import { ProfileMenu } from "./ProfileMenu";
 import { RefreshButton } from "./RefreshButton";
+import { RefreshProgressBar } from "./RefreshProgressBar";
 import { NewsButton } from "./NewsButton";
 
 interface HeaderProps {
@@ -40,6 +41,7 @@ export const Header = ({
 					<ProfileMenu user={user} />
 				</div>
 			</div>
+			<RefreshProgressBar />
 		</header>
 	);
 };
