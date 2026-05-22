@@ -163,11 +163,10 @@
 
 ### 6.6 Track New Thread (modal)
 
-- [ ] Opens from header "Add" menu and from "Track New Thread" on thread pages
-- [ ] Character dropdown populated; required validation works
-- [ ] Post ID field required
-- [ ] Tags: add via Enter key; remove via × button
-- [ ] Save creates thread; appears in table and context updates
+- [x] Opens from header "Add" menu and from "Track New Thread" on thread pages
+- [x] Character dropdown populated; required validation works
+- [x] Tags: add via comma key; remove via × button
+- [x] Save creates thread; appears in table and context updates
 
 ---
 

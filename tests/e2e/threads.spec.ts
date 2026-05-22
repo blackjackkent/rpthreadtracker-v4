@@ -308,3 +308,66 @@ test.describe("Archived", () => {
 		await expect(archivedTable.getByText("unarchive-test")).not.toBeVisible();
 	});
 });
+
+// 6.6 Track New Thread (modal)
+test.describe("Track New Thread Modal", () => {
+	test("opens from header Add menu", async ({ page }) => {
+		await page.goto("/threads/all");
+		await waitForThreads(page);
+		await page.getByRole("button", { name: "Add menu" }).click();
+		await page.getByRole("banner").getByRole("button", { name: "Track New Thread" }).click();
+		await expect(page.getByRole("dialog")).toBeVisible();
+	});
+
+	test("opens from Track New Thread button on thread pages", async ({ page }) => {
+		await page.goto("/threads/all");
+		await waitForThreads(page);
+		await page.getByRole("button", { name: /track new thread/i }).click();
+		await expect(page.getByRole("dialog")).toBeVisible();
+	});
+
+	test("character dropdown is populated and required", async ({ page }) => {
+		await page.goto("/threads/all");
+		await waitForThreads(page);
+		await page.getByRole("button", { name: /track new thread/i }).click();
+		// Dropdown should have the Active Character option
+		const charSelect = page.getByLabel("Character");
+		await expect(charSelect.getByRole("option", { name: "Active Character" })).toBeAttached();
+		// Submit without selecting a character — validation error
+		await page.getByRole("button", { name: "Track Thread", exact: true }).click();
+		await expect(page.getByText("Please select a character")).toBeVisible();
+	});
+
+	test("tags can be added via Enter and removed via x button", async ({ page }) => {
+		await page.goto("/threads/all");
+		await waitForThreads(page);
+		await page.getByRole("button", { name: /track new thread/i }).click();
+		const tagInput = page.getByPlaceholder(/add tags/i);
+		// Add a tag by typing and pressing Enter
+		await tagInput.fill("test-tag");
+		await tagInput.press("Enter");
+		const firstTag = page.getByRole("listitem").filter({ hasText: "test-tag" });
+		await expect(firstTag).toBeVisible();
+		// Add another
+		await tagInput.fill("second-tag");
+		await tagInput.press("Enter");
+		const secondTag = page.getByRole("listitem").filter({ hasText: "second-tag" });
+		await expect(secondTag).toBeVisible();
+		// Remove the first tag via x button
+		await firstTag.getByRole("button").click();
+		await expect(firstTag).not.toBeVisible();
+		await expect(secondTag).toBeVisible();
+	});
+
+	test("save creates thread and appears in table", async ({ page }) => {
+		await page.goto("/threads/all");
+		await waitForThreads(page);
+		const table = page.getByRole("table");
+		await page.getByRole("button", { name: /track new thread/i }).click();
+		await page.getByLabel("Character").selectOption({ label: "Active Character" });
+		await page.getByLabel("Thread Title").fill("Modal Test Thread");
+		await page.getByRole("button", { name: "Track Thread", exact: true }).click();
+		await expect(page.getByRole("dialog")).toBeHidden();
+		await expect(table.getByText("Modal Test Thread")).toBeVisible();
+	});
+});

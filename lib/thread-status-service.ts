@@ -362,7 +362,7 @@ export async function refreshSingleThreadStatus(
 				lastPostDate: null,
 				lastPosterUrlIdentifier: "",
 				lastPostUrl: "",
-				isCallingCharactersTurn: false,
+				isCallingCharactersTurn: true,
 				isQueued: false,
 			};
 		}
