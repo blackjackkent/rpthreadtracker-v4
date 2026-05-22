@@ -4,6 +4,7 @@ import type {
 	ThreadStatusRequest,
 	ThreadStatusResponse,
 } from "@/types/tumblr";
+import { getTumblrPostWithRetry } from "@/lib/tumblr-client";
 
 /**
  * Get the most recent relevant reblog note from a post
@@ -121,4 +122,31 @@ export function calculateThreadStatus(
 		isCallingCharactersTurn,
 		isQueued,
 	};
+}
+
+/**
+ * Fetch Tumblr data and calculate statuses for a batch of threads.
+ * Staggers requests by 150ms to avoid Tumblr rate limits.
+ * Used by both the authenticated API route and the public view page.
+ */
+export async function batchCalculateThreadStatuses(
+	requests: ThreadStatusRequest[]
+): Promise<ThreadStatusResponse[]> {
+	const results: ThreadStatusResponse[] = [];
+	for (let i = 0; i < requests.length; i++) {
+		const request = requests[i];
+		if (i > 0) {
+			await new Promise((resolve) => setTimeout(resolve, 150));
+		}
+		try {
+			const post = await getTumblrPostWithRetry(
+				request.characterUrlIdentifier,
+				request.postId
+			);
+			results.push(calculateThreadStatus(request, post));
+		} catch {
+			results.push(calculateThreadStatus(request, null));
+		}
+	}
+	return results;
 }

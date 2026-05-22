@@ -6,6 +6,7 @@ import {
 } from "@/lib/db/public-view";
 import type { ThreadStatusRequest, ThreadStatusResponse } from "@/types/tumblr";
 import type { ThreadWithCharacter } from "@/lib/db/types";
+import { batchCalculateThreadStatuses } from "@/lib/thread-status-calculator";
 import {
 	PublicViewContent,
 	type PublicViewThread,
@@ -30,7 +31,6 @@ export async function generateMetadata({
 }
 
 const CHUNK_SIZE = 10;
-const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
 async function fetchStatusesInChunks(
 	threads: ThreadWithCharacter[]
@@ -46,29 +46,20 @@ async function fetchStatusesInChunks(
 		chunks.push(threadsWithPostId.slice(i, i + CHUNK_SIZE));
 	}
 
-	const chunkPromises = chunks.map(async (chunk) => {
-		const requests: ThreadStatusRequest[] = chunk.map((t) => ({
-			threadId: t.ThreadId,
-			postId: t.PostId!,
-			characterUrlIdentifier: t.Characters.UrlIdentifier!,
-			partnerUrlIdentifier: t.PartnerUrlIdentifier || undefined,
-			dateMarkedQueued: t.DateMarkedQueued || undefined,
-		}));
-		try {
-			const res = await fetch(`${BASE_URL}/api/thread`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(requests),
-				cache: "no-store",
-			});
-			if (!res.ok) return [] as ThreadStatusResponse[];
-			return (await res.json()) as ThreadStatusResponse[];
-		} catch {
-			return [] as ThreadStatusResponse[];
-		}
-	});
+	const chunkResults = await Promise.all(
+		chunks.map((chunk) => {
+			const requests: ThreadStatusRequest[] = chunk.map((t) => ({
+				threadId: t.ThreadId,
+				postId: t.PostId!,
+				characterUrlIdentifier: t.Characters.UrlIdentifier!,
+				partnerUrlIdentifier: t.PartnerUrlIdentifier || undefined,
+				dateMarkedQueued: t.DateMarkedQueued || undefined,
+			}));
+			return batchCalculateThreadStatuses(requests);
+		})
+	);
 
-	const results = (await Promise.all(chunkPromises)).flat();
+	const results = chunkResults.flat();
 	const map = new Map<number, ThreadStatusResponse>();
 	for (const status of results) {
 		if (status.threadId) map.set(status.threadId, status);

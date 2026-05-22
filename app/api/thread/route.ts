@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTumblrPostWithRetry } from "@/lib/tumblr-client";
-import { calculateThreadStatus } from "@/lib/thread-status-calculator";
+import {
+	calculateThreadStatus,
+	batchCalculateThreadStatuses,
+} from "@/lib/thread-status-calculator";
 import { requireAuth } from "@/lib/api-auth";
 import type { ThreadStatusRequest } from "@/types/tumblr";
 
@@ -81,27 +84,7 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// Process threads with staggered delays to avoid Tumblr rate limits
-		const results: Awaited<ReturnType<typeof calculateThreadStatus>>[] = [];
-		for (let i = 0; i < body.length; i++) {
-			const threadRequest = body[i];
-			if (i > 0) {
-				await new Promise((resolve) => setTimeout(resolve, 150));
-			}
-			try {
-				const post = await getTumblrPostWithRetry(
-					threadRequest.characterUrlIdentifier,
-					threadRequest.postId
-				);
-				results.push(calculateThreadStatus(threadRequest, post));
-			} catch (error) {
-				console.error(
-					`Error processing thread ${threadRequest.postId}:`,
-					error
-				);
-				results.push(calculateThreadStatus(threadRequest, null));
-			}
-		}
+		const results = await batchCalculateThreadStatuses(body);
 
 		return NextResponse.json(results);
 	} catch (error) {

@@ -1,24 +1,18 @@
 "use client";
 
-import { useState, useMemo, Fragment } from "react";
+import { useState, useMemo } from "react";
 import {
 	useReactTable,
 	getCoreRowModel,
 	getSortedRowModel,
 	getPaginationRowModel,
-	getExpandedRowModel,
 	SortingState,
 	ColumnDef,
 	createColumnHelper,
 	flexRender,
 } from "@tanstack/react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-	faExternalLinkAlt,
-	faChevronDown,
-	faChevronRight,
-	faTag,
-} from "@fortawesome/free-solid-svg-icons";
+import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
 import type { PublicView } from "@/lib/db/public-view";
 
 export interface PublicViewThread {
@@ -91,57 +85,10 @@ function StatusBadge({ thread }: { thread: PublicViewThread }) {
 	);
 }
 
-function ExpandedRow({ thread }: { thread: PublicViewThread }) {
-	const hasTags = thread.tags && thread.tags.length > 0;
-	if (!thread.description && !hasTags) return null;
-
-	return (
-		<div className="px-4 py-3 bg-background/50 border-t border-border/50 space-y-2">
-			{thread.description && (
-				<p className="text-sm text-text-muted">{thread.description}</p>
-			)}
-			{hasTags && (
-				<div className="flex flex-wrap gap-1.5">
-					{thread.tags.map((tag) => (
-						<span
-							key={tag.tagId}
-							className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-primary/20 text-tag-text border border-primary/30"
-						>
-							<FontAwesomeIcon icon={faTag} className="w-2.5 h-2.5" />
-							{tag.tagText}
-						</span>
-					))}
-				</div>
-			)}
-		</div>
-	);
-}
-
 const columnHelper = createColumnHelper<PublicViewThread>();
 
 function buildColumns(enabledColumns: string[]): ColumnDef<PublicViewThread>[] {
 	const cols: ColumnDef<PublicViewThread>[] = [];
-
-	// Expander
-	cols.push(
-		columnHelper.display({
-			id: "expander",
-			header: () => null,
-			cell: ({ row }) => (
-				<button
-					onClick={row.getToggleExpandedHandler()}
-					className="cursor-pointer text-text-muted hover:text-text"
-				>
-					{row.getIsExpanded() ? (
-						<FontAwesomeIcon icon={faChevronDown} className="w-3 h-3" />
-					) : (
-						<FontAwesomeIcon icon={faChevronRight} className="w-3 h-3" />
-					)}
-				</button>
-			),
-			size: 40,
-		}) as ColumnDef<PublicViewThread>,
-	);
 
 	if (enabledColumns.includes("threadTitle")) {
 		cols.push(
@@ -294,9 +241,7 @@ export const PublicViewContent = ({
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
-		getExpandedRowModel: getExpandedRowModel(),
 		getRowId: (row) => String(row.threadId),
-		getRowCanExpand: () => true,
 		initialState: {
 			pagination: { pageSize: 25 },
 		},
@@ -372,25 +317,16 @@ export const PublicViewContent = ({
 					</thead>
 					<tbody className="bg-surface divide-y divide-border">
 						{table.getRowModel().rows.map((row) => (
-							<Fragment key={row.id}>
-								<tr className="hover:bg-background/50">
-									{row.getVisibleCells().map((cell) => (
-										<td key={cell.id} className="px-4 py-3 text-sm text-text">
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</td>
-									))}
-								</tr>
-								{row.getIsExpanded() && (
-									<tr>
-										<td colSpan={row.getVisibleCells().length}>
-											<ExpandedRow thread={row.original} />
-										</td>
-									</tr>
-								)}
-							</Fragment>
+							<tr key={row.id} className="hover:bg-background/50">
+								{row.getVisibleCells().map((cell) => (
+									<td key={cell.id} className="px-4 py-3 text-sm text-text">
+										{flexRender(
+											cell.column.columnDef.cell,
+											cell.getContext(),
+										)}
+									</td>
+								))}
+							</tr>
 						))}
 						{table.getRowModel().rows.length === 0 && (
 							<tr>

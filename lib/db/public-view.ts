@@ -104,6 +104,7 @@ export async function getThreadsForPublicView(
 		where: {
 			Characters: {
 				UserId: userId,
+				IsOnHiatus: false,
 				...(characterIds && characterIds.length > 0
 					? { CharacterId: { in: characterIds } }
 					: {}),

@@ -186,15 +186,15 @@
 
 ### 7.3 Manage Public Views
 
-- [ ] Public views list loads
-- [ ] **Create**: modal opens; fill all fields; slug availability check on blur; save creates view and appears in list
-- [ ] **Edit**: opens pre-filled modal; changes save correctly
-- [ ] **Copy URL**: copies `/public/{username}/{slug}` to clipboard
-- [ ] **Delete**: inline confirm, then removes from list
+- [x] Public views list loads
+- [x] **Create**: modal opens; fill all fields; slug availability check on blur; save creates view and appears in list
+- [x] **Edit**: opens pre-filled modal; changes save correctly
+- [x] **Copy URL**: copies `/public/{username}/{slug}` to clipboard
+- [x] **Delete**: inline confirm, then removes from list
 
 ### 7.4 Browser Extensions
 
-- [ ] Tab renders with download links and instructions (static content)
+- [x] Tab renders with download links and instructions (static content)
 
 ---
 
