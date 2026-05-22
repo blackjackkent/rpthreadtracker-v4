@@ -17,8 +17,10 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 
 export const ManageTagsPane = () => {
+	const { refreshThreadMetadata } = useThreadStatus();
 	const [tags, setTags] = useState<TagWithCount[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState("");
@@ -80,6 +82,7 @@ export const ManageTagsPane = () => {
 		try {
 			await bulkRenameTag(currentTag, trimmed);
 			await fetchTags();
+			await refreshThreadMetadata();
 			setEditingTag(null);
 			setNewTagText("");
 			toast.success(`"${currentTag}" renamed to "${trimmed}"`);
@@ -95,6 +98,7 @@ export const ManageTagsPane = () => {
 		try {
 			await bulkDeleteTag(tagText);
 			await fetchTags();
+			await refreshThreadMetadata();
 			setConfirmingDeleteTag(null);
 			toast.success(`"${tagText}" removed from all threads`);
 		} catch {

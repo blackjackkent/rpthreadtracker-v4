@@ -174,15 +174,15 @@
 
 ### 7.1 Export to Excel
 
-- [ ] "Export" button triggers `.xlsx` download
-- [ ] File contains threads organized by character sheet
-- [ ] "Include archived" toggle includes/excludes archived threads in export
+- [x] "Export" button triggers `.xlsx` download
+- [x] File contains threads organized by character sheet
+- [x] "Include archived" toggle includes/excludes archived threads in export
 
 ### 7.2 Manage Tags
 
-- [ ] Tag list loads with counts
-- [ ] Rename: select tag(s), enter new name, confirm — all renamed threads update
-- [ ] Delete: select tag(s), confirm — removed from all threads
+- [x] Tag list loads with counts
+- [x] Rename: select tag(s), enter new name, confirm — all renamed threads update
+- [x] Delete: select tag(s), confirm — removed from all threads
 
 ### 7.3 Manage Public Views
 

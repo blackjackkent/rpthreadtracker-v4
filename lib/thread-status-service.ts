@@ -311,6 +311,55 @@ export async function refreshThreadStatusesInChunks(
 }
 
 /**
+ * Re-fetch thread metadata from the database and patch cached entries.
+ * Preserves existing Tumblr status data (lastPostDate, turn, etc.)
+ * while updating DB fields (tags, title, description, etc.).
+ */
+export async function refreshThreadMetadata(
+	existing: Map<number, ThreadStatusWithDetails>
+): Promise<Map<number, ThreadStatusWithDetails>> {
+	const response = await fetch("/api/threads/active", {
+		cache: "no-store",
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch active threads");
+	}
+
+	const activeThreads: ThreadWithCharacter[] = await response.json();
+	const updated = new Map<number, ThreadStatusWithDetails>();
+
+	for (const thread of activeThreads) {
+		const cached = existing.get(thread.ThreadId);
+		updated.set(thread.ThreadId, {
+			threadId: thread.ThreadId,
+			postId: thread.PostId || "",
+			lastPostDate: cached?.lastPostDate ?? null,
+			lastPosterUrlIdentifier: cached?.lastPosterUrlIdentifier ?? "",
+			lastPostUrl: cached?.lastPostUrl ?? "",
+			isCallingCharactersTurn: cached?.isCallingCharactersTurn ?? true,
+			isQueued: cached?.isQueued ?? false,
+			userTitle: thread.UserTitle,
+			characterName: thread.Characters.CharacterName || "",
+			characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
+			partnerUrlIdentifier: thread.PartnerUrlIdentifier,
+			dateMarkedQueued: thread.DateMarkedQueued,
+			isArchived: thread.IsArchived,
+			description: thread.Description,
+			characterId: thread.Characters.CharacterId,
+			characterIsOnHiatus: thread.Characters.IsOnHiatus,
+			tags: thread.ThreadTags?.map((tag) => ({
+				tagId: tag.TagID,
+				tagText: tag.TagText,
+				threadId: tag.ThreadID || 0,
+			})),
+		});
+	}
+
+	return updated;
+}
+
+/**
  * Fetch status for a single thread
  * Used after creating/updating a thread to get fresh Tumblr data
  * @param threadId - The thread ID to refresh

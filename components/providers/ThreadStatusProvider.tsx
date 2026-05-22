@@ -11,6 +11,7 @@ import type { ThreadStatusWithDetails } from "@/types/tumblr";
 import {
 	refreshThreadStatusesInChunks,
 	refreshSingleThreadStatus,
+	refreshThreadMetadata as fetchThreadMetadata,
 	calculateStats,
 	type DashboardStats,
 	type RefreshProgress,
@@ -38,6 +39,7 @@ interface ThreadStatusContextValue {
 	refreshThreadStatuses: () => Promise<void>;
 	refreshSingleThread: (threadId: number) => Promise<void>;
 	removeThread: (threadId: number) => void;
+	refreshThreadMetadata: () => Promise<void>;
 	refreshCharacters: () => Promise<void>;
 	getThreadStatus: (threadId: number) => ThreadStatusWithDetails | null;
 }
@@ -138,6 +140,16 @@ export function ThreadStatusProvider({
 		});
 	}, []);
 
+	const refreshThreadMetadata = useCallback(async () => {
+		try {
+			const updated = await fetchThreadMetadata(threadStatuses);
+			setThreadStatuses(updated);
+			setDashboardStats(calculateStats(Array.from(updated.values()), updated.size));
+		} catch (error) {
+			console.error("Error refreshing thread metadata:", error);
+		}
+	}, [threadStatuses]);
+
 	const getThreadStatus = useCallback(
 		(threadId: number): ThreadStatusWithDetails | null => {
 			return threadStatuses.get(threadId) || null;
@@ -181,6 +193,7 @@ export function ThreadStatusProvider({
 		refreshThreadStatuses,
 		refreshSingleThread,
 		removeThread,
+		refreshThreadMetadata,
 		refreshCharacters,
 		getThreadStatus,
 	};

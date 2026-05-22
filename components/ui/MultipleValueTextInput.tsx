@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ReactNode } from "react";
+import { useState, useEffect, ReactNode } from "react";
 
 interface MultipleValueTextInputProps {
 	/** Any values the input's collection should be prepopulated with. */
@@ -74,6 +74,12 @@ export const MultipleValueTextInput = ({
 }: MultipleValueTextInputProps) => {
 	const [values, setValues] = useState(initialValues);
 	const [value, setValue] = useState("");
+
+	const initialKey = JSON.stringify(initialValues);
+	useEffect(() => {
+		setValues(initialValues);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [initialKey]);
 	const nonCharacterKeyLabels: string[] = ["Enter", "Tab"];
 	const delimiters: string[] = submitKeys.filter(
 		(element) => !nonCharacterKeyLabels.includes(element)

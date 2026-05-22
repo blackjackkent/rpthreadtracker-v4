@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import {
@@ -172,6 +173,42 @@ async function globalSetup() {
 				IsArchived: false,
 			},
 		});
+
+		// ── Tags ─────────────────────────────────────────────────────────────
+		// Add tags to some threads for tag management tests
+		const yourTurnThread = await prisma.threads.findFirst({
+			where: { UserTitle: "Your Turn Thread", Characters: { UserId: TEST_USER_ID } },
+		});
+		const theirTurnThread = await prisma.threads.findFirst({
+			where: { UserTitle: "Their Turn Thread", Characters: { UserId: TEST_USER_ID } },
+		});
+		const queuedThread = await prisma.threads.findFirst({
+			where: { UserTitle: "Queued Thread", Characters: { UserId: TEST_USER_ID } },
+		});
+
+		if (yourTurnThread) {
+			await prisma.threadTags.createMany({
+				data: [
+					{ TagID: crypto.randomUUID(), ThreadID: yourTurnThread.ThreadId, TagText: "adventure" },
+					{ TagID: crypto.randomUUID(), ThreadID: yourTurnThread.ThreadId, TagText: "angst" },
+				],
+			});
+		}
+		if (theirTurnThread) {
+			await prisma.threadTags.createMany({
+				data: [
+					{ TagID: crypto.randomUUID(), ThreadID: theirTurnThread.ThreadId, TagText: "adventure" },
+					{ TagID: crypto.randomUUID(), ThreadID: theirTurnThread.ThreadId, TagText: "fluff" },
+				],
+			});
+		}
+		if (queuedThread) {
+			await prisma.threadTags.createMany({
+				data: [
+					{ TagID: crypto.randomUUID(), ThreadID: queuedThread.ThreadId, TagText: "angst" },
+				],
+			});
+		}
 
 		console.log("✅ Test database seeded.");
 	} finally {
