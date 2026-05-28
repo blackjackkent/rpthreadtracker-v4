@@ -1,4 +1,4 @@
-import { Column } from "@tanstack/react-table";
+import { Column, Table, Row } from "@tanstack/react-table";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { useMemo } from "react";
 
@@ -27,7 +27,7 @@ export const CharacterFilter = ({
 	table,
 }: {
 	column: Column<ThreadStatusWithDetails>;
-	table: any;
+	table: Table<ThreadStatusWithDetails>;
 }) => {
 	const columnFilterValue = column.getFilterValue() as number | undefined;
 
@@ -38,8 +38,8 @@ export const CharacterFilter = ({
 			{ id: number; name: string; urlIdentifier: string }
 		>();
 
-		table.getPreFilteredRowModel().rows.forEach((row: any) => {
-			const thread = row.original as ThreadStatusWithDetails;
+		table.getPreFilteredRowModel().rows.forEach((row: Row<ThreadStatusWithDetails>) => {
+			const thread = row.original;
 			if (thread.characterId && !thread.characterIsOnHiatus) {
 				characterMap.set(thread.characterId, {
 					id: thread.characterId,
@@ -80,7 +80,7 @@ export const LastPosterFilter = ({
 	table,
 }: {
 	column: Column<ThreadStatusWithDetails>;
-	table: any;
+	table: Table<ThreadStatusWithDetails>;
 }) => {
 	const columnFilterValue = column.getFilterValue() as string | undefined;
 
@@ -88,8 +88,8 @@ export const LastPosterFilter = ({
 	const uniquePosters = useMemo(() => {
 		const posterSet = new Set<string>();
 
-		table.getPreFilteredRowModel().rows.forEach((row: any) => {
-			const thread = row.original as ThreadStatusWithDetails;
+		table.getPreFilteredRowModel().rows.forEach((row: Row<ThreadStatusWithDetails>) => {
+			const thread = row.original;
 			if (thread.lastPosterUrlIdentifier) {
 				posterSet.add(thread.lastPosterUrlIdentifier);
 			}
@@ -120,7 +120,7 @@ export const PartnerFilter = ({
 	table,
 }: {
 	column: Column<ThreadStatusWithDetails>;
-	table: any;
+	table: Table<ThreadStatusWithDetails>;
 }) => {
 	const columnFilterValue = column.getFilterValue() as string | undefined;
 
@@ -128,8 +128,8 @@ export const PartnerFilter = ({
 	const uniquePartners = useMemo(() => {
 		const partnerSet = new Set<string>();
 
-		table.getPreFilteredRowModel().rows.forEach((row: any) => {
-			const thread = row.original as ThreadStatusWithDetails;
+		table.getPreFilteredRowModel().rows.forEach((row: Row<ThreadStatusWithDetails>) => {
+			const thread = row.original;
 			if (thread.partnerUrlIdentifier) {
 				partnerSet.add(thread.partnerUrlIdentifier);
 			}
