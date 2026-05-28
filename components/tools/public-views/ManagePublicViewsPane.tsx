@@ -199,7 +199,7 @@ const ViewRow = ({
 
 	if (isDeletingConfirm) {
 		return (
-			<div className="border border-red-500/50 bg-red-500/5 rounded-lg p-4 space-y-2">
+			<div data-testid="public-view-card" className="border border-red-500/50 bg-red-500/5 rounded-lg p-4 space-y-2">
 				<p className="text-sm text-text">
 					Delete <strong>&quot;{view.name}&quot;</strong>? This cannot be
 					undone.
@@ -232,7 +232,7 @@ const ViewRow = ({
 	}
 
 	return (
-		<div className="border border-border rounded-lg p-4 space-y-2 hover:border-border/80 transition-colors">
+		<div data-testid="public-view-card" className="border border-border rounded-lg p-4 space-y-2 hover:border-border/80 transition-colors">
 			<div className="flex items-start justify-between gap-2">
 				<div className="min-w-0">
 					<div className="font-medium text-text">{view.name}</div>

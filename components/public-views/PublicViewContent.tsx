@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
 	useReactTable,
 	getCoreRowModel,
@@ -12,8 +12,10 @@ import {
 	flexRender,
 } from "@tanstack/react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
+import { faExternalLinkAlt, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import type { PublicView } from "@/lib/db/public-view";
+import { fetchTumblrStatusesInChunks } from "@/lib/fetch-tumblr-statuses";
+import type { ThreadStatusRequest } from "@/types/tumblr";
 
 export interface PublicViewThread {
 	threadId: number;
@@ -202,10 +204,59 @@ export const PublicViewContent = ({
 	view,
 	threads,
 }: PublicViewContentProps) => {
+	const [enrichedThreads, setEnrichedThreads] = useState(threads);
+	const [isLoading, setIsLoading] = useState(true);
 	const [statusFilter, setStatusFilter] = useState<string>("all");
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: view.sortKey, desc: view.sortDescending },
 	]);
+
+	const fetchStatuses = useCallback(async () => {
+		const requests: ThreadStatusRequest[] = threads
+			.filter((t) => t.postId && t.characterUrlIdentifier)
+			.map((t) => ({
+				threadId: t.threadId,
+				postId: t.postId,
+				characterUrlIdentifier: t.characterUrlIdentifier,
+				partnerUrlIdentifier: t.partnerUrlIdentifier || undefined,
+				dateMarkedQueued: t.dateMarkedQueued || undefined,
+			}));
+
+		if (requests.length === 0) {
+			setIsLoading(false);
+			return;
+		}
+
+		try {
+			const statuses = await fetchTumblrStatusesInChunks(requests);
+			const statusMap = new Map(
+				statuses.filter((s) => s.threadId).map((s) => [s.threadId!, s])
+			);
+
+			setEnrichedThreads(
+				threads.map((t) => {
+					const status = statusMap.get(t.threadId);
+					if (!status) return t;
+					return {
+						...t,
+						lastPostDate: status.lastPostDate ? String(status.lastPostDate) : null,
+						lastPosterUrlIdentifier: status.lastPosterUrlIdentifier,
+						lastPostUrl: status.lastPostUrl,
+						isCallingCharactersTurn: status.isCallingCharactersTurn,
+						isQueued: status.isQueued,
+					};
+				})
+			);
+		} catch {
+			// On failure, keep the default thread data
+		} finally {
+			setIsLoading(false);
+		}
+	}, [threads]);
+
+	useEffect(() => {
+		fetchStatuses();
+	}, [fetchStatuses]);
 
 	// Build available filter options based on view config
 	const filterOptions = useMemo(() => {
@@ -225,14 +276,12 @@ export const PublicViewContent = ({
 
 	// Pre-filter threads by status selection
 	const filteredThreads = useMemo(() => {
-		if (statusFilter === "all") return threads;
-		return threads.filter((t) => getThreadStatus(t) === statusFilter);
-	}, [threads, statusFilter]);
+		if (statusFilter === "all") return enrichedThreads;
+		return enrichedThreads.filter((t) => getThreadStatus(t) === statusFilter);
+	}, [enrichedThreads, statusFilter]);
 
 	const columns = useMemo(() => buildColumns(view.columns), [view.columns]);
 
-	// TanStack Table v8 works with React 19 but isn't optimized by React Compiler yet
-	// eslint-disable-next-line react-hooks/incompatible-library
 	const table = useReactTable({
 		data: filteredThreads,
 		columns,
@@ -249,6 +298,13 @@ export const PublicViewContent = ({
 
 	return (
 		<div className="space-y-4">
+			{isLoading && (
+				<div className="flex items-center gap-2 text-sm text-text-muted">
+					<FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" />
+					Loading thread statuses…
+				</div>
+			)}
+
 			{/* Status Filter Dropdown */}
 			{filterOptions.length > 1 && (
 				<div className="flex items-center gap-2">

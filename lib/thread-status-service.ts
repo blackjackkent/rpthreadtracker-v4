@@ -5,6 +5,7 @@ import type {
 } from "@/types/tumblr";
 import { getActiveThreadsForUser } from "./db/thread";
 import { ThreadWithCharacter } from "./db/types";
+import { fetchTumblrStatusesInChunks } from "./fetch-tumblr-statuses";
 
 export interface DashboardStats {
 	activeThreadsCount: number;
@@ -209,53 +210,8 @@ export async function refreshThreadStatusesInChunks(
 		};
 	}
 
-	// Split into chunks of 10
-	const CHUNK_SIZE = 10;
-	const chunks: ThreadWithCharacter[][] = [];
-	for (let i = 0; i < threadsWithPostId.length; i += CHUNK_SIZE) {
-		chunks.push(threadsWithPostId.slice(i, i + CHUNK_SIZE));
-	}
-
-	// Track completed chunks for progress
-	let completedCount = 0;
-
-	// Process all chunks in parallel (server-side staggers individual Tumblr API calls)
-	const chunkPromises = chunks.map(async (chunk) => {
-		const chunkRequests = chunk.map(threadToRequest);
-
-		try {
-			const response = await fetch("/api/thread", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(chunkRequests),
-				cache: "no-store",
-			});
-
-			if (!response.ok) {
-				throw new Error(`Failed to fetch thread statuses: ${response.status}`);
-			}
-
-			const chunkStatuses: ThreadStatusResponse[] = await response.json();
-
-			completedCount += chunk.length;
-			if (onProgress) {
-				onProgress({
-					current: completedCount,
-					total: threadsWithPostId.length,
-				});
-			}
-			return chunkStatuses;
-		} catch (error) {
-			console.error("Error fetching chunk:", error);
-			throw error;
-		}
-	});
-
-	// Wait for all chunks to complete
-	const chunkResults = await Promise.all(chunkPromises);
-
-	// Flatten all results
-	const allStatuses = chunkResults.flat();
+	const requests = threadsWithPostId.map(threadToRequest);
+	const allStatuses = await fetchTumblrStatusesInChunks(requests, onProgress);
 
 	// Build status lookup map
 	const statusMap = new Map<number, ThreadStatusResponse>();

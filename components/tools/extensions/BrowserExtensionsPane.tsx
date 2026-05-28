@@ -19,10 +19,15 @@ export const BrowserExtensionsPane = () => {
 				<div className="bg-background border border-border rounded-lg p-4">
 					<h3 className="font-semibold mb-2">How It Works</h3>
 					<ol className="list-decimal list-inside space-y-1 text-sm text-text-muted">
-						<li>Install the RPThreadTracker QuickAdd extension for your browser</li>
+						<li>
+							Install the RPThreadTracker QuickAdd extension for your browser
+						</li>
 						<li>Navigate to any Tumblr post you want to track</li>
 						<li>Click the extension icon in your browser toolbar</li>
-						<li>The "Track New Thread" form opens with the post ID pre-filled</li>
+						<li>
+							The &quot;Track New Thread&quot; form opens with the post ID
+							pre-filled
+						</li>
 						<li>Select your character and submit to track the thread</li>
 					</ol>
 				</div>
@@ -39,8 +44,8 @@ export const BrowserExtensionsPane = () => {
 						<div className="flex-1">
 							<h3 className="text-lg font-semibold mb-2">Chrome Extension</h3>
 							<p className="text-sm text-text-muted mb-4">
-								Install the RPThreadTracker QuickAdd extension from the Chrome Web
-								Store.
+								Install the RPThreadTracker QuickAdd extension from the Chrome
+								Web Store.
 							</p>
 							<a
 								href="https://chrome.google.com/webstore/category/extensions"
@@ -67,7 +72,8 @@ export const BrowserExtensionsPane = () => {
 						<div className="flex-1">
 							<h3 className="text-lg font-semibold mb-2">Firefox Extension</h3>
 							<p className="text-sm text-text-muted mb-4">
-								Install the RPThreadTracker QuickAdd extension from Firefox Add-ons.
+								Install the RPThreadTracker QuickAdd extension from Firefox
+								Add-ons.
 							</p>
 							<a
 								href="https://addons.mozilla.org/en-US/firefox/"
@@ -85,8 +91,8 @@ export const BrowserExtensionsPane = () => {
 				{/* Note */}
 				<div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
 					<p className="text-sm text-text-muted">
-						<strong className="text-text">Note:</strong> The browser extensions are
-						currently in development. Check back soon for download links!
+						<strong className="text-text">Note:</strong> The browser extensions
+						are currently in development. Check back soon for download links!
 					</p>
 				</div>
 			</div>

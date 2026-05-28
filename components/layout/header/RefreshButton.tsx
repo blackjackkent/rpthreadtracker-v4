@@ -5,7 +5,7 @@ import { faSync } from "@fortawesome/free-solid-svg-icons";
 import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 
 export function RefreshButton() {
-	const { refreshThreadStatuses, isRefreshing, progress } = useThreadStatus();
+	const { refreshThreadStatuses, isRefreshing } = useThreadStatus();
 
 	return (
 		<button

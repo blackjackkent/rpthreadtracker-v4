@@ -79,8 +79,9 @@ test.describe("All Threads", () => {
 		// Click the expander on the first row
 		const firstRow = table.getByRole("row").filter({ hasText: "Your Turn Thread" });
 		await firstRow.getByRole("button").first().click();
-		// Expanded row should show the "no tags" message
-		await expect(table.getByText("There are no tags assigned to this thread.")).toBeVisible();
+		// Expanded row should show the seeded tags
+		await expect(table.getByText("adventure")).toBeVisible();
+		await expect(table.getByText("angst")).toBeVisible();
 	});
 
 	test("row checkboxes and select-all work", async ({ page }) => {

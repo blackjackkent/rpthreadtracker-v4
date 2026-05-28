@@ -40,6 +40,7 @@ async function globalSetup() {
 			where: { Characters: { UserId: TEST_USER_ID } },
 		});
 		await prisma.characters.deleteMany({ where: { UserId: TEST_USER_ID } });
+		await prisma.publicViews.deleteMany({ where: { UserId: TEST_USER_ID } });
 		await prisma.profileSettings.deleteMany({ where: { UserId: TEST_USER_ID } });
 		await prisma.passwordResetTokens.deleteMany({ where: { UserId: TEST_USER_ID } });
 		await prisma.emailChangeTokens.deleteMany({ where: { UserId: TEST_USER_ID } });
@@ -209,6 +210,25 @@ async function globalSetup() {
 				],
 			});
 		}
+
+		// ── Public View ──────────────────────────────────────────────────
+		await prisma.publicViews.create({
+			data: {
+				Id: crypto.randomUUID(),
+				UserId: TEST_USER_ID,
+				Name: "Seeded Public View",
+				Slug: "seeded-view",
+				IncludeMyTurn: true,
+				IncludeTheirTurn: true,
+				IncludeQueued: false,
+				IncludeArchived: false,
+				Columns: JSON.stringify(["threadTitle", "partner", "lastPostDate", "status"]),
+				SortKey: "lastPostDate",
+				SortDescending: true,
+				CharacterIds: null,
+				Tags: null,
+			},
+		});
 
 		console.log("✅ Test database seeded.");
 	} finally {

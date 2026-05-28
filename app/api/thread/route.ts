@@ -66,13 +66,11 @@ export async function GET(request: NextRequest) {
  * Batch fetch thread status for multiple threads
  * Body: ThreadStatusRequest[]
  *
- * @requires Authentication
+ * No authentication required — this is a Tumblr data proxy
+ * that operates on public post IDs, not user-specific data.
+ * Used by both authenticated views and public views.
  */
 export async function POST(request: NextRequest) {
-	// Require authentication
-	const authResult = await requireAuth();
-	if (authResult instanceof NextResponse) return authResult;
-
 	try {
 		const body: ThreadStatusRequest[] = await request.json();
 

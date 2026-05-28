@@ -105,3 +105,128 @@ test.describe("Manage Tags", () => {
 		await expect(page.getByText("#adventure")).toBeVisible();
 	});
 });
+
+// 7.3 Manage Public Views
+// Each test creates its own preconditions — no ordering dependency.
+test.describe("Manage Public Views", () => {
+	/** Helper: navigate to the Manage Public Views tab */
+	async function openPublicViewsTab(page: import("@playwright/test").Page) {
+		await page.goto("/tools");
+		await page.getByRole("button", { name: /manage public views/i }).click();
+		await expect(page.getByRole("heading", { name: "Manage Public Views" })).toBeVisible();
+	}
+
+	/** Helper: create a view and wait for it to appear in the list */
+	async function createView(page: import("@playwright/test").Page, name: string, slug: string) {
+		await page.getByRole("button", { name: /new view/i }).click();
+		await expect(page.getByRole("heading", { name: "Create Public View" })).toBeVisible();
+		await page.getByLabel(/view name/i).fill(name);
+		const slugInput = page.getByLabel(/url slug/i);
+		await slugInput.fill(slug);
+		await slugInput.blur();
+		const submitBtn = page.getByRole("button", { name: /create view/i });
+		await expect(submitBtn).toBeEnabled();
+		await submitBtn.click();
+		await expect(page.getByRole("heading", { name: "Create Public View" })).not.toBeVisible();
+		await expect(page.getByText(name)).toBeVisible();
+	}
+
+	/** Helper: locate the card for a specific view by name */
+	function viewCard(page: import("@playwright/test").Page, name: string) {
+		return page.getByTestId("public-view-card").filter({ hasText: name });
+	}
+
+	test("create public view via modal", async ({ page }) => {
+		await openPublicViewsTab(page);
+		await page.getByRole("button", { name: /new view/i }).click();
+		await expect(page.getByRole("heading", { name: "Create Public View" })).toBeVisible();
+
+		await page.getByLabel(/view name/i).fill("Create Test View");
+		const slugInput = page.getByLabel(/url slug/i);
+		await slugInput.fill("create-test");
+		await slugInput.blur();
+
+		const submitBtn = page.getByRole("button", { name: /create view/i });
+		await expect(submitBtn).toBeEnabled();
+		await submitBtn.click();
+
+		await expect(page.getByRole("heading", { name: "Create Public View" })).not.toBeVisible();
+		await expect(page.getByText("Create Test View")).toBeVisible();
+		await expect(page.getByText("/public/testuser/create-test")).toBeVisible();
+	});
+
+	test("edit public view via modal", async ({ page }) => {
+		await openPublicViewsTab(page);
+		await createView(page, "Edit Test View", "edit-test");
+
+		await viewCard(page, "Edit Test View").getByTitle("Edit").click();
+		await expect(page.getByRole("heading", { name: "Edit Public View" })).toBeVisible();
+
+		const nameInput = page.getByLabel(/view name/i);
+		await nameInput.clear();
+		await nameInput.fill("Edited View");
+		await page.getByRole("button", { name: /save changes/i }).click();
+
+		await expect(page.getByText("Edited View")).toBeVisible();
+	});
+
+	test("copy URL button works", async ({ page }) => {
+		await openPublicViewsTab(page);
+		await createView(page, "Copy URL View", "copy-url-test");
+
+		await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+		await viewCard(page, "Copy URL View").getByTitle("Copy URL").click();
+
+		const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
+		expect(clipboardText).toContain("/public/testuser/copy-url-test");
+	});
+
+	test("delete public view with confirmation", async ({ page }) => {
+		await openPublicViewsTab(page);
+		await createView(page, "Delete Test View", "delete-test");
+
+		const card = viewCard(page, "Delete Test View");
+		await card.getByTitle("Delete").click();
+		await expect(card.getByText(/delete.*delete test view/i)).toBeVisible();
+		await card.getByRole("button", { name: "Delete" }).click();
+
+		await expect(page.getByTestId("public-view-card").filter({ hasText: "Delete Test View" })).not.toBeVisible();
+	});
+
+	test("delete can be cancelled", async ({ page }) => {
+		await openPublicViewsTab(page);
+		await createView(page, "Cancel Delete View", "cancel-del-test");
+
+		const card = viewCard(page, "Cancel Delete View");
+		await card.getByTitle("Delete").click();
+		await expect(card.getByText(/delete.*cancel delete view/i)).toBeVisible();
+		await card.getByRole("button", { name: "Cancel" }).click();
+
+		await expect(page.getByText("Cancel Delete View")).toBeVisible();
+	});
+
+	test("slug availability check on blur", async ({ page }) => {
+		await openPublicViewsTab(page);
+		// The seeded view uses "seeded-view" slug — test collision against it
+		await page.getByRole("button", { name: /new view/i }).click();
+		await page.getByLabel(/view name/i).fill("Duplicate Slug");
+		const slugInput = page.getByLabel(/url slug/i);
+		await slugInput.fill("seeded-view");
+		await slugInput.blur();
+		await expect(page.getByText(/already taken/i)).toBeVisible();
+	});
+});
+
+// 7.4 Browser Extensions
+test.describe("Browser Extensions", () => {
+	test("tab renders with instructions and download links", async ({ page }) => {
+		await page.goto("/tools");
+		await page.getByRole("button", { name: /browser extensions/i }).click();
+		await expect(page.getByRole("heading", { name: "Browser Extensions" })).toBeVisible();
+		await expect(page.getByText(/how it works/i)).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Chrome Extension" })).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Firefox Extension" })).toBeVisible();
+		await expect(page.getByRole("link", { name: /chrome web store/i })).toBeVisible();
+		await expect(page.getByRole("link", { name: /firefox add-ons/i })).toBeVisible();
+	});
+});

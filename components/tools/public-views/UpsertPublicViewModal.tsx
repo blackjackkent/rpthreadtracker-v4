@@ -237,10 +237,11 @@ export const UpsertPublicViewModal = ({
 
 						{/* Name */}
 						<div>
-							<label className="block text-sm font-medium mb-1">
+							<label htmlFor="pv-name" className="block text-sm font-medium mb-1">
 								View Name <span className="text-red-500">*</span>
 							</label>
 							<input
+								id="pv-name"
 								type="text"
 								value={form.name}
 								onChange={(e) =>
@@ -254,11 +255,12 @@ export const UpsertPublicViewModal = ({
 
 						{/* Slug */}
 						<div>
-							<label className="block text-sm font-medium mb-1">
+							<label htmlFor="pv-slug" className="block text-sm font-medium mb-1">
 								URL Slug <span className="text-red-500">*</span>
 							</label>
 							<div className="relative">
 								<input
+									id="pv-slug"
 									type="text"
 									value={form.slug}
 									onChange={(e) => {

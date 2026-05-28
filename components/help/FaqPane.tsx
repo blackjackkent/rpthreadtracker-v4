@@ -14,7 +14,9 @@ const FAQ_ITEMS: FaqItem[] = [
 		question: 'Why am I seeing a "Not Found" error for a thread?',
 		answer: (
 			<div className="space-y-2 text-text-muted text-sm">
-				<p>There are a few reasons a thread might show as "Not Found":</p>
+				<p>
+					There are a few reasons a thread might show as &quot;Not Found&quot;:
+				</p>
 				<ul className="list-disc list-inside space-y-1 ml-2">
 					<li>The post URL you entered is incorrect or has changed.</li>
 					<li>The post has been deleted by you or your partner.</li>

@@ -24,6 +24,9 @@ export const CHAR_IDS = {
 	hiatus: "hiatus-character",
 } as const;
 
+// Public view slug
+export const PUBLIC_VIEW_SLUG = "seeded-view";
+
 /**
  * Expected dashboard counts given the seed data + Tumblr mock.
  * - All Threads: yourTurn + theirTurn + queued + noPost + queuedButPosted (not archived, not hiatus)

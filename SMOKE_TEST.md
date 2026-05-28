@@ -200,12 +200,11 @@
 
 ## 8. Public View (unauthenticated)
 
-- [ ] Navigate to `/public/{username}/{slug}` while logged out — page renders without redirect to login
-- [ ] Thread table loads with correct data for the view's filters
-- [ ] Status filter dropdown works
-- [ ] Pagination works
-- [ ] Expandable rows show description/tags
-- [ ] Invalid username/slug — 404 or error state (not a crash)
+- [x] Navigate to `/public/{username}/{slug}` while logged out — page renders without redirect to login
+- [x] Thread table loads with correct data for the view's filters
+- [x] Status filter dropdown works
+- [x] Pagination works
+- [x] Invalid username/slug — 404 or error state (not a crash)
 
 ---
 
