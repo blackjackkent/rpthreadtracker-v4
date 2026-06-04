@@ -21,7 +21,8 @@ export const LayoutContent = ({ children }: LayoutContentProps) => {
 		pathname.startsWith("/reset-password") ||
 		pathname.startsWith("/verify-email") ||
 		pathname.startsWith("/quick-add") ||
-		pathname.startsWith("/register");
+		pathname.startsWith("/register") ||
+		pathname === "/maintenance";
 
 	useEffect(() => {
 		if (status === "unauthenticated" && !isLoginPage && !isPublicPage && !isAuthPage) {

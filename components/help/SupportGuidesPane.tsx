@@ -18,13 +18,13 @@ const GUIDES: Guide[] = [
 		title: "Guide to Managing Public Views",
 		description:
 			"Learn how to create shareable public views of your thread lists that partners and followers can browse.",
-		href: "https://rpthreadtracker.tumblr.com/post/public-views-guide",
+		href: "https://tblrthreadtracker.tumblr.com/post/public-views-guide",
 	},
 	{
 		title: "Guide to Marking Threads as Queued",
 		description:
 			"Understand how to use the queue feature to track threads you've queued in Tumblr's post queue.",
-		href: "https://rpthreadtracker.tumblr.com/post/queued-threads-guide",
+		href: "https://tblrthreadtracker.tumblr.com/post/queued-threads-guide",
 	},
 ];
 
@@ -38,7 +38,10 @@ export const SupportGuidesPane = () => {
 				</p>
 				<ul className="space-y-4">
 					{GUIDES.map((guide) => (
-						<li key={guide.href} className="border-t border-border pt-4 first:border-t-0 first:pt-0">
+						<li
+							key={guide.href}
+							className="border-t border-border pt-4 first:border-t-0 first:pt-0"
+						>
 							<a
 								href={guide.href}
 								target="_blank"
@@ -48,7 +51,9 @@ export const SupportGuidesPane = () => {
 								{guide.title}
 								<FontAwesomeIcon icon={faExternalLinkAlt} className="w-3 h-3" />
 							</a>
-							<p className="text-text-muted text-sm mt-1">{guide.description}</p>
+							<p className="text-text-muted text-sm mt-1">
+								{guide.description}
+							</p>
 						</li>
 					))}
 				</ul>

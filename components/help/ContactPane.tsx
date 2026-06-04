@@ -22,7 +22,7 @@ export const ContactPane = () => {
 				<p className="text-text-muted leading-relaxed">
 					You can also find updates and announcements on the{" "}
 					<a
-						href="https://rpthreadtracker.tumblr.com"
+						href="https://tblrthreadtracker.tumblr.com"
 						target="_blank"
 						rel="noopener noreferrer"
 						className="text-primary hover:underline inline-flex items-center gap-1"
