@@ -18,7 +18,8 @@ export default auth((req) => {
     '/tools',
     '/settings',
     '/help',
-    '/profile'
+    '/profile',
+    '/quick-add'
   ];
   const isProtectedRoute = protectedRoutes.some((route) =>
     req.nextUrl.pathname.startsWith(route)
@@ -27,7 +28,10 @@ export default auth((req) => {
   // If user is not logged in and trying to access protected route, redirect to login
   if (!isLoggedIn && isProtectedRoute) {
     const loginUrl = new URL('/login', req.url);
-    loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname);
+    const callbackUrl = req.nextUrl.search
+      ? `${req.nextUrl.pathname}${req.nextUrl.search}`
+      : req.nextUrl.pathname;
+    loginUrl.searchParams.set('callbackUrl', callbackUrl);
     return NextResponse.redirect(loginUrl);
   }
 

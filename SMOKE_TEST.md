@@ -212,53 +212,54 @@
 
 ### 9.1 Change Password
 
-- [ ] Submit empty form — validation errors
-- [ ] Wrong current password — error shown
-- [ ] Mismatched new passwords — error shown
-- [ ] Valid submission — success toast; can log in with new password
+- [x] Submit empty form — validation errors
+- [x] Wrong current password — error shown
+- [x] Mismatched new passwords — error shown
+- [x] Valid submission — success toast; can log in with new password
 
 ### 9.2 Account Info
 
-- [ ] Username field editable; save updates username (sidebar/header reflect new name without full reload)
-- [ ] Email field shows current email (disabled); separate input for new email
-- [ ] "Send Verification Email" — success toast, email arrives
+- [x] Username field editable; save updates username (sidebar/header reflect new name without full reload)
+- [x] Errors if changing to existing username
+- [x] Email field shows current email (disabled); separate input for new email
+- [x] "Send Verification Email" — success toast, email arrives
 
 ### 9.3 Delete Account
 
-- [ ] "Delete Account" button shows inline confirmation
-- [ ] Cancel dismisses prompt
-- [ ] Confirm — signs out, redirects to `/login`; attempting to log in with deleted credentials fails
+- [x] "Delete Account" button shows inline confirmation
+- [x] Cancel dismisses prompt
+- [x] Confirm — signs out, redirects to `/login`; attempting to log in with deleted credentials fails
 
 ---
 
 ## 10. Help (`/help`)
 
-- [ ] Page loads
-- [ ] All 4 tabs render: About, Support Guides, FAQ, Contact
-- [ ] FAQ accordion items expand/collapse
-- [ ] External links (Patreon, GitHub Issues, guides) have correct `href` and open in new tab
+- [x] Page loads
+- [x] All 4 tabs render: About, Support Guides, FAQ, Contact
+- [x] FAQ accordion items expand/collapse
+- [x] External links (Patreon, GitHub Issues, guides) have correct `href` and open in new tab
 
 ---
 
 ## 11. Quick-Add (Browser Extension Flow)
 
-- [ ] Navigate to `/quick-add?blogShortname=someblog&postId=12345` while logged out — redirects to `/login?callbackUrl=...`; after login, returns to quick-add with params preserved
-- [ ] While logged in — page renders without sidebar/header (minimal shell)
-- [ ] Character dropdown pre-selects character matching `blogShortname` (if one exists)
-- [ ] Post ID pre-filled from `postId` param
-- [ ] Submit valid thread — success confirmation shown
-- [ ] Form resets for adding another thread
+- [x] Navigate to `/quick-add?blogShortname=someblog&postId=12345` while logged out — redirects to `/login?callbackUrl=...`; after login, returns to quick-add with params preserved
+- [x] While logged in — page renders without sidebar/header (minimal shell)
+- [x] Character dropdown pre-selects character matching `blogShortname` (if one exists)
+- [x] Post ID pre-filled from `postId` param
+- [x] Submit valid thread — success confirmation shown
+- [x] Form gives 'you may now close this window' message
 
 ---
 
 ## 12. Cross-Cutting Concerns
 
-- [ ] **Toast notifications**: success and error toasts appear and auto-dismiss for all mutations
-- [ ] **Loading states**: buttons show disabled/spinner while async operations are in flight
-- [ ] **No console errors** on any page under normal use
-- [ ] **Mobile layout**: sidebar collapses, tables scroll horizontally, cards stack vertically
-- [ ] **Dark/light mode**: all pages readable in both themes; no invisible text
-- [ ] **Thread status refresh**: "Refresh" button in header triggers re-fetch; progress indicator visible; counts update after completion
+- [x] **Toast notifications**: success and error toasts appear and auto-dismiss for all mutations
+- [x] **Loading states**: buttons show disabled/spinner while async operations are in flight
+- [x] **No console errors** on any page under normal use
+- [x] **Mobile layout**: sidebar collapses, tables scroll horizontally, cards stack vertically
+- [x] **Dark/light mode**: all pages readable in both themes; no invisible text
+- [x] **Thread status refresh**: "Refresh" button in header triggers re-fetch; progress indicator visible; counts update after completion
 
 ---
 

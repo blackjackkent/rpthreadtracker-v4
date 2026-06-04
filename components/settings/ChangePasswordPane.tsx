@@ -59,8 +59,9 @@ export const ChangePasswordPane = () => {
 		placeholder?: string
 	) => (
 		<div>
-			<label className="block text-sm font-medium mb-1">{label}</label>
+			<label htmlFor={`pw-${key}`} className="block text-sm font-medium mb-1">{label}</label>
 			<input
+				id={`pw-${key}`}
 				type="password"
 				value={form[key]}
 				onChange={(e) => {
@@ -87,10 +88,11 @@ export const ChangePasswordPane = () => {
 			<form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
 				{field("currentPassword", "Current Password")}
 				<div>
-					<label className="block text-sm font-medium mb-1">
+					<label htmlFor="pw-newPassword" className="block text-sm font-medium mb-1">
 						New Password
 					</label>
 					<input
+						id="pw-newPassword"
 						type="password"
 						value={form.newPassword}
 						onChange={(e) => {

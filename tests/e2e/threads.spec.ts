@@ -92,10 +92,13 @@ test.describe("All Threads", () => {
 		await yourTurnRow.getByRole("checkbox").click();
 		await expect(page.getByText("1 selected")).toBeVisible();
 
-		// Select all via header checkbox
+		// Select all via header checkbox — count data rows dynamically
+		// since parallel tests may create/delete threads
+		const dataRows = page.getByRole("table").getByRole("row").filter({ has: page.getByRole("checkbox") });
+		const rowCount = await dataRows.count() - 1; // subtract header row
 		const headerCheckbox = page.getByRole("row").first().getByRole("checkbox");
 		await headerCheckbox.click();
-		await expect(page.getByText("5 selected")).toBeVisible();
+		await expect(page.getByText(`${rowCount} selected`)).toBeVisible();
 	});
 
 	test("edit action opens pre-filled modal", async ({ page }) => {

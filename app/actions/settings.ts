@@ -10,20 +10,15 @@ import {
 	updateUserEmail,
 	deleteUser,
 } from "@/lib/db/user";
-import {
-	createEmailChangeToken,
-} from "@/lib/db/email-change";
+import { createEmailChangeToken } from "@/lib/db/email-change";
 import { sendEmailChangeVerificationEmail } from "@/lib/email";
-import {
-	verifyPassword,
-	hashPasswordBcrypt,
-} from "@/lib/password-verifiers";
+import { verifyPassword, hashPasswordBcrypt } from "@/lib/password-verifiers";
 import { revalidatePath } from "next/cache";
 
 export async function changePassword(
 	currentPassword: string,
 	newPassword: string,
-	confirmPassword: string
+	confirmPassword: string,
 ): Promise<void> {
 	const session = await auth();
 	if (!session?.user?.id) throw new Error("Unauthorized");
@@ -45,20 +40,22 @@ export async function changePassword(
 }
 
 export async function updateAccountInfo(
-	username: string
+	username: string,
 ): Promise<{ newUsername: string }> {
 	const session = await auth();
 	if (!session?.user?.id) throw new Error("Unauthorized");
 
 	const trimmed = username.trim();
 	if (!trimmed) throw new Error("Username is required");
-	if (trimmed.length < 3) throw new Error("Username must be at least 3 characters");
-	if (trimmed.length > 256) throw new Error("Username must be 256 characters or fewer");
+	if (trimmed.length < 3)
+		throw new Error("Username must be at least 3 characters");
+	if (trimmed.length > 256)
+		throw new Error("Username must be 256 characters or fewer");
 
 	// Check uniqueness (exclude current user)
 	const existing = await getUserByUsername(trimmed);
 	if (existing && existing.Id !== session.user.id) {
-		throw new Error("That username is already taken");
+		throw new Error("Error updating username.");
 	}
 
 	await updateUsername(session.user.id, trimmed);
@@ -84,14 +81,14 @@ export async function requestEmailChange(newEmail: string): Promise<void> {
 }
 
 export async function verifyEmailChange(
-	rawToken: string
+	rawToken: string,
 ): Promise<{ newEmail: string }> {
-	const { validateEmailChangeToken, consumeEmailChangeToken } = await import(
-		"@/lib/db/email-change"
-	);
+	const { validateEmailChangeToken, consumeEmailChangeToken } =
+		await import("@/lib/db/email-change");
 
 	const result = await validateEmailChangeToken(rawToken);
-	if (!result) throw new Error("This verification link is invalid or has expired");
+	if (!result)
+		throw new Error("This verification link is invalid or has expired");
 
 	await updateUserEmail(result.userId, result.newEmail);
 	await consumeEmailChangeToken(rawToken);

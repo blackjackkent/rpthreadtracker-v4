@@ -79,8 +79,9 @@ export const UpdateAccountInfoPane = ({ user }: UpdateAccountInfoPaneProps) => {
 						</div>
 					)}
 					<div>
-						<label className="block text-sm font-medium mb-1">Username</label>
+						<label htmlFor="acct-username" className="block text-sm font-medium mb-1">Username</label>
 						<input
+							id="acct-username"
 							type="text"
 							value={username}
 							onChange={(e) => { setUsernameError(""); setUsername(e.target.value); }}
@@ -109,8 +110,9 @@ export const UpdateAccountInfoPane = ({ user }: UpdateAccountInfoPaneProps) => {
 				</div>
 				<div className="px-6 py-4 space-y-4">
 					<div>
-						<label className="block text-sm font-medium mb-1">Current email</label>
+						<label htmlFor="acct-current-email" className="block text-sm font-medium mb-1">Current email</label>
 						<input
+							id="acct-current-email"
 							type="email"
 							value={user.email}
 							disabled
@@ -124,8 +126,9 @@ export const UpdateAccountInfoPane = ({ user }: UpdateAccountInfoPaneProps) => {
 							</div>
 						)}
 						<div>
-							<label className="block text-sm font-medium mb-1">New email address</label>
+							<label htmlFor="acct-new-email" className="block text-sm font-medium mb-1">New email address</label>
 							<input
+								id="acct-new-email"
 								type="email"
 								value={newEmail}
 								onChange={(e) => { setEmailError(""); setNewEmail(e.target.value); }}

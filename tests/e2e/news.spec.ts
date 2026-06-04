@@ -4,6 +4,13 @@ import { mockTumblrApi, mockNewsApiWithItems } from "../helpers/tumblr-mock";
 test.beforeEach(async ({ page }) => {
 	await mockTumblrApi(page);
 	await mockNewsApiWithItems(page);
+	// Reset lastNewsReadDate so parallel tests that open the sidebar
+	// don't poison the "unread" state for other tests
+	await page.goto("/");
+	await page.request.patch("/api/profile-settings", {
+		data: { lastNewsReadDate: null },
+	});
+	await page.reload();
 });
 
 const newsButton = (page: Page) =>
@@ -48,7 +55,8 @@ test.describe("News Sidebar", () => {
 	}) => {
 		await page.goto("/");
 		await newsButton(page).click();
-		await expect(newsPanel(page).getByText("New", { exact: true }).first()).toBeVisible();
+		// Wait for news items to load (opening marks them as read)
+		await expect(page.getByText("Test News Item One")).toBeVisible();
 		await page.getByRole("button", { name: "Close news" }).click();
 		await newsButton(page).click();
 		await expect(newsPanel(page).getByText("New", { exact: true })).toHaveCount(0);

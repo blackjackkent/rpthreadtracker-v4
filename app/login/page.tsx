@@ -42,7 +42,8 @@ export default function LoginPage() {
 			if (result?.error) {
 				setError("Invalid email/username or password");
 			} else {
-				router.push("/");
+				const callbackUrl = searchParams.get("callbackUrl") || "/";
+				router.push(callbackUrl);
 				router.refresh();
 			}
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars

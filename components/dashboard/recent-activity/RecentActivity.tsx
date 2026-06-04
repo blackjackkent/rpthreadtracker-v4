@@ -4,10 +4,10 @@ import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 import { RecentThreadItem } from "./RecentThreadItem";
 import { useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBolt } from "@fortawesome/free-solid-svg-icons";
+import { faBolt, faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 export function RecentActivity() {
-	const { threadStatuses } = useThreadStatus();
+	const { threadStatuses, lastRefreshed } = useThreadStatus();
 
 	// Filter to Your Turn threads (not queued) and sort by most recent post date
 	const recentThreads = useMemo(() => {
@@ -42,9 +42,16 @@ export function RecentActivity() {
 					</h2>
 				</div>
 				<div className="p-4">
-					<p className="text-text-muted text-sm">
-						You do not owe a reply on any of your threads! Nice job!
-					</p>
+					{lastRefreshed === null ? (
+						<p className="text-text-muted text-sm flex items-center gap-2">
+							<FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />
+							Loading recent activity…
+						</p>
+					) : (
+						<p className="text-text-muted text-sm">
+							You do not owe a reply on any of your threads! Nice job!
+						</p>
+					)}
 				</div>
 			</div>
 		);
