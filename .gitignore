@@ -49,3 +49,7 @@ next-env.d.ts
 CLAUDE.md
 
 /lib/generated/prisma
+
+# temp md files
+ENV_VARS.md
+LAUNCH_PLAN.md

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import "@/lib/fontawesome";
 import { Providers } from "@/components/Providers";
@@ -16,6 +17,13 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className="antialiased">
+				{process.env.UMAMI_WEBSITE_ID && (
+					<Script
+						src={process.env.UMAMI_SCRIPT_URL || "https://cloud.umami.is/script.js"}
+						data-website-id={process.env.UMAMI_WEBSITE_ID}
+						strategy="afterInteractive"
+					/>
+				)}
 				<Providers>
 					<LayoutContent>{children}</LayoutContent>
 				</Providers>
