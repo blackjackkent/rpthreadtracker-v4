@@ -75,6 +75,13 @@ async function globalSetup() {
 			},
 		});
 
+		// ── Platforms (reference data) ────────────────────────────────────────
+		await prisma.platforms.upsert({
+			where: { PlatformId: 1 },
+			update: {},
+			create: { PlatformId: 1, PlatformName: "Tumblr" },
+		});
+
 		// ── Characters ───────────────────────────────────────────────────────
 		const activeChar = await prisma.characters.create({
 			data: {
