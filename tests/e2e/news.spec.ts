@@ -1,16 +1,31 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mockTumblrApi, mockNewsApiWithItems } from "../helpers/tumblr-mock";
 
+/**
+ * Intercept GET /api/profile-settings to force lastNewsReadDate=null,
+ * guaranteeing unread state regardless of what other tests wrote to the DB.
+ */
+async function forceUnreadNews(page: Page) {
+	await page.route("/api/profile-settings", async (route) => {
+		if (route.request().method() === "GET") {
+			await route.fulfill({
+				json: {
+					showDashboardThreadDistribution: true,
+					useInvertedTheme: false,
+					allowMarkQueued: true,
+					lastNewsReadDate: null,
+					threadTablePageSize: 10,
+				},
+			});
+		} else {
+			await route.continue();
+		}
+	});
+}
+
 test.beforeEach(async ({ page }) => {
 	await mockTumblrApi(page);
 	await mockNewsApiWithItems(page);
-	// Reset lastNewsReadDate so parallel tests that open the sidebar
-	// don't poison the "unread" state for other tests
-	await page.goto("/");
-	await page.request.patch("/api/profile-settings", {
-		data: { lastNewsReadDate: null },
-	});
-	await page.reload();
 });
 
 const newsButton = (page: Page) =>
@@ -21,6 +36,7 @@ const newsPanel = (page: Page) =>
 // 4. News Sidebar
 test.describe("News Sidebar", () => {
 	test("news button shows unread badge on first visit", async ({ page }) => {
+		await forceUnreadNews(page);
 		await page.goto("/");
 		await expect(
 			page.getByRole("button", { name: /news \(2 unread\)/i }),
@@ -36,6 +52,7 @@ test.describe("News Sidebar", () => {
 	});
 
 	test("news items display with New badges on first open", async ({ page }) => {
+		await forceUnreadNews(page);
 		await page.goto("/");
 		await newsButton(page).click();
 		await expect(page.getByText("Test News Item One")).toBeVisible();
@@ -53,9 +70,11 @@ test.describe("News Sidebar", () => {
 	test("closing and reopening shows no New badges after reading", async ({
 		page,
 	}) => {
+		await forceUnreadNews(page);
 		await page.goto("/");
+		// Remove the intercept so the PATCH to mark-as-read hits the real API
+		await page.unroute("/api/profile-settings");
 		await newsButton(page).click();
-		// Wait for news items to load (opening marks them as read)
 		await expect(page.getByText("Test News Item One")).toBeVisible();
 		await page.getByRole("button", { name: "Close news" }).click();
 		await newsButton(page).click();
