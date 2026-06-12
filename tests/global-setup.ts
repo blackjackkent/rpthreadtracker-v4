@@ -76,11 +76,14 @@ async function globalSetup() {
 		});
 
 		// ── Platforms (reference data) ────────────────────────────────────────
-		await prisma.platforms.upsert({
-			where: { PlatformId: 1 },
-			update: {},
-			create: { PlatformId: 1, PlatformName: "Tumblr" },
-		});
+		const platformExists = await prisma.platforms.findUnique({ where: { PlatformId: 1 } });
+		if (!platformExists) {
+			await prisma.$executeRawUnsafe(`
+				SET IDENTITY_INSERT [dbo].[Platforms] ON;
+				INSERT INTO [dbo].[Platforms] (PlatformId, PlatformName) VALUES (1, 'Tumblr');
+				SET IDENTITY_INSERT [dbo].[Platforms] OFF;
+			`);
+		}
 
 		// ── Characters ───────────────────────────────────────────────────────
 		const activeChar = await prisma.characters.create({
