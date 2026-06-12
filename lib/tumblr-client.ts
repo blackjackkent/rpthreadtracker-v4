@@ -1,27 +1,30 @@
 import tumblr from "tumblr.js";
 import type { TumblrPost, TumblrBlogPostsResponse } from "@/types/tumblr";
 
-// Validate required environment variables
-const requiredEnvVars = [
-	"TUMBLR_CONSUMER_KEY",
-	"TUMBLR_CONSUMER_SECRET",
-	"TUMBLR_OAUTH_TOKEN",
-	"TUMBLR_OAUTH_SECRET",
-];
+let _client: ReturnType<typeof tumblr.createClient> | null = null;
 
-for (const envVar of requiredEnvVars) {
-	if (!process.env[envVar]) {
-		throw new Error(`Missing required environment variable: ${envVar}`);
+function getClient() {
+	if (!_client) {
+		const requiredEnvVars = [
+			"TUMBLR_CONSUMER_KEY",
+			"TUMBLR_CONSUMER_SECRET",
+			"TUMBLR_OAUTH_TOKEN",
+			"TUMBLR_OAUTH_SECRET",
+		];
+		for (const envVar of requiredEnvVars) {
+			if (!process.env[envVar]) {
+				throw new Error(`Missing required environment variable: ${envVar}`);
+			}
+		}
+		_client = tumblr.createClient({
+			consumer_key: process.env.TUMBLR_CONSUMER_KEY!,
+			consumer_secret: process.env.TUMBLR_CONSUMER_SECRET!,
+			token: process.env.TUMBLR_OAUTH_TOKEN!,
+			token_secret: process.env.TUMBLR_OAUTH_SECRET!,
+		});
 	}
+	return _client;
 }
-
-// Create Tumblr client singleton
-const client = tumblr.createClient({
-	consumer_key: process.env.TUMBLR_CONSUMER_KEY!,
-	consumer_secret: process.env.TUMBLR_CONSUMER_SECRET!,
-	token: process.env.TUMBLR_OAUTH_TOKEN!,
-	token_secret: process.env.TUMBLR_OAUTH_SECRET!,
-});
 
 /**
  * Fetch a post from Tumblr with reblog notes
@@ -37,7 +40,7 @@ export async function getTumblrPost(
 		// Normalize blog identifier to lowercase (Tumblr URLs are case-insensitive)
 		const normalizedBlogIdentifier = blogIdentifier.toLowerCase();
 
-		const response = (await client.blogPosts(normalizedBlogIdentifier, {
+		const response = (await getClient().blogPosts(normalizedBlogIdentifier, {
 			id: postId,
 			notes_info: true, // Critical: include reblog notes
 			// Note: Not filtering by type - posts can be text, photo, link, etc.
@@ -72,7 +75,7 @@ export interface NewsPost {
  */
 export async function getNewsPosts(): Promise<NewsPost[]> {
 	try {
-		const response = (await client.blogPosts("tblrthreadtracker", {
+		const response = (await getClient().blogPosts("tblrthreadtracker", {
 			tag: "news",
 			limit: 5,
 			type: "text",
