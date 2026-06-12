@@ -7,7 +7,6 @@ on:
     branches: [trunk]
 
 env:
-  CI_DB_PASSWORD: "CiTestPassword123!"
   CI_DB_URL: "sqlserver://localhost:1433;database=RPThreadTracker_Test;user=sa;password=CiTestPassword123!;trustServerCertificate=true"
 
 jobs:
@@ -24,6 +23,16 @@ jobs:
           - 1433:1433
 
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Wait for SQL Server
         run: |
           for i in $(seq 1 30); do
@@ -37,36 +46,13 @@ jobs:
           echo "SQL Server did not start in time"
           exit 1
 
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Create test database
+        run: npx prisma db push --force-reset
+        env:
+          DATABASE_URL: "sqlserver://localhost:1433;database=RPThreadTracker_Test;user=sa;password=CiTestPassword123!;trustServerCertificate=true;encrypt=true"
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-
-      - name: Install sqlcmd
-        run: |
-          curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/$(lsb_release -rs)/prod $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/mssql-release.list
-          sudo apt-get update
-          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-
-      - name: Create test database
-        run: |
-          /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa \
-            -P "$CI_DB_PASSWORD" -C \
-            -Q "CREATE DATABASE RPThreadTracker_Test"
-
-      - name: Push schema to test database
-        env:
-          DATABASE_URL: ${{ env.CI_DB_URL }}
-        run: npx prisma db push --skip-generate
 
       - name: Run E2E tests
         env:
