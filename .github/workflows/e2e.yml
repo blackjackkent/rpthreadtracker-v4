@@ -2,9 +2,13 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main, trunk]
+    branches: [trunk]
   pull_request:
-    branches: [main]
+    branches: [trunk]
+
+env:
+  CI_DB_PASSWORD: "CiTestPassword123!"
+  CI_DB_URL: "sqlserver://localhost:1433;database=RPThreadTracker_Test;user=sa;password=CiTestPassword123!;trustServerCertificate=true"
 
 jobs:
   test:
@@ -15,11 +19,11 @@ jobs:
         image: mcr.microsoft.com/mssql/server:2022-latest
         env:
           ACCEPT_EULA: Y
-          SA_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+          SA_PASSWORD: CiTestPassword123!
         ports:
           - 1433:1433
         options: >-
-          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${{ secrets.CI_DB_PASSWORD }} -C -Q 'SELECT 1'"
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P CiTestPassword123! -C -Q 'SELECT 1'"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
@@ -29,7 +33,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -41,20 +45,19 @@ jobs:
       - name: Create test database
         run: |
           /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa \
-            -P "${{ secrets.CI_DB_PASSWORD }}" -C \
+            -P "$CI_DB_PASSWORD" -C \
             -Q "CREATE DATABASE RPThreadTracker_Test"
 
       - name: Push schema to test database
         env:
-          DATABASE_URL: ${{ secrets.CI_TEST_DATABASE_URL }}
+          DATABASE_URL: ${{ env.CI_DB_URL }}
         run: npx prisma db push --skip-generate
 
       - name: Run E2E tests
         env:
-          TEST_DATABASE_URL: ${{ secrets.CI_TEST_DATABASE_URL }}
-          NEXTAUTH_SECRET: ${{ secrets.CI_NEXTAUTH_SECRET }}
+          TEST_DATABASE_URL: ${{ env.CI_DB_URL }}
+          NEXTAUTH_SECRET: ci-test-secret
           NEXTAUTH_URL: http://localhost:3000
-          # Resend — use a fake key; email flows aren't tested in E2E
           RESEND_API_KEY: re_test_placeholder
           RESEND_FROM_EMAIL: noreply@example.com
         run: npm test
