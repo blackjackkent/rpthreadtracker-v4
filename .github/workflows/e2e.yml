@@ -22,13 +22,21 @@ jobs:
           SA_PASSWORD: CiTestPassword123!
         ports:
           - 1433:1433
-        options: >-
-          --health-cmd "cat /dev/null > /dev/tcp/127.0.0.1/1433 || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
 
     steps:
+      - name: Wait for SQL Server
+        run: |
+          for i in $(seq 1 30); do
+            if nc -z localhost 1433 2>/dev/null; then
+              echo "SQL Server is ready"
+              exit 0
+            fi
+            echo "Waiting for SQL Server... ($i/30)"
+            sleep 2
+          done
+          echo "SQL Server did not start in time"
+          exit 1
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
