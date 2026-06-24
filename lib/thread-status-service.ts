@@ -272,6 +272,7 @@ export async function refreshThreadStatusesInChunks(
 			if (!onChunkComplete) return;
 			const chunkMap = new Map<number, ThreadStatusWithDetails>();
 			for (const status of chunkStatuses) {
+				if (!status.threadId) continue;
 				const thread = threadLookup.get(status.threadId);
 				if (thread) {
 					chunkMap.set(thread.ThreadId, mergeThreadStatus(thread, status));
