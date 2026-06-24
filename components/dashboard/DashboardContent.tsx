@@ -25,18 +25,13 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 			</div>
 
 			{/* At a Glance Section */}
-			{dashboardStats ? (
-				<AtAGlance
-					activeThreadsCount={dashboardStats.activeThreadsCount}
-					yourTurnCount={dashboardStats.yourTurnCount}
-					theirTurnCount={dashboardStats.theirTurnCount}
-					queuedCount={dashboardStats.queuedCount}
-				/>
-			) : (
-				<div className="text-text-muted">
-					{isRefreshing ? "Loading thread data..." : "No thread data available"}
-				</div>
-			)}
+			<AtAGlance
+				activeThreadsCount={dashboardStats?.activeThreadsCount}
+				yourTurnCount={dashboardStats?.yourTurnCount}
+				theirTurnCount={dashboardStats?.theirTurnCount}
+				queuedCount={dashboardStats?.queuedCount}
+				isLoading={!dashboardStats && isRefreshing}
+			/>
 
 			{/* Two Column Layout for Recent Activity and Your Characters */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
