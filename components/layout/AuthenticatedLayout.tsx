@@ -63,12 +63,15 @@ const LayoutContent = ({ children, user }: AuthenticatedLayoutProps) => {
 	}, []);
 
 	// Compute unread count from news + lastNewsReadDate
-	const unreadNewsCount = news.filter((post) => {
-		const lastRead = settings?.lastNewsReadDate
-			? new Date(settings.lastNewsReadDate)
-			: null;
-		return !lastRead || new Date(post.postDate) > lastRead;
-	}).length;
+	// Don't show unread badges until settings have loaded to avoid a flash
+	const unreadNewsCount = settings
+		? news.filter((post) => {
+				const lastRead = settings.lastNewsReadDate
+					? new Date(settings.lastNewsReadDate)
+					: null;
+				return !lastRead || new Date(post.postDate) > lastRead;
+			}).length
+		: 0;
 
 	const handleAddCharacter = async (data: {
 		characterName?: string;
