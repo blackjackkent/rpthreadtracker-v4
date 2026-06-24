@@ -80,6 +80,12 @@ export const ThreadsContent = ({
 			);
 		}
 
+		result.sort((a, b) => {
+			const dateA = a.lastPostDate ? new Date(a.lastPostDate).getTime() : 0;
+			const dateB = b.lastPostDate ? new Date(b.lastPostDate).getTime() : 0;
+			return dateB - dateA;
+		});
+
 		return result;
 	}, [threads, filterFunction, tagFilter]);
 
