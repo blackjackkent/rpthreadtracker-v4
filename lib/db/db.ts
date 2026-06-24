@@ -6,6 +6,7 @@ const TRANSIENT_ERROR_PATTERNS = [
 	"Connection reset",
 	"ETIMEOUT",
 	"ECONNRESET",
+	"TLS settings didn't allow the connection",
 ];
 
 function isTransientError(error: unknown): boolean {
@@ -49,4 +50,15 @@ export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
 	globalForPrisma.prisma = prisma;
+}
+
+// Keep the connection pool warm so idle periods don't cause slow reconnects
+const KEEPALIVE_INTERVAL_MS = 4 * 60 * 1000; // 4 minutes
+const globalForKeepalive = globalThis as unknown as {
+	keepaliveTimer: ReturnType<typeof setInterval> | undefined;
+};
+if (!globalForKeepalive.keepaliveTimer) {
+	globalForKeepalive.keepaliveTimer = setInterval(() => {
+		prisma.$queryRawUnsafe("SELECT 1").catch(() => {});
+	}, KEEPALIVE_INTERVAL_MS);
 }
