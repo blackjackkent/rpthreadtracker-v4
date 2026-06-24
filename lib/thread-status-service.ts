@@ -128,14 +128,11 @@ export async function refreshThreadStatusesInChunks(
 		threadLookup.set(thread.ThreadId, thread);
 	}
 
-	// Immediately emit threads that don't need Tumblr data (no PostId)
-	// so they appear in the table right away
-	const threadsWithoutPostId = activeThreads.filter(
-		(thread) => !thread.PostId || !thread.Characters.UrlIdentifier
-	);
-	if (threadsWithoutPostId.length > 0 && onChunkComplete) {
+	// Emit ALL threads immediately with default status so the table
+	// populates right away; Tumblr data updates them as chunks arrive
+	if (onChunkComplete) {
 		const initialMap = new Map<number, ThreadStatusWithDetails>();
-		for (const thread of threadsWithoutPostId) {
+		for (const thread of activeThreads) {
 			initialMap.set(thread.ThreadId, mergeThreadStatus(thread));
 		}
 		onChunkComplete(initialMap);
