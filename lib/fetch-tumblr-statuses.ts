@@ -14,7 +14,8 @@ export interface FetchProgress {
  */
 export async function fetchTumblrStatusesInChunks(
 	requests: ThreadStatusRequest[],
-	onProgress?: (progress: FetchProgress) => void
+	onProgress?: (progress: FetchProgress) => void,
+	onChunkComplete?: (statuses: ThreadStatusResponse[]) => void
 ): Promise<ThreadStatusResponse[]> {
 	if (requests.length === 0) return [];
 
@@ -45,6 +46,7 @@ export async function fetchTumblrStatusesInChunks(
 			current: completedCount,
 			total: requests.length,
 		});
+		onChunkComplete?.(chunkStatuses);
 
 		return chunkStatuses;
 	});

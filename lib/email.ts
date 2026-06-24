@@ -5,6 +5,14 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.RESEND_FROM_EMAIL ?? "noreply@rpthreadtracker.com";
 const APP_URL = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
+async function send(params: Parameters<typeof resend.emails.send>[0]) {
+	if (process.env.RESEND_API_KEY?.startsWith("re_test_")) {
+		console.log(`[email] Skipped (test key): to=${params.to} subject="${params.subject}"`);
+		return;
+	}
+	await resend.emails.send(params);
+}
+
 function emailWrapper(content: string): string {
 	return `
 		<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
@@ -38,7 +46,7 @@ export async function sendPasswordResetEmail(
 ): Promise<void> {
 	const resetUrl = `${APP_URL}/reset-password/${token}`;
 
-	await resend.emails.send({
+	await send({
 		from: FROM,
 		to: toEmail,
 		subject: "Reset your RPThreadTracker password",
@@ -61,7 +69,7 @@ export async function sendEmailChangeVerificationEmail(
 ): Promise<void> {
 	const verifyUrl = `${APP_URL}/verify-email/${token}`;
 
-	await resend.emails.send({
+	await send({
 		from: FROM,
 		to: toEmail,
 		subject: "Verify your new email address",

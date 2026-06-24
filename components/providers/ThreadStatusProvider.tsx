@@ -85,6 +85,15 @@ export function ThreadStatusProvider({
 				userId,
 				(progressUpdate) => {
 					setProgress(progressUpdate);
+				},
+				(chunkStatuses) => {
+					setThreadStatuses((prev) => {
+						const merged = new Map(prev);
+						for (const [id, status] of chunkStatuses) {
+							merged.set(id, status);
+						}
+						return merged;
+					});
 				}
 			);
 

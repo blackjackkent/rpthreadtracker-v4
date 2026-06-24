@@ -175,9 +175,42 @@ export function calculateStats(
  * @param onProgress - Callback for progress updates
  * @returns Thread statuses map and dashboard stats
  */
+/**
+ * Merge a thread's DB data with its optional Tumblr status into a single object.
+ */
+function mergeThreadStatus(
+	thread: ThreadWithCharacter,
+	status?: ThreadStatusResponse
+): ThreadStatusWithDetails {
+	return {
+		threadId: thread.ThreadId,
+		postId: thread.PostId || "",
+		lastPostDate: status?.lastPostDate ?? null,
+		lastPosterUrlIdentifier: status?.lastPosterUrlIdentifier ?? "",
+		lastPostUrl: status?.lastPostUrl ?? "",
+		isCallingCharactersTurn: status?.isCallingCharactersTurn ?? true,
+		isQueued: status?.isQueued ?? false,
+		userTitle: thread.UserTitle,
+		characterName: thread.Characters.CharacterName || "",
+		characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
+		partnerUrlIdentifier: thread.PartnerUrlIdentifier,
+		dateMarkedQueued: thread.DateMarkedQueued,
+		isArchived: thread.IsArchived,
+		description: thread.Description,
+		characterId: thread.Characters.CharacterId,
+		characterIsOnHiatus: thread.Characters.IsOnHiatus,
+		tags: thread.ThreadTags?.map((tag) => ({
+			tagId: tag.TagID,
+			tagText: tag.TagText,
+			threadId: tag.ThreadID || 0,
+		})),
+	};
+}
+
 export async function refreshThreadStatusesInChunks(
 	_userId: string,
-	onProgress?: (progress: RefreshProgress) => void
+	onProgress?: (progress: RefreshProgress) => void,
+	onChunkComplete?: (statuses: Map<number, ThreadStatusWithDetails>) => void
 ): Promise<RefreshResult> {
 	// Fetch active threads from API (uses session authentication)
 	const response = await fetch("/api/threads/active", {
@@ -192,28 +225,63 @@ export async function refreshThreadStatusesInChunks(
 
 	const activeThreadsCount = activeThreads.length;
 
+	// Build a lookup from threadId → thread for fast merging
+	const threadLookup = new Map<number, ThreadWithCharacter>();
+	for (const thread of activeThreads) {
+		threadLookup.set(thread.ThreadId, thread);
+	}
+
+	// Immediately emit threads that don't need Tumblr data (no PostId)
+	// so they appear in the table right away
+	const threadsWithoutPostId = activeThreads.filter(
+		(thread) => !thread.PostId || !thread.Characters.UrlIdentifier
+	);
+	if (threadsWithoutPostId.length > 0 && onChunkComplete) {
+		const initialMap = new Map<number, ThreadStatusWithDetails>();
+		for (const thread of threadsWithoutPostId) {
+			initialMap.set(thread.ThreadId, mergeThreadStatus(thread));
+		}
+		onChunkComplete(initialMap);
+	}
+
 	// Filter to threads with PostId
 	const threadsWithPostId = activeThreads.filter(
 		(thread) => thread.PostId && thread.Characters.UrlIdentifier
 	);
 
-	// If no threads to process, return empty result
+	// If no threads to process, return result with what we have
 	if (threadsWithPostId.length === 0) {
+		const threadStatusesMap = new Map<number, ThreadStatusWithDetails>();
+		for (const thread of activeThreads) {
+			threadStatusesMap.set(thread.ThreadId, mergeThreadStatus(thread));
+		}
 		return {
-			threadStatuses: new Map(),
-			dashboardStats: {
-				activeThreadsCount,
-				yourTurnCount: 0,
-				theirTurnCount: 0,
-				queuedCount: 0,
-			},
+			threadStatuses: threadStatusesMap,
+			dashboardStats: calculateStats(
+				Array.from(threadStatusesMap.values()),
+				activeThreadsCount
+			),
 		};
 	}
 
 	const requests = threadsWithPostId.map(threadToRequest);
-	const allStatuses = await fetchTumblrStatusesInChunks(requests, onProgress);
+	const allStatuses = await fetchTumblrStatusesInChunks(
+		requests,
+		onProgress,
+		(chunkStatuses) => {
+			if (!onChunkComplete) return;
+			const chunkMap = new Map<number, ThreadStatusWithDetails>();
+			for (const status of chunkStatuses) {
+				const thread = threadLookup.get(status.threadId);
+				if (thread) {
+					chunkMap.set(thread.ThreadId, mergeThreadStatus(thread, status));
+				}
+			}
+			onChunkComplete(chunkMap);
+		}
+	);
 
-	// Build status lookup map
+	// Build final complete map
 	const statusMap = new Map<number, ThreadStatusResponse>();
 	for (const status of allStatuses) {
 		if (status.threadId) {
@@ -221,40 +289,14 @@ export async function refreshThreadStatusesInChunks(
 		}
 	}
 
-	// Build thread statuses map - loop through all threads
 	const threadStatusesMap = new Map<number, ThreadStatusWithDetails>();
 	for (const thread of activeThreads) {
-		const status = statusMap.get(thread.ThreadId);
-
-		const mergedStatus: ThreadStatusWithDetails = {
-			// Tumblr status (if available, otherwise defaults)
-			threadId: thread.ThreadId,
-			postId: thread.PostId || "",
-			lastPostDate: status?.lastPostDate ?? null,
-			lastPosterUrlIdentifier: status?.lastPosterUrlIdentifier ?? "",
-			lastPostUrl: status?.lastPostUrl ?? "",
-			isCallingCharactersTurn: status?.isCallingCharactersTurn ?? true, // Default to "Your Turn" if no status
-			isQueued: status?.isQueued ?? false,
-			// Database fields
-			userTitle: thread.UserTitle,
-			characterName: thread.Characters.CharacterName || "",
-			characterUrlIdentifier: thread.Characters.UrlIdentifier || "",
-			partnerUrlIdentifier: thread.PartnerUrlIdentifier,
-			dateMarkedQueued: thread.DateMarkedQueued,
-			isArchived: thread.IsArchived,
-			description: thread.Description,
-			characterId: thread.Characters.CharacterId,
-			characterIsOnHiatus: thread.Characters.IsOnHiatus,
-			tags: thread.ThreadTags?.map((tag) => ({
-				tagId: tag.TagID,
-				tagText: tag.TagText,
-				threadId: tag.ThreadID || 0,
-			})),
-		};
-		threadStatusesMap.set(thread.ThreadId, mergedStatus);
+		threadStatusesMap.set(
+			thread.ThreadId,
+			mergeThreadStatus(thread, statusMap.get(thread.ThreadId))
+		);
 	}
 
-	// Calculate dashboard stats from the full merged map (includes no-PostId threads with defaults)
 	const dashboardStats = calculateStats(
 		Array.from(threadStatusesMap.values()),
 		activeThreadsCount
