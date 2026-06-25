@@ -52,13 +52,20 @@ if (process.env.NODE_ENV !== "production") {
 	globalForPrisma.prisma = prisma;
 }
 
-// Keep the connection pool warm so idle periods don't cause slow reconnects
-const KEEPALIVE_INTERVAL_MS = 4 * 60 * 1000; // 4 minutes
+// Keep the connection pool warm so idle periods don't cause slow reconnects.
+// Azure SQL aggressively closes idle connections; retry on failure to force
+// Prisma to open a fresh one before a real request needs it.
+const KEEPALIVE_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 const globalForKeepalive = globalThis as unknown as {
 	keepaliveTimer: ReturnType<typeof setInterval> | undefined;
 };
 if (!globalForKeepalive.keepaliveTimer) {
-	globalForKeepalive.keepaliveTimer = setInterval(() => {
-		prisma.$queryRawUnsafe("SELECT 1").catch(() => {});
+	globalForKeepalive.keepaliveTimer = setInterval(async () => {
+		try {
+			console.log("[db keepalive] pinging database...");
+			await withRetry(() => prisma.$queryRawUnsafe("SELECT 1"));
+		} catch (error) {
+			console.warn("[db keepalive] failed after retries:", error);
+		}
 	}, KEEPALIVE_INTERVAL_MS);
 }
