@@ -86,9 +86,10 @@ export const createThreadColumns = (
 		cell: (info) => {
 			const title = info.getValue();
 			const postId = info.row.original.postId;
+			const display = title || postId || "Untitled Thread";
 			return (
-				<span className="font-medium">
-					{title || postId || "Untitled Thread"}
+				<span className="font-medium block truncate" title={display}>
+					{display}
 				</span>
 			);
 		},
@@ -106,7 +107,6 @@ export const createThreadColumns = (
 		meta: {
 			filterComponent: TextFilter,
 		},
-		size: 200,
 	}),
 
 	// Character column
@@ -115,7 +115,8 @@ export const createThreadColumns = (
 		cell: (info) => {
 			const characterName = info.getValue();
 			const characterUrl = info.row.original.characterUrlIdentifier;
-			return <span>{characterName || characterUrl}</span>;
+			const display = characterName || characterUrl;
+			return <span className="block truncate" title={display}>{display}</span>;
 		},
 		sortingFn: (rowA, rowB) => {
 			const nameA =
@@ -131,6 +132,7 @@ export const createThreadColumns = (
 		meta: {
 			filterComponent: CharacterFilter,
 		},
+		size: 160,
 	}),
 
 	// Partner column (Tracked Partner) - Hidden below 2xl breakpoint
@@ -139,7 +141,7 @@ export const createThreadColumns = (
 		cell: (info) => {
 			const partner = info.getValue();
 			if (!partner) return <span className="text-text-muted">-</span>;
-			return <span>{partner}</span>;
+			return <span className="block truncate" title={partner}>{partner}</span>;
 		},
 		sortingFn: (rowA, rowB) => {
 			const partnerA = rowA.original.partnerUrlIdentifier || "";
@@ -155,6 +157,7 @@ export const createThreadColumns = (
 			filterComponent: PartnerFilter,
 			className: "hidden 2xl:table-cell",
 		},
+		size: 160,
 	}),
 
 	// Last Poster column (most recent poster with link to post)
@@ -172,14 +175,15 @@ export const createThreadColumns = (
 						href={lastPostUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="text-primary hover:text-primary-dark hover:underline"
+						className="text-primary hover:text-primary-dark hover:underline block truncate"
+						title={lastPoster}
 					>
 						{lastPoster}
 					</a>
 				);
 			}
 
-			return <span>{lastPoster}</span>;
+			return <span className="block truncate" title={lastPoster}>{lastPoster}</span>;
 		},
 		sortingFn: (rowA, rowB) => {
 			const posterA = rowA.original.lastPosterUrlIdentifier || "";
@@ -194,6 +198,7 @@ export const createThreadColumns = (
 		meta: {
 			filterComponent: LastPosterFilter,
 		},
+		size: 160,
 	}),
 
 	// Status column - Hidden below 2xl breakpoint
@@ -210,23 +215,25 @@ export const createThreadColumns = (
 		meta: {
 			className: "hidden 2xl:table-cell",
 		},
+		size: 110,
 	}),
 
-	// Last Post Date column (with time)
+	// Last Post Date column
 	columnHelper.accessor("lastPostDate", {
 		header: "Last Post",
 		cell: (info) => {
 			const date = info.getValue();
 			if (!date) return <span className="text-text-muted">-</span>;
 			return new Intl.DateTimeFormat("en-US", {
-				year: "numeric",
-				month: "short",
+				year: "2-digit",
+				month: "numeric",
 				day: "numeric",
 				hour: "numeric",
 				minute: "2-digit",
 				hour12: true,
 			}).format(new Date(date));
 		},
+		size: 155,
 		sortingFn: (rowA, rowB) => {
 			const dateA = rowA.original.lastPostDate;
 			const dateB = rowB.original.lastPostDate;
@@ -312,6 +319,6 @@ export const createThreadColumns = (
 				</div>
 			);
 		},
-		size: 180,
+		size: 120,
 	}),
 ];

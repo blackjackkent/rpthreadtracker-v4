@@ -97,7 +97,7 @@ export const ThreadsTable = ({
 		<div className="space-y-4">
 			{/* Table */}
 			<div className="overflow-x-auto border border-border rounded-lg">
-				<table className="min-w-full divide-y divide-border">
+				<table className="w-full divide-y divide-border" style={{ tableLayout: "fixed" }}>
 					<thead className="bg-surface">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<Fragment key={headerGroup.id}>
@@ -182,7 +182,7 @@ export const ThreadsTable = ({
 										return (
 											<td
 												key={cell.id}
-												className={`px-4 py-3 text-sm text-text ${customClassName || ""}`}
+												className={`px-4 py-3 text-sm text-text overflow-hidden max-w-0 ${customClassName || ""}`}
 											>
 												{flexRender(
 													cell.column.columnDef.cell,

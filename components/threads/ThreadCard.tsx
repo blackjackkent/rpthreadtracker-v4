@@ -49,8 +49,8 @@ export const ThreadCard = ({
 	const formatDate = (date: Date | null) => {
 		if (!date) return null;
 		return new Intl.DateTimeFormat("en-US", {
-			year: "numeric",
-			month: "short",
+			year: "2-digit",
+			month: "numeric",
 			day: "numeric",
 			hour: "numeric",
 			minute: "2-digit",
