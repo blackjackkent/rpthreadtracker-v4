@@ -76,7 +76,12 @@ export default function ForgotPasswordPage() {
 							disabled={isLoading}
 							className="w-full rounded-md bg-primary px-4 py-2 text-white hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
-							{isLoading ? "Sending..." : "Send reset link"}
+							{isLoading ? (
+								<span className="flex items-center justify-center gap-2">
+									<span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+									Sending...
+								</span>
+							) : "Send reset link"}
 						</button>
 
 						<p className="text-center text-sm text-text-muted">
