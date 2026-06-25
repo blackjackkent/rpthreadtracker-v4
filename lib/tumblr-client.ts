@@ -3,6 +3,29 @@ import type { TumblrPost, TumblrBlogPostsResponse } from "@/types/tumblr";
 
 let _client: ReturnType<typeof tumblr.createClient> | null = null;
 
+// TUMBLR_SIMULATE_RATE_LIMIT=5 → first 5 requests succeed, then 429s until reset
+let _simulateCounter = 0;
+const _simulateThreshold = process.env.TUMBLR_SIMULATE_RATE_LIMIT
+	? parseInt(process.env.TUMBLR_SIMULATE_RATE_LIMIT, 10)
+	: 0;
+
+function checkSimulatedRateLimit() {
+	if (_simulateThreshold > 0) {
+		_simulateCounter++;
+		if (_simulateCounter > _simulateThreshold) {
+			const err = new Error(
+				"API error (malformed API response): <html>\n<head><title>429 Too Many Requests</title></head>\n</html>",
+			);
+			(err as { status?: number }).status = 429;
+			throw err;
+		}
+	}
+}
+
+export function resetSimulatedRateLimit() {
+	_simulateCounter = 0;
+}
+
 function getClient() {
 	if (!_client) {
 		const requiredEnvVars = [
@@ -34,9 +57,11 @@ function getClient() {
  */
 export async function getTumblrPost(
 	blogIdentifier: string,
-	postId: string
+	postId: string,
 ): Promise<TumblrPost | null> {
 	try {
+		checkSimulatedRateLimit();
+
 		// Normalize blog identifier to lowercase (Tumblr URLs are case-insensitive)
 		const normalizedBlogIdentifier = blogIdentifier.toLowerCase();
 
@@ -48,17 +73,23 @@ export async function getTumblrPost(
 
 		if (!response || !response.posts || response.posts.length === 0) {
 			console.warn(
-				`Post not found: blog=${normalizedBlogIdentifier}, postId=${postId}`
+				`Post not found: blog=${normalizedBlogIdentifier}, postId=${postId}`,
 			);
 			return null;
 		}
 
 		return response.posts[0];
 	} catch (error) {
-		console.error(
-			`Error fetching Tumblr post: blog=${blogIdentifier}, postId=${postId}`,
-			error
-		);
+		const message = error instanceof Error ? error.message : String(error);
+		const isRateLimit =
+			(error as { status?: number })?.status === 429 || message.includes("429");
+		if (isRateLimit) {
+			throw error;
+		}
+		// console.warn(
+		// 	`Error fetching Tumblr post: blog=${blogIdentifier}, postId=${postId}`,
+		// 	error,
+		// );
 		return null;
 	}
 }
@@ -102,7 +133,7 @@ export async function getNewsPosts(): Promise<NewsPost[]> {
 export async function getTumblrPostWithRetry(
 	blogIdentifier: string,
 	postId: string,
-	maxRetries = 5
+	maxRetries = 5,
 ): Promise<TumblrPost | null> {
 	for (let attempt = 0; attempt < maxRetries; attempt++) {
 		try {
@@ -110,8 +141,11 @@ export async function getTumblrPostWithRetry(
 			return post;
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
+			const message = error instanceof Error ? error.message : String(error);
+			const isRateLimit = error?.status === 429 || message.includes("429");
+
 			// Check if it's a rate limit error (429)
-			if (error?.status === 429 && attempt < maxRetries - 1) {
+			if (isRateLimit && attempt < maxRetries - 1) {
 				// Exponential backoff with jitter
 				const baseDelay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s, 8s, 16s
 				const jitter = Math.random() * 1000; // 0-1000ms random jitter
@@ -120,7 +154,7 @@ export async function getTumblrPostWithRetry(
 				console.warn(
 					`Rate limited (429). Retrying in ${Math.round(delay)}ms... (attempt ${
 						attempt + 1
-					}/${maxRetries})`
+					}/${maxRetries})`,
 				);
 				await new Promise((resolve) => setTimeout(resolve, delay));
 				continue;
@@ -144,7 +178,7 @@ export async function getTumblrPostWithRetry(
 			// For other errors or final retry, return null
 			console.error(
 				`Failed to fetch post after ${attempt + 1} attempts`,
-				error
+				error,
 			);
 			if (attempt === maxRetries - 1) {
 				return null;

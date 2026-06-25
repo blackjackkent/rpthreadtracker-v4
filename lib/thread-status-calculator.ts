@@ -125,14 +125,37 @@ export function calculateThreadStatus(
 }
 
 /**
+ * Run async tasks with a concurrency limit.
+ */
+async function withConcurrency<T>(
+	tasks: (() => Promise<T>)[],
+	limit: number
+): Promise<T[]> {
+	const results: T[] = new Array(tasks.length);
+	let next = 0;
+
+	async function worker() {
+		while (next < tasks.length) {
+			const i = next++;
+			results[i] = await tasks[i]();
+		}
+	}
+
+	await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, () => worker()));
+	return results;
+}
+
+const CONCURRENCY_LIMIT = 3;
+
+/**
  * Fetch Tumblr data and calculate statuses for a batch of threads.
- * Runs all requests within the batch in parallel.
+ * Runs requests with limited concurrency to avoid Tumblr rate limits.
  * Used by both the authenticated API route and the public view page.
  */
 export async function batchCalculateThreadStatuses(
 	requests: ThreadStatusRequest[]
 ): Promise<ThreadStatusResponse[]> {
-	const promises = requests.map(async (request) => {
+	const tasks = requests.map((request) => async () => {
 		try {
 			const post = await getTumblrPostWithRetry(
 				request.characterUrlIdentifier,
@@ -143,5 +166,5 @@ export async function batchCalculateThreadStatuses(
 			return calculateThreadStatus(request, null);
 		}
 	});
-	return Promise.all(promises);
+	return withConcurrency(tasks, CONCURRENCY_LIMIT);
 }
