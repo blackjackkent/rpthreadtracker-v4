@@ -86,7 +86,7 @@ export const ThreadCard = ({
 				{/* Main Content */}
 				<div className="flex-1 min-w-0">
 					{/* Thread Title */}
-					<h3 className="font-medium text-base truncate">{title}</h3>
+					<h3 className="font-medium text-base break-words">{title}</h3>
 
 					{/* Character and Status */}
 					<div className="flex items-center gap-2 mt-1 flex-wrap">
