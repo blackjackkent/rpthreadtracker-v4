@@ -38,12 +38,14 @@ declare module "@tanstack/react-table" {
 interface ThreadsTableProps {
 	threads: ThreadStatusWithDetails[];
 	columns: ColumnDef<ThreadStatusWithDetails>[];
-	onRowSelectionChange?: (selectedThreadIds: number[]) => void;
+	rowSelection: RowSelectionState;
+	onRowSelectionChange: (updater: (prev: RowSelectionState) => RowSelectionState) => void;
 }
 
 export const ThreadsTable = ({
 	threads,
 	columns,
+	rowSelection,
 	onRowSelectionChange,
 }: ThreadsTableProps) => {
 	const { settings, updatePageSize } = useProfileSettings();
@@ -51,7 +53,6 @@ export const ThreadsTable = ({
 		{ id: "lastPostDate", desc: true },
 	]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
 	// TanStack Table v8 works with React 19 but isn't optimized by React Compiler yet
 	// eslint-disable-next-line react-hooks/incompatible-library
@@ -66,16 +67,9 @@ export const ThreadsTable = ({
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onRowSelectionChange: (updater) => {
-			setRowSelection(updater);
-			// Notify parent of selection changes
-			if (onRowSelectionChange) {
-				const newSelection =
-					typeof updater === "function" ? updater(rowSelection) : updater;
-				const selectedIds = Object.keys(newSelection)
-					.map(Number)
-					.filter((id) => !isNaN(id));
-				onRowSelectionChange(selectedIds);
-			}
+			onRowSelectionChange(
+				typeof updater === "function" ? updater : () => updater
+			);
 		},
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),

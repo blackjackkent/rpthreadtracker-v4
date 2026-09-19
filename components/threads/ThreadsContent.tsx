@@ -17,7 +17,7 @@ import { ThreadCard } from "./ThreadCard";
 import { createThreadColumns } from "./columns";
 import { UpsertThreadModal } from "./UpsertThreadModal";
 import type { ThreadFilterFunction } from "./filters";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, RowSelectionState } from "@tanstack/react-table";
 import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
 import {
 	createThread,
@@ -52,7 +52,7 @@ export const ThreadsContent = ({
 	filterFunction,
 }: ThreadsContentProps) => {
 	const router = useRouter();
-	const [selectedThreadIds, setSelectedThreadIds] = useState<number[]>([]);
+	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 	const [tagFilter, setTagFilter] = useState<string>("all");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [threadToEdit, setThreadToEdit] =
@@ -60,6 +60,25 @@ export const ThreadsContent = ({
 	const [isLoading, setIsLoading] = useState(false);
 
 	const { refreshSingleThread, removeThread, characters } = useThreadStatus();
+
+	const selectedThreadIds = useMemo(
+		() =>
+			Object.entries(rowSelection)
+				.filter(([, isSelected]) => isSelected)
+				.map(([id]) => Number(id))
+				.filter((id) => !isNaN(id)),
+		[rowSelection]
+	);
+
+	const deselectThreads = (threadIds: number[]) => {
+		setRowSelection((prev) => {
+			const next = { ...prev };
+			threadIds.forEach((id) => {
+				delete next[String(id)];
+			});
+			return next;
+		});
+	};
 
 	// Apply filters to threads
 	const filteredThreads = useMemo(() => {
@@ -161,6 +180,7 @@ export const ThreadsContent = ({
 			try {
 				await archiveThread(threadId);
 				removeThread(threadId);
+				deselectThreads([threadId]);
 				router.refresh();
 				toast.success("Thread archived");
 			} catch (error) {
@@ -173,6 +193,7 @@ export const ThreadsContent = ({
 				await unarchiveThread(threadId);
 				// Refresh Tumblr status when unarchiving
 				await refreshSingleThread(threadId);
+				deselectThreads([threadId]);
 				router.refresh();
 				toast.success("Thread unarchived");
 			} catch (error) {
@@ -184,6 +205,7 @@ export const ThreadsContent = ({
 			try {
 				await toggleThreadQueued(threadId);
 				await refreshSingleThread(threadId);
+				deselectThreads([threadId]);
 				router.refresh();
 				toast.success("Thread queue status updated");
 			} catch (error) {
@@ -200,6 +222,7 @@ export const ThreadsContent = ({
 				try {
 					await deleteThread(threadId);
 					removeThread(threadId);
+					deselectThreads([threadId]);
 					router.refresh();
 					toast.success("Thread untracked");
 				} catch (error) {
@@ -215,9 +238,9 @@ export const ThreadsContent = ({
 		try {
 			await bulkArchiveThreads(selectedThreadIds);
 			selectedThreadIds.forEach(removeThread);
-			router.refresh();
 			toast.success(`${selectedThreadIds.length} thread(s) archived`);
-			setSelectedThreadIds([]);
+			setRowSelection({});
+			router.refresh();
 		} catch (error) {
 			console.error("Error bulk archiving:", error);
 			toast.error("Failed to archive threads");
@@ -228,9 +251,9 @@ export const ThreadsContent = ({
 		try {
 			await bulkUnarchiveThreads(selectedThreadIds);
 			await Promise.all(selectedThreadIds.map(refreshSingleThread));
-			router.refresh();
 			toast.success(`${selectedThreadIds.length} thread(s) unarchived`);
-			setSelectedThreadIds([]);
+			setRowSelection({});
+			router.refresh();
 		} catch (error) {
 			console.error("Error bulk unarchiving:", error);
 			toast.error("Failed to unarchive threads");
@@ -241,11 +264,11 @@ export const ThreadsContent = ({
 		try {
 			await bulkToggleThreadsQueued(selectedThreadIds);
 			await Promise.all(selectedThreadIds.map(refreshSingleThread));
-			router.refresh();
 			toast.success(
 				`Queue status updated for ${selectedThreadIds.length} thread(s)`
 			);
-			setSelectedThreadIds([]);
+			setRowSelection({});
+			router.refresh();
 		} catch (error) {
 			console.error("Error bulk toggle queue:", error);
 			toast.error("Failed to update queue status");
@@ -263,7 +286,7 @@ export const ThreadsContent = ({
 				selectedThreadIds.forEach(removeThread);
 				router.refresh();
 				toast.success(`${selectedThreadIds.length} thread(s) untracked`);
-				setSelectedThreadIds([]);
+				setRowSelection({});
 			} catch (error) {
 				console.error("Error bulk deleting:", error);
 				toast.error("Failed to untrack threads");
@@ -392,7 +415,8 @@ export const ThreadsContent = ({
 				<ThreadsTable
 					threads={filteredThreads}
 					columns={columns}
-					onRowSelectionChange={setSelectedThreadIds}
+					rowSelection={rowSelection}
+					onRowSelectionChange={setRowSelection}
 				/>
 			</div>
 
@@ -413,11 +437,15 @@ export const ThreadsContent = ({
 									: false
 							}
 							onSelect={(threadId) => {
-								setSelectedThreadIds((prev) =>
-									prev.includes(threadId)
-										? prev.filter((id) => id !== threadId)
-										: [...prev, threadId]
-								);
+								setRowSelection((prev) => {
+									const next = { ...prev };
+									if (next[String(threadId)]) {
+										delete next[String(threadId)];
+									} else {
+										next[String(threadId)] = true;
+									}
+									return next;
+								});
 							}}
 							onEdit={columnActions.onEdit}
 							onArchive={columnActions.onArchive}
