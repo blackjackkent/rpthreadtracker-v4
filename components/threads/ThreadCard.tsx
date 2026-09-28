@@ -10,8 +10,10 @@ import {
 	faTrash,
 	faChevronDown,
 	faChevronRight,
+	faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
+import type { ThreadAction } from "@/hooks/use-thread-actions";
 import { ThreadStatusBadge } from "./ThreadStatusBadge";
 
 interface ThreadCardProps {
@@ -25,6 +27,7 @@ interface ThreadCardProps {
 	onUntrack: (threadId: number) => void;
 	isArchivedPage: boolean;
 	showToggleQueue: boolean;
+	pendingAction: ThreadAction | null;
 }
 
 export const ThreadCard = ({
@@ -38,8 +41,17 @@ export const ThreadCard = ({
 	onUntrack,
 	isArchivedPage,
 	showToggleQueue,
+	pendingAction,
 }: ThreadCardProps) => {
 	const [isExpanded, setIsExpanded] = useState(false);
+
+	const isBusy = pendingAction !== null;
+	const buttonClass =
+		"text-primary hover:text-primary-dark cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+	const iconFor = (action: ThreadAction, icon: typeof faEdit) =>
+		pendingAction === action ? faSpinner : icon;
+	const iconClass = (action: ThreadAction) =>
+		pendingAction === action ? "w-4 h-4 animate-spin" : "w-4 h-4";
 
 	const title = thread.userTitle || thread.postId || "Untitled Thread";
 	const characterName = thread.characterName || thread.characterUrlIdentifier;
@@ -86,7 +98,7 @@ export const ThreadCard = ({
 				{/* Main Content */}
 				<div className="flex-1 min-w-0">
 					{/* Thread Title */}
-					<h3 className="font-medium text-base break-words">{title}</h3>
+					<h3 className="font-medium text-base wrap-break-word">{title}</h3>
 
 					{/* Character and Status */}
 					<div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -135,7 +147,8 @@ export const ThreadCard = ({
 					<button
 						type="button"
 						onClick={() => onEdit(thread)}
-						className="text-primary hover:text-primary-dark cursor-pointer"
+						disabled={isBusy}
+						className={buttonClass}
 						title="Edit thread"
 					>
 						<FontAwesomeIcon icon={faEdit} className="w-4 h-4" />
@@ -145,19 +158,27 @@ export const ThreadCard = ({
 						<button
 							type="button"
 							onClick={() => thread.threadId && onUnarchive(thread.threadId)}
-							className="text-primary hover:text-primary-dark cursor-pointer"
+							disabled={isBusy}
+							className={buttonClass}
 							title="Unarchive thread"
 						>
-							<FontAwesomeIcon icon={faBoxOpen} className="w-4 h-4" />
+							<FontAwesomeIcon
+								icon={iconFor("unarchive", faBoxOpen)}
+								className={iconClass("unarchive")}
+							/>
 						</button>
 					) : (
 						<button
 							type="button"
 							onClick={() => thread.threadId && onArchive(thread.threadId)}
-							className="text-primary hover:text-primary-dark cursor-pointer"
+							disabled={isBusy}
+							className={buttonClass}
 							title="Archive thread"
 						>
-							<FontAwesomeIcon icon={faBoxArchive} className="w-4 h-4" />
+							<FontAwesomeIcon
+								icon={iconFor("archive", faBoxArchive)}
+								className={iconClass("archive")}
+							/>
 						</button>
 					)}
 
@@ -165,11 +186,11 @@ export const ThreadCard = ({
 						<button
 							type="button"
 							onClick={() => thread.threadId && onToggleQueue(thread.threadId)}
-							disabled={!thread.lastPostDate}
+							disabled={!thread.lastPostDate || isBusy}
 							className={
 								!thread.lastPostDate
 									? "text-text-muted cursor-not-allowed opacity-50"
-									: "text-primary hover:text-primary-dark cursor-pointer"
+									: buttonClass
 							}
 							title={
 								!thread.lastPostDate
@@ -179,17 +200,24 @@ export const ThreadCard = ({
 										: "Queue thread"
 							}
 						>
-							<FontAwesomeIcon icon={faClock} className="w-4 h-4" />
+							<FontAwesomeIcon
+								icon={iconFor("queue", faClock)}
+								className={iconClass("queue")}
+							/>
 						</button>
 					)}
 
 					<button
 						type="button"
 						onClick={() => thread.threadId && onUntrack(thread.threadId)}
-						className="text-red-500 hover:text-red-600 cursor-pointer"
+						disabled={isBusy}
+						className="text-red-500 hover:text-red-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 						title="Untrack thread"
 					>
-						<FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+						<FontAwesomeIcon
+							icon={iconFor("untrack", faTrash)}
+							className={iconClass("untrack")}
+						/>
 					</button>
 				</div>
 			</div>

@@ -11,9 +11,10 @@ export const RandomThreadGenerator = () => {
 	const { threadStatuses } = useThreadStatus();
 	const [selectedThread, setSelectedThread] =
 		useState<ThreadStatusWithDetails | null>(null);
-	const { untrack, archive, markQueued, pendingAction } = useThreadActions({
+	const { untrack, archive, markQueued, getPendingAction } = useThreadActions({
 		onSuccess: () => setSelectedThread(null),
 	});
+	const pendingAction = getPendingAction(selectedThread?.threadId);
 	const isUntracking = pendingAction === "untrack";
 	const isArchiving = pendingAction === "archive";
 	const isQueuing = pendingAction === "queue";

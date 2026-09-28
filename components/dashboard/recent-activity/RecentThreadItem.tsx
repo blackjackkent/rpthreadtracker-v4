@@ -8,7 +8,8 @@ interface RecentThreadItemProps {
 }
 
 export function RecentThreadItem({ thread }: RecentThreadItemProps) {
-	const { untrack, archive, markQueued, pendingAction } = useThreadActions();
+	const { untrack, archive, markQueued, getPendingAction } = useThreadActions();
+	const pendingAction = getPendingAction(thread.threadId);
 	const isUntracking = pendingAction === "untrack";
 	const isArchiving = pendingAction === "archive";
 	const isQueuing = pendingAction === "queue";

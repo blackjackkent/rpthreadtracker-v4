@@ -20,7 +20,12 @@ interface UseThreadActionsOptions {
 export const useThreadActions = ({ onSuccess }: UseThreadActionsOptions = {}) => {
 	const router = useRouter();
 	const { refreshSingleThread, removeThread } = useThreadStatus();
-	const [pendingAction, setPendingAction] = useState<ThreadAction | null>(null);
+	const [pendingActions, setPendingActions] = useState<
+		Record<number, ThreadAction>
+	>({});
+
+	const getPendingAction = (threadId: number | null | undefined) =>
+		threadId ? (pendingActions[threadId] ?? null) : null;
 
 	const run = async (
 		action: ThreadAction,
@@ -29,7 +34,7 @@ export const useThreadActions = ({ onSuccess }: UseThreadActionsOptions = {}) =>
 		successMessage: string,
 		errorMessage: string
 	) => {
-		setPendingAction(action);
+		setPendingActions((prev) => ({ ...prev, [threadId]: action }));
 		try {
 			await perform();
 			onSuccess?.(threadId, action);
@@ -39,7 +44,11 @@ export const useThreadActions = ({ onSuccess }: UseThreadActionsOptions = {}) =>
 			console.error(`Error performing thread action "${action}":`, error);
 			toast.error(errorMessage);
 		} finally {
-			setPendingAction(null);
+			setPendingActions((prev) => {
+				const next = { ...prev };
+				delete next[threadId];
+				return next;
+			});
 		}
 	};
 
@@ -117,6 +126,6 @@ export const useThreadActions = ({ onSuccess }: UseThreadActionsOptions = {}) =>
 		unarchive,
 		toggleQueued,
 		markQueued,
-		pendingAction,
+		getPendingAction,
 	};
 };

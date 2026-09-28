@@ -10,8 +10,10 @@ import {
 	faTrash,
 	faChevronDown,
 	faChevronRight,
+	faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
+import type { ThreadAction } from "@/hooks/use-thread-actions";
 import { ThreadStatusBadge } from "./ThreadStatusBadge";
 import {
 	TextFilter,
@@ -28,6 +30,7 @@ interface ColumnActions {
 	onUnarchive: (threadId: number) => void;
 	onToggleQueue: (threadId: number) => void;
 	onUntrack: (threadId: number) => void;
+	getPendingAction: (threadId: number) => ThreadAction | null;
 }
 
 export const createThreadColumns = (
@@ -256,12 +259,22 @@ export const createThreadColumns = (
 
 			if (!threadId) return null;
 
+			const pendingAction = actions.getPendingAction(threadId);
+			const isBusy = pendingAction !== null;
+			const buttonClass =
+				"text-primary hover:text-primary-dark cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+			const iconFor = (action: ThreadAction, icon: typeof faEdit) =>
+				pendingAction === action ? faSpinner : icon;
+			const iconClass = (action: ThreadAction) =>
+				pendingAction === action ? "w-4 h-4 animate-spin" : "w-4 h-4";
+
 			return (
 				<div className="flex items-center gap-2">
 					{/* Edit button */}
 					<button
 						onClick={() => actions.onEdit(thread)}
-						className="text-primary hover:text-primary-dark cursor-pointer"
+						disabled={isBusy}
+						className={buttonClass}
 						title="Edit thread"
 					>
 						<FontAwesomeIcon icon={faEdit} className="w-4 h-4" />
@@ -271,18 +284,26 @@ export const createThreadColumns = (
 					{isArchivedPage ? (
 						<button
 							onClick={() => actions.onUnarchive(threadId)}
-							className="text-primary hover:text-primary-dark cursor-pointer"
+							disabled={isBusy}
+							className={buttonClass}
 							title="Unarchive thread"
 						>
-							<FontAwesomeIcon icon={faBoxOpen} className="w-4 h-4" />
+							<FontAwesomeIcon
+								icon={iconFor("unarchive", faBoxOpen)}
+								className={iconClass("unarchive")}
+							/>
 						</button>
 					) : (
 						<button
 							onClick={() => actions.onArchive(threadId)}
-							className="text-primary hover:text-primary-dark cursor-pointer"
+							disabled={isBusy}
+							className={buttonClass}
 							title="Archive thread"
 						>
-							<FontAwesomeIcon icon={faBoxArchive} className="w-4 h-4" />
+							<FontAwesomeIcon
+								icon={iconFor("archive", faBoxArchive)}
+								className={iconClass("archive")}
+							/>
 						</button>
 					)}
 
@@ -290,11 +311,11 @@ export const createThreadColumns = (
 					{!isArchivedPage && showToggleQueue && (
 						<button
 							onClick={() => actions.onToggleQueue(threadId)}
-							disabled={!thread.lastPostDate}
+							disabled={!thread.lastPostDate || isBusy}
 							className={
 								!thread.lastPostDate
 									? "text-text-muted cursor-not-allowed opacity-50"
-									: "text-primary hover:text-primary-dark cursor-pointer"
+									: buttonClass
 							}
 							title={
 								!thread.lastPostDate
@@ -304,17 +325,24 @@ export const createThreadColumns = (
 										: "Queue thread"
 							}
 						>
-							<FontAwesomeIcon icon={faClock} className="w-4 h-4" />
+							<FontAwesomeIcon
+								icon={iconFor("queue", faClock)}
+								className={iconClass("queue")}
+							/>
 						</button>
 					)}
 
 					{/* Untrack button */}
 					<button
 						onClick={() => actions.onUntrack(threadId)}
-						className="text-red-500 hover:text-red-600 cursor-pointer"
+						disabled={isBusy}
+						className="text-red-500 hover:text-red-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 						title="Untrack thread"
 					>
-						<FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+						<FontAwesomeIcon
+							icon={iconFor("untrack", faTrash)}
+							className={iconClass("untrack")}
+						/>
 					</button>
 				</div>
 			);

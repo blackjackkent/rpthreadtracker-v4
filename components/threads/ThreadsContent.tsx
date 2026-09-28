@@ -176,6 +176,7 @@ export const ThreadsContent = ({
 		onUnarchive: threadActions.unarchive,
 		onToggleQueue: threadActions.toggleQueued,
 		onUntrack: threadActions.untrack,
+		getPendingAction: threadActions.getPendingAction,
 	};
 
 	// Bulk actions
@@ -399,6 +400,7 @@ export const ThreadsContent = ({
 							onUntrack={columnActions.onUntrack}
 							isArchivedPage={isArchived}
 							showToggleQueue={!isAllThreadsPage}
+							pendingAction={threadActions.getPendingAction(thread.threadId)}
 						/>
 					))
 				)}
