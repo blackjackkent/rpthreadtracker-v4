@@ -1,87 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDice, faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
-import {
-	deleteThread,
-	archiveThread,
-	toggleThreadQueued,
-} from "@/app/actions/thread";
 import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
+import { useThreadActions } from "@/hooks/use-thread-actions";
 import type { ThreadStatusWithDetails } from "@/types/tumblr";
 
 export const RandomThreadGenerator = () => {
-	const router = useRouter();
-	const { threadStatuses, refreshSingleThread, removeThread } =
-		useThreadStatus();
+	const { threadStatuses } = useThreadStatus();
 	const [selectedThread, setSelectedThread] =
 		useState<ThreadStatusWithDetails | null>(null);
-	const [isUntracking, setIsUntracking] = useState(false);
-	const [isArchiving, setIsArchiving] = useState(false);
-	const [isQueuing, setIsQueuing] = useState(false);
+	const { untrack, archive, markQueued, pendingAction } = useThreadActions({
+		onSuccess: () => setSelectedThread(null),
+	});
+	const isUntracking = pendingAction === "untrack";
+	const isArchiving = pendingAction === "archive";
+	const isQueuing = pendingAction === "queue";
 
-	const handleUntrack = async () => {
-		if (!selectedThread?.threadId) return;
-		if (
-			!confirm(
-				"Are you sure you want to untrack this thread? This action cannot be undone."
-			)
-		)
-			return;
-
-		setIsUntracking(true);
-		try {
-			await deleteThread(selectedThread.threadId);
-			removeThread(selectedThread.threadId);
-			setSelectedThread(null);
-			router.refresh();
-			toast.success("Thread untracked");
-		} catch (error) {
-			console.error("Error untracking thread:", error);
-			toast.error("Failed to untrack thread");
-		} finally {
-			setIsUntracking(false);
-		}
-	};
-
-	const handleArchive = async () => {
-		if (!selectedThread?.threadId) return;
-
-		setIsArchiving(true);
-		try {
-			await archiveThread(selectedThread.threadId);
-			removeThread(selectedThread.threadId);
-			setSelectedThread(null);
-			router.refresh();
-			toast.success("Thread archived");
-		} catch (error) {
-			console.error("Error archiving thread:", error);
-			toast.error("Failed to archive thread");
-		} finally {
-			setIsArchiving(false);
-		}
-	};
-
-	const handleMarkQueued = async () => {
-		if (!selectedThread?.threadId) return;
-
-		setIsQueuing(true);
-		try {
-			await toggleThreadQueued(selectedThread.threadId);
-			await refreshSingleThread(selectedThread.threadId);
-			setSelectedThread(null);
-			router.refresh();
-			toast.success("Thread marked as queued");
-		} catch (error) {
-			console.error("Error marking thread queued:", error);
-			toast.error("Failed to mark thread as queued");
-		} finally {
-			setIsQueuing(false);
-		}
-	};
+	const handleUntrack = () =>
+		selectedThread?.threadId && untrack(selectedThread.threadId);
+	const handleArchive = () =>
+		selectedThread?.threadId && archive(selectedThread.threadId);
+	const handleMarkQueued = () =>
+		selectedThread?.threadId && markQueued(selectedThread.threadId);
 
 	const handleGenerateRandom = () => {
 		// Convert Map to array and filter to only "Your Turn" threads with valid last post URLs

@@ -1,26 +1,17 @@
 "use client";
 
 import type { ThreadStatusWithDetails } from "@/types/tumblr";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import {
-	deleteThread,
-	archiveThread,
-	toggleThreadQueued,
-} from "@/app/actions/thread";
-import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
+import { useThreadActions } from "@/hooks/use-thread-actions";
 
 interface RecentThreadItemProps {
 	thread: ThreadStatusWithDetails;
 }
 
 export function RecentThreadItem({ thread }: RecentThreadItemProps) {
-	const router = useRouter();
-	const { refreshSingleThread, removeThread } = useThreadStatus();
-	const [isUntracking, setIsUntracking] = useState(false);
-	const [isArchiving, setIsArchiving] = useState(false);
-	const [isQueuing, setIsQueuing] = useState(false);
+	const { untrack, archive, markQueued, pendingAction } = useThreadActions();
+	const isUntracking = pendingAction === "untrack";
+	const isArchiving = pendingAction === "archive";
+	const isQueuing = pendingAction === "queue";
 
 	// Format date using Intl.DateTimeFormat
 	const formatDate = (dateString: string | Date) => {
@@ -35,57 +26,9 @@ export function RecentThreadItem({ thread }: RecentThreadItemProps) {
 		}).format(date);
 	};
 
-	const handleUntrack = async () => {
-		if (!thread.threadId) return;
-		if (!confirm("Are you sure you want to untrack this thread? This action cannot be undone.")) return;
-
-		setIsUntracking(true);
-		try {
-			await deleteThread(thread.threadId);
-			removeThread(thread.threadId);
-			router.refresh();
-			toast.success("Thread untracked");
-		} catch (error) {
-			console.error("Error untracking thread:", error);
-			toast.error("Failed to untrack thread");
-		} finally {
-			setIsUntracking(false);
-		}
-	};
-
-	const handleArchive = async () => {
-		if (!thread.threadId) return;
-
-		setIsArchiving(true);
-		try {
-			await archiveThread(thread.threadId);
-			removeThread(thread.threadId);
-			router.refresh();
-			toast.success("Thread archived");
-		} catch (error) {
-			console.error("Error archiving thread:", error);
-			toast.error("Failed to archive thread");
-		} finally {
-			setIsArchiving(false);
-		}
-	};
-
-	const handleMarkQueued = async () => {
-		if (!thread.threadId) return;
-
-		setIsQueuing(true);
-		try {
-			await toggleThreadQueued(thread.threadId);
-			await refreshSingleThread(thread.threadId);
-			router.refresh();
-			toast.success("Thread marked as queued");
-		} catch (error) {
-			console.error("Error marking thread queued:", error);
-			toast.error("Failed to mark thread as queued");
-		} finally {
-			setIsQueuing(false);
-		}
-	};
+	const handleUntrack = () => thread.threadId && untrack(thread.threadId);
+	const handleArchive = () => thread.threadId && archive(thread.threadId);
+	const handleMarkQueued = () => thread.threadId && markQueued(thread.threadId);
 
 	return (
 		<div className="py-3 first:pt-0 last:pb-0">

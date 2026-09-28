@@ -19,13 +19,10 @@ import { UpsertThreadModal } from "./UpsertThreadModal";
 import type { ThreadFilterFunction } from "./filters";
 import type { ColumnDef, RowSelectionState } from "@tanstack/react-table";
 import { useThreadStatus } from "@/components/providers/ThreadStatusProvider";
+import { useThreadActions } from "@/hooks/use-thread-actions";
 import {
 	createThread,
 	updateThread,
-	archiveThread,
-	unarchiveThread,
-	toggleThreadQueued,
-	deleteThread,
 	bulkArchiveThreads,
 	bulkUnarchiveThreads,
 	bulkToggleThreadsQueued,
@@ -70,15 +67,14 @@ export const ThreadsContent = ({
 		[rowSelection]
 	);
 
-	const deselectThreads = (threadIds: number[]) => {
-		setRowSelection((prev) => {
-			const next = { ...prev };
-			threadIds.forEach((id) => {
-				delete next[String(id)];
-			});
-			return next;
-		});
-	};
+	const threadActions = useThreadActions({
+		onSuccess: (threadId) =>
+			setRowSelection((prev) => {
+				const next = { ...prev };
+				delete next[String(threadId)];
+				return next;
+			}),
+	});
 
 	// Apply filters to threads
 	const filteredThreads = useMemo(() => {
@@ -176,61 +172,10 @@ export const ThreadsContent = ({
 		onEdit: (thread: ThreadStatusWithDetails) => {
 			handleOpenModal(thread);
 		},
-		onArchive: async (threadId: number) => {
-			try {
-				await archiveThread(threadId);
-				removeThread(threadId);
-				deselectThreads([threadId]);
-				router.refresh();
-				toast.success("Thread archived");
-			} catch (error) {
-				console.error("Error archiving thread:", error);
-				toast.error("Failed to archive thread");
-			}
-		},
-		onUnarchive: async (threadId: number) => {
-			try {
-				await unarchiveThread(threadId);
-				// Refresh Tumblr status when unarchiving
-				await refreshSingleThread(threadId);
-				deselectThreads([threadId]);
-				router.refresh();
-				toast.success("Thread unarchived");
-			} catch (error) {
-				console.error("Error unarchiving thread:", error);
-				toast.error("Failed to unarchive thread");
-			}
-		},
-		onToggleQueue: async (threadId: number) => {
-			try {
-				await toggleThreadQueued(threadId);
-				await refreshSingleThread(threadId);
-				deselectThreads([threadId]);
-				router.refresh();
-				toast.success("Thread queue status updated");
-			} catch (error) {
-				console.error("Error toggling queue:", error);
-				toast.error("Failed to update queue status");
-			}
-		},
-		onUntrack: async (threadId: number) => {
-			if (
-				window.confirm(
-					"Are you sure you want to untrack this thread? This action cannot be undone."
-				)
-			) {
-				try {
-					await deleteThread(threadId);
-					removeThread(threadId);
-					deselectThreads([threadId]);
-					router.refresh();
-					toast.success("Thread untracked");
-				} catch (error) {
-					console.error("Error deleting thread:", error);
-					toast.error("Failed to untrack thread");
-				}
-			}
-		},
+		onArchive: threadActions.archive,
+		onUnarchive: threadActions.unarchive,
+		onToggleQueue: threadActions.toggleQueued,
+		onUntrack: threadActions.untrack,
 	};
 
 	// Bulk actions
