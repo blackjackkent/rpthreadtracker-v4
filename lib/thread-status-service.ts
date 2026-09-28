@@ -5,6 +5,7 @@ import type {
 } from "@/types/tumblr";
 import type { ThreadWithCharacter } from "./db/types";
 import { fetchTumblrStatusesInChunks } from "./fetch-tumblr-statuses";
+import { HttpError } from "./http-error";
 
 export interface DashboardStats {
 	activeThreadsCount: number;
@@ -20,7 +21,6 @@ export interface RefreshProgress {
 
 export interface RefreshResult {
 	threadStatuses: Map<number, ThreadStatusWithDetails>;
-	dashboardStats: DashboardStats;
 }
 
 /**
@@ -37,18 +37,20 @@ function threadToRequest(thread: ThreadWithCharacter): ThreadStatusRequest {
 }
 
 /**
- * Helper: Calculate dashboard stats from thread statuses
+ * Helper: Calculate dashboard stats from thread statuses.
+ * Pending placeholders count toward active threads but not toward any turn bucket.
  */
 export function calculateStats(
-	allStatuses: ThreadStatusResponse[],
-	totalThreadCount: number
+	allStatuses: ThreadStatusWithDetails[]
 ): DashboardStats {
 	let yourTurnCount = 0;
 	let theirTurnCount = 0;
 	let queuedCount = 0;
 
 	for (const status of allStatuses) {
-		if (status.isQueued) {
+		if (status.isStatusPending) {
+			continue;
+		} else if (status.isQueued) {
 			queuedCount++;
 		} else if (status.isCallingCharactersTurn) {
 			yourTurnCount++;
@@ -58,7 +60,7 @@ export function calculateStats(
 	}
 
 	return {
-		activeThreadsCount: totalThreadCount,
+		activeThreadsCount: allStatuses.length,
 		yourTurnCount,
 		theirTurnCount,
 		queuedCount,
@@ -77,9 +79,11 @@ export function calculateStats(
  */
 function mergeThreadStatus(
 	thread: ThreadWithCharacter,
-	status?: ThreadStatusResponse
+	status?: ThreadStatusResponse,
+	isStatusPending = false
 ): ThreadStatusWithDetails {
 	return {
+		isStatusPending,
 		threadId: thread.ThreadId,
 		postId: thread.PostId || "",
 		lastPostDate: status?.lastPostDate ?? null,
@@ -115,12 +119,10 @@ export async function refreshThreadStatusesInChunks(
 	});
 
 	if (!response.ok) {
-		throw new Error("Failed to fetch active threads");
+		throw new HttpError("Failed to fetch active threads", response.status);
 	}
 
 	const activeThreads: ThreadWithCharacter[] = await response.json();
-
-	const activeThreadsCount = activeThreads.length;
 
 	// Build a lookup from threadId → thread for fast merging
 	const threadLookup = new Map<number, ThreadWithCharacter>();
@@ -128,20 +130,23 @@ export async function refreshThreadStatusesInChunks(
 		threadLookup.set(thread.ThreadId, thread);
 	}
 
+	const hasTumblrPost = (thread: ThreadWithCharacter) =>
+		!!thread.PostId && !!thread.Characters.UrlIdentifier;
+
 	// Emit ALL threads immediately with default status so the table
 	// populates right away; Tumblr data updates them as chunks arrive
 	if (onChunkComplete) {
 		const initialMap = new Map<number, ThreadStatusWithDetails>();
 		for (const thread of activeThreads) {
-			initialMap.set(thread.ThreadId, mergeThreadStatus(thread));
+			initialMap.set(
+				thread.ThreadId,
+				mergeThreadStatus(thread, undefined, hasTumblrPost(thread))
+			);
 		}
 		onChunkComplete(initialMap);
 	}
 
-	// Filter to threads with PostId
-	const threadsWithPostId = activeThreads.filter(
-		(thread) => thread.PostId && thread.Characters.UrlIdentifier
-	);
+	const threadsWithPostId = activeThreads.filter(hasTumblrPost);
 
 	// If no threads to process, return result with what we have
 	if (threadsWithPostId.length === 0) {
@@ -149,13 +154,7 @@ export async function refreshThreadStatusesInChunks(
 		for (const thread of activeThreads) {
 			threadStatusesMap.set(thread.ThreadId, mergeThreadStatus(thread));
 		}
-		return {
-			threadStatuses: threadStatusesMap,
-			dashboardStats: calculateStats(
-				Array.from(threadStatusesMap.values()),
-				activeThreadsCount
-			),
-		};
+		return { threadStatuses: threadStatusesMap };
 	}
 
 	const requests = threadsWithPostId.map(threadToRequest);
@@ -192,15 +191,7 @@ export async function refreshThreadStatusesInChunks(
 		);
 	}
 
-	const dashboardStats = calculateStats(
-		Array.from(threadStatusesMap.values()),
-		activeThreadsCount
-	);
-
-	return {
-		threadStatuses: threadStatusesMap,
-		dashboardStats,
-	};
+	return { threadStatuses: threadStatusesMap };
 }
 
 /**
@@ -225,6 +216,7 @@ export async function refreshThreadMetadata(
 	for (const thread of activeThreads) {
 		const cached = existing.get(thread.ThreadId);
 		updated.set(thread.ThreadId, {
+			isStatusPending: cached?.isStatusPending ?? false,
 			threadId: thread.ThreadId,
 			postId: thread.PostId || "",
 			lastPostDate: cached?.lastPostDate ?? null,

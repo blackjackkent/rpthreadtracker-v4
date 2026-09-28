@@ -5,6 +5,7 @@ import type {
 	ThreadStatusResponse,
 } from "@/types/tumblr";
 import { getTumblrPostWithRetry } from "@/lib/tumblr-client";
+import { withConcurrency } from "@/lib/concurrency";
 
 /**
  * Get the most recent relevant reblog note from a post
@@ -122,27 +123,6 @@ export function calculateThreadStatus(
 		isCallingCharactersTurn,
 		isQueued,
 	};
-}
-
-/**
- * Run async tasks with a concurrency limit.
- */
-async function withConcurrency<T>(
-	tasks: (() => Promise<T>)[],
-	limit: number
-): Promise<T[]> {
-	const results: T[] = new Array(tasks.length);
-	let next = 0;
-
-	async function worker() {
-		while (next < tasks.length) {
-			const i = next++;
-			results[i] = await tasks[i]();
-		}
-	}
-
-	await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, () => worker()));
-	return results;
 }
 
 const CONCURRENCY_LIMIT = 3;

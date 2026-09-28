@@ -6,7 +6,10 @@ import React, {
 	useState,
 	useCallback,
 	useEffect,
+	useMemo,
+	useRef,
 } from "react";
+import { HttpError } from "@/lib/http-error";
 import type { ThreadStatusWithDetails } from "@/types/tumblr";
 import {
 	refreshThreadStatusesInChunks,
@@ -48,6 +51,13 @@ const ThreadStatusContext = createContext<ThreadStatusContextValue | null>(
 	null
 );
 
+const REFRESH_RETRY_DELAYS_MS = [5_000, 15_000, 45_000];
+
+const isRetryableRefreshError = (error: unknown) =>
+	!(error instanceof HttpError && (error.status === 401 || error.status === 403));
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export function useThreadStatus() {
 	const context = useContext(ThreadStatusContext);
 	if (!context) {
@@ -68,38 +78,75 @@ export function ThreadStatusProvider({
 	const [threadStatuses, setThreadStatuses] = useState<
 		Map<number, ThreadStatusWithDetails>
 	>(new Map());
-	const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
-		null
-	);
 	const [characters, setCharacters] = useState<Character[]>([]);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [progress, setProgress] = useState<RefreshProgress | null>(null);
 	const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+
+	const dashboardStats = useMemo<DashboardStats | null>(() => {
+		if (threadStatuses.size === 0 && !lastRefreshed) return null;
+		return calculateStats(Array.from(threadStatuses.values()));
+	}, [threadStatuses, lastRefreshed]);
+
+	const isMountedRef = useRef(true);
+	useEffect(() => {
+		isMountedRef.current = true;
+		return () => {
+			isMountedRef.current = false;
+		};
+	}, []);
 
 	const refreshThreadStatuses = useCallback(async () => {
 		setIsRefreshing(true);
 		setProgress(null);
 
 		try {
-			const result = await refreshThreadStatusesInChunks(
-				userId,
-				(progressUpdate) => {
-					setProgress(progressUpdate);
-				},
-				(chunkStatuses) => {
-					setThreadStatuses((prev) => {
-						const merged = new Map(prev);
-						for (const [id, status] of chunkStatuses) {
-							merged.set(id, status);
+			for (let attempt = 0; ; attempt++) {
+				try {
+					const result = await refreshThreadStatusesInChunks(
+						userId,
+						(progressUpdate) => {
+							setProgress(progressUpdate);
+						},
+						(chunkStatuses) => {
+							setThreadStatuses((prev) => {
+								const merged = new Map(prev);
+								for (const [id, status] of chunkStatuses) {
+									const existing = prev.get(id);
+									// On a manual refresh, keep showing the previous result until the new one arrives
+									if (status.isStatusPending && existing && !existing.isStatusPending) {
+										continue;
+									}
+									merged.set(id, status);
+								}
+								return merged;
+							});
 						}
-						return merged;
-					});
-				}
-			);
+					);
 
-			setThreadStatuses(result.threadStatuses);
-			setDashboardStats(result.dashboardStats);
-			setLastRefreshed(new Date());
+					if (!isMountedRef.current) return;
+					setThreadStatuses(result.threadStatuses);
+					setLastRefreshed(new Date());
+					return;
+				} catch (error) {
+					const delay = REFRESH_RETRY_DELAYS_MS[attempt];
+					if (
+						delay === undefined ||
+						!isRetryableRefreshError(error) ||
+						!isMountedRef.current
+					) {
+						throw error;
+					}
+					console.warn(
+						`Thread refresh failed (attempt ${attempt + 1}); retrying in ${delay / 1000}s`,
+						error
+					);
+					setProgress(null);
+					await sleep(delay);
+					// Provider unmounted (e.g. logged out) while waiting
+					if (!isMountedRef.current) return;
+				}
+			}
 		} catch (error) {
 			console.error("Error refreshing thread statuses:", error);
 			toast.error("Failed to refresh thread data. Please try again.");
@@ -115,22 +162,10 @@ export function ThreadStatusProvider({
 				const updatedThread = await refreshSingleThreadStatus(threadId);
 
 				if (updatedThread) {
-					// Update or add the thread in the map
 					setThreadStatuses((prev) => {
 						const newMap = new Map(prev);
 						newMap.set(threadId, updatedThread);
 						return newMap;
-					});
-
-					// Recalculate dashboard stats from updated thread map
-					setDashboardStats(() => {
-						const updatedMap = new Map(threadStatuses);
-						updatedMap.set(threadId, updatedThread);
-
-						// Convert map values to array for calculateStats
-						const allStatuses = Array.from(updatedMap.values());
-
-						return calculateStats(allStatuses, updatedMap.size);
 					});
 				}
 			} catch (error) {
@@ -138,7 +173,7 @@ export function ThreadStatusProvider({
 				toast.error("Failed to refresh thread data.");
 			}
 		},
-		[threadStatuses]
+		[]
 	);
 
 	const removeThread = useCallback((threadId: number) => {
@@ -153,7 +188,6 @@ export function ThreadStatusProvider({
 		try {
 			const updated = await fetchThreadMetadata(threadStatuses);
 			setThreadStatuses(updated);
-			setDashboardStats(calculateStats(Array.from(updated.values()), updated.size));
 		} catch (error) {
 			console.error("Error refreshing thread metadata:", error);
 		}
@@ -180,12 +214,13 @@ export function ThreadStatusProvider({
 		}
 	}, []);
 
-	// Auto-fetch on initial mount
+	// Auto-fetch once on initial mount; failures are retried inside refreshThreadStatuses
+	const hasStartedInitialFetchRef = useRef(false);
 	useEffect(() => {
-		if (!lastRefreshed && !isRefreshing) {
-			refreshThreadStatuses();
-		}
-	}, [lastRefreshed, isRefreshing, refreshThreadStatuses]);
+		if (hasStartedInitialFetchRef.current) return;
+		hasStartedInitialFetchRef.current = true;
+		refreshThreadStatuses();
+	}, [refreshThreadStatuses]);
 
 	// Fetch characters on initial mount
 	useEffect(() => {

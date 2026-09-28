@@ -55,6 +55,9 @@ export interface ThreadStatusWithDetails extends ThreadStatusResponse {
 
 	// Tags from ThreadTags table
 	tags?: ThreadTag[];
+
+	// True while this entry is a placeholder awaiting its Tumblr result
+	isStatusPending?: boolean;
 }
 
 // Thread form data for create/update operations

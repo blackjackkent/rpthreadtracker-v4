@@ -2,6 +2,12 @@ import type {
 	ThreadStatusRequest,
 	ThreadStatusResponse,
 } from "@/types/tumblr";
+import { withConcurrency } from "./concurrency";
+import { HttpError } from "./http-error";
+
+const CHUNK_SIZE = 10;
+// Each chunk runs up to 3 Tumblr calls server-side, so this caps a single page load at ~9 in flight
+const MAX_CONCURRENT_CHUNKS = 3;
 
 export interface FetchProgress {
 	current: number;
@@ -19,7 +25,6 @@ export async function fetchTumblrStatusesInChunks(
 ): Promise<ThreadStatusResponse[]> {
 	if (requests.length === 0) return [];
 
-	const CHUNK_SIZE = 10;
 	const chunks: ThreadStatusRequest[][] = [];
 	for (let i = 0; i < requests.length; i += CHUNK_SIZE) {
 		chunks.push(requests.slice(i, i + CHUNK_SIZE));
@@ -27,7 +32,7 @@ export async function fetchTumblrStatusesInChunks(
 
 	let completedCount = 0;
 
-	const chunkPromises = chunks.map(async (chunk) => {
+	const chunkTasks = chunks.map((chunk) => async () => {
 		const response = await fetch("/api/thread", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -36,7 +41,10 @@ export async function fetchTumblrStatusesInChunks(
 		});
 
 		if (!response.ok) {
-			throw new Error(`Failed to fetch thread statuses: ${response.status}`);
+			throw new HttpError(
+				`Failed to fetch thread statuses: ${response.status}`,
+				response.status
+			);
 		}
 
 		const chunkStatuses: ThreadStatusResponse[] = await response.json();
@@ -51,6 +59,6 @@ export async function fetchTumblrStatusesInChunks(
 		return chunkStatuses;
 	});
 
-	const chunkResults = await Promise.all(chunkPromises);
+	const chunkResults = await withConcurrency(chunkTasks, MAX_CONCURRENT_CHUNKS);
 	return chunkResults.flat();
 }
