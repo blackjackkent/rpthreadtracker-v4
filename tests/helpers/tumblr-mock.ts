@@ -83,9 +83,20 @@ function mockStatusForPost(
 	};
 }
 
+function getSeededThreads(): Map<number, TumblrStatusRequest> {
+	const raw = process.env.E2E_SEEDED_THREADS;
+	if (!raw) {
+		throw new Error("E2E_SEEDED_THREADS is not set; it is populated by global-setup.ts");
+	}
+	const threads: (TumblrStatusRequest & { threadId: number })[] = JSON.parse(raw);
+	return new Map(threads.map((thread) => [thread.threadId, thread]));
+}
+
 /**
- * Intercepts POST /api/thread and returns deterministic mock responses.
- * Call this in beforeEach for any test that triggers the ThreadStatusProvider.
+ * Intercepts the thread status endpoints and returns deterministic mock responses:
+ * POST /api/thread (logged-in, sends post details) and
+ * POST /api/public-views/:viewId/thread-status (public, sends only thread IDs).
+ * Call this in beforeEach for any test that loads thread statuses.
  */
 export async function mockTumblrApi(page: Page) {
 	await page.route("/api/thread", async (route) => {
@@ -95,6 +106,16 @@ export async function mockTumblrApi(page: Page) {
 		}
 		const body: TumblrStatusRequest[] = route.request().postDataJSON();
 		const responses = body.map(mockStatusForPost);
+		await route.fulfill({ json: responses });
+	});
+
+	await page.route("/api/public-views/*/thread-status", async (route) => {
+		const seededThreads = getSeededThreads();
+		const { threadIds }: { threadIds: number[] } = route.request().postDataJSON();
+		const responses = threadIds
+			.map((id) => seededThreads.get(id))
+			.filter((thread): thread is TumblrStatusRequest => !!thread)
+			.map(mockStatusForPost);
 		await route.fulfill({ json: responses });
 	});
 }
