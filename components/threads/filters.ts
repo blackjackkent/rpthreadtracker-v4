@@ -9,11 +9,13 @@ export type ThreadFilterFunction = (
 
 /**
  * Filter for "Your Turn" threads
- * Shows active threads where it's the calling character's turn (not queued)
+ * Shows active threads where it's the calling character's turn (not queued).
+ * Turn filters skip threads still awaiting Tumblr data, whose turn fields are placeholders.
  */
 export const filterYourTurn: ThreadFilterFunction = (thread) => {
 	return (
 		!thread.isArchived &&
+		!thread.isStatusPending &&
 		thread.isCallingCharactersTurn === true &&
 		thread.isQueued !== true
 	);
@@ -26,6 +28,7 @@ export const filterYourTurn: ThreadFilterFunction = (thread) => {
 export const filterTheirTurn: ThreadFilterFunction = (thread) => {
 	return (
 		!thread.isArchived &&
+		!thread.isStatusPending &&
 		thread.isCallingCharactersTurn === false &&
 		thread.isQueued !== true
 	);
@@ -36,7 +39,7 @@ export const filterTheirTurn: ThreadFilterFunction = (thread) => {
  * Shows active threads that are marked as queued
  */
 export const filterQueued: ThreadFilterFunction = (thread) => {
-	return !thread.isArchived && thread.isQueued === true;
+	return !thread.isArchived && !thread.isStatusPending && thread.isQueued === true;
 };
 
 /**

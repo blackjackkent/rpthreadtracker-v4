@@ -213,6 +213,7 @@ export const createThreadColumns = (
 				isArchived={row.original.isArchived}
 				isQueued={row.original.isQueued}
 				isCallingCharactersTurn={row.original.isCallingCharactersTurn}
+				isPending={row.original.isStatusPending}
 			/>
 		),
 		meta: {
@@ -225,6 +226,14 @@ export const createThreadColumns = (
 	columnHelper.accessor("lastPostDate", {
 		header: "Last Post",
 		cell: (info) => {
+			if (info.row.original.isStatusPending) {
+				return (
+					<span className="text-text-muted inline-flex items-center gap-1.5">
+						<FontAwesomeIcon icon={faSpinner} className="w-3 h-3 animate-spin" />
+						Checking…
+					</span>
+				);
+			}
 			const date = info.getValue();
 			if (!date) return <span className="text-text-muted">-</span>;
 			return new Intl.DateTimeFormat("en-US", {

@@ -40,6 +40,7 @@ interface ThreadsTableProps {
 	columns: ColumnDef<ThreadStatusWithDetails>[];
 	rowSelection: RowSelectionState;
 	onRowSelectionChange: (updater: (prev: RowSelectionState) => RowSelectionState) => void;
+	emptyMessage?: string;
 }
 
 export const ThreadsTable = ({
@@ -47,6 +48,7 @@ export const ThreadsTable = ({
 	columns,
 	rowSelection,
 	onRowSelectionChange,
+	emptyMessage = "No threads found",
 }: ThreadsTableProps) => {
 	const { settings, updatePageSize } = useProfileSettings();
 	const [sorting, setSorting] = useState<SortingState>([
@@ -208,7 +210,7 @@ export const ThreadsTable = ({
 									colSpan={columns.length}
 									className="px-4 py-8 text-center text-text-muted"
 								>
-									No threads found
+									{emptyMessage}
 								</td>
 							</tr>
 						)}

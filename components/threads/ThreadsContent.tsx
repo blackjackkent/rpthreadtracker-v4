@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useId } from "react";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,7 +9,10 @@ import {
 	faBoxOpen,
 	faClock,
 	faTrash,
+	faSpinner,
+	faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import type { RefreshProgress } from "@/lib/thread-status-service";
 import { toast } from "react-toastify";
 import { ThreadStatusWithDetails } from "@/types/tumblr";
 import { ThreadsTable } from "./ThreadsTable";
@@ -37,6 +40,8 @@ interface ThreadsContentProps {
 	isArchived?: boolean;
 	isAllThreadsPage?: boolean;
 	filterFunction?: ThreadFilterFunction;
+	isLoadingStatuses?: boolean;
+	loadingProgress?: RefreshProgress | null;
 }
 
 export const ThreadsContent = ({
@@ -47,7 +52,13 @@ export const ThreadsContent = ({
 	isArchived = false,
 	isAllThreadsPage = false,
 	filterFunction,
+	isLoadingStatuses = false,
+	loadingProgress = null,
 }: ThreadsContentProps) => {
+	const emptyMessage = isLoadingStatuses
+		? "Loading threads…"
+		: "No threads found";
+	const slowLoadingTooltipId = useId();
 	const router = useRouter();
 	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 	const [tagFilter, setTagFilter] = useState<string>("all");
@@ -64,7 +75,7 @@ export const ThreadsContent = ({
 				.filter(([, isSelected]) => isSelected)
 				.map(([id]) => Number(id))
 				.filter((id) => !isNaN(id)),
-		[rowSelection]
+		[rowSelection],
 	);
 
 	const threadActions = useThreadActions({
@@ -91,7 +102,7 @@ export const ThreadsContent = ({
 		// Apply tag filter
 		if (tagFilter !== "all") {
 			result = result.filter((thread) =>
-				thread.tags?.some((tag) => tag.tagText === tagFilter)
+				thread.tags?.some((tag) => tag.tagText === tagFilter),
 			);
 		}
 
@@ -211,7 +222,7 @@ export const ThreadsContent = ({
 			await bulkToggleThreadsQueued(selectedThreadIds);
 			await Promise.all(selectedThreadIds.map(refreshSingleThread));
 			toast.success(
-				`Queue status updated for ${selectedThreadIds.length} thread(s)`
+				`Queue status updated for ${selectedThreadIds.length} thread(s)`,
 			);
 			setRowSelection({});
 			router.refresh();
@@ -224,7 +235,7 @@ export const ThreadsContent = ({
 	const handleBulkUntrack = async () => {
 		if (
 			window.confirm(
-				`Are you sure you want to untrack ${selectedThreadIds.length} thread(s)? This action cannot be undone.`
+				`Are you sure you want to untrack ${selectedThreadIds.length} thread(s)? This action cannot be undone.`,
 			)
 		) {
 			try {
@@ -243,7 +254,7 @@ export const ThreadsContent = ({
 	const columns = createThreadColumns(
 		columnActions,
 		isArchived,
-		!isAllThreadsPage // Hide toggle queue on All Threads page
+		!isAllThreadsPage, // Hide toggle queue on All Threads page
 	) as ColumnDef<ThreadStatusWithDetails>[];
 
 	return (
@@ -266,30 +277,68 @@ export const ThreadsContent = ({
 			</div>
 
 			{/* Filters and Bulk Actions */}
-			<div className="flex items-center justify-between gap-4">
-				{/* Tag Filter */}
-				<div className="flex items-center gap-2">
-					<label htmlFor="tag-filter" className="text-sm text-text-muted">
-						Filter by tag:
-					</label>
-					<select
-						id="tag-filter"
-						value={tagFilter}
-						onChange={(e) => setTagFilter(e.target.value)}
-						className="px-3 py-1.5 text-sm border border-border rounded bg-surface text-text"
-					>
-						<option value="all">All Tags</option>
-						{uniqueTags.map((tag) => (
-							<option key={tag} value={tag}>
-								{tag}
-							</option>
-						))}
-					</select>
+			<div className="flex flex-col items-start gap-3 xl:flex-row xl:items-center xl:justify-between xl:gap-4">
+				<div className="flex flex-col items-start gap-3 xl:flex-row xl:items-center xl:gap-2">
+					{/* Tag Filter */}
+					<div className="flex items-center gap-2">
+						<label htmlFor="tag-filter" className="text-sm text-text-muted">
+							Filter by tag:
+						</label>
+						<select
+							id="tag-filter"
+							value={tagFilter}
+							onChange={(e) => setTagFilter(e.target.value)}
+							className="px-3 py-1.5 text-sm border border-border rounded bg-surface text-text"
+						>
+							<option value="all">All Tags</option>
+							{uniqueTags.map((tag) => (
+								<option key={tag} value={tag}>
+									{tag}
+								</option>
+							))}
+						</select>
+					</div>
+					{isLoadingStatuses && (
+						<span className="flex items-center gap-2 text-sm text-text-muted xl:ml-2 xl:whitespace-nowrap">
+							<span className="flex items-center gap-2" role="status">
+								<FontAwesomeIcon
+									icon={faSpinner}
+									className="w-3.5 h-3.5 animate-spin"
+								/>
+								{loadingProgress && loadingProgress.total > 0
+									? `Checking ${loadingProgress.current} of ${loadingProgress.total} threads with Tumblr…`
+									: "Loading…"}
+							</span>
+							<span className="relative group">
+								<button
+									type="button"
+									aria-label="Why is this taking a while?"
+									aria-describedby={slowLoadingTooltipId}
+									className="text-text-muted hover:text-text cursor-help"
+								>
+									<FontAwesomeIcon
+										icon={faInfoCircle}
+										className="w-3.5 h-3.5"
+									/>
+								</button>
+								<span
+									id={slowLoadingTooltipId}
+									role="tooltip"
+									className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute right-0 top-full mt-2 z-20 w-60 whitespace-normal rounded-md border border-border bg-surface px-3 py-2 text-xs text-text shadow-lg"
+								>
+									If this is taking a while, you may have enough threads that
+									Tumblr is rate-limiting requests. The tracker will retry these
+									requests automatically and should fill the remainder in
+									shortly.
+								</span>
+							</span>
+						</span>
+					)}
 				</div>
 
 				{/* Bulk Actions */}
 				{selectedThreadIds.length > 0 && (
-					<div className="flex items-center gap-2">
+					<div className="flex flex-wrap items-center gap-2">
 						<span className="text-sm text-text-muted">
 							{selectedThreadIds.length} selected
 						</span>
@@ -318,7 +367,7 @@ export const ThreadsContent = ({
 										const selectedThreadsWithNoPost = filteredThreads
 											.filter(
 												(t) =>
-													t.threadId && selectedThreadIds.includes(t.threadId)
+													t.threadId && selectedThreadIds.includes(t.threadId),
 											)
 											.some((t) => !t.lastPostDate);
 
@@ -363,6 +412,7 @@ export const ThreadsContent = ({
 					columns={columns}
 					rowSelection={rowSelection}
 					onRowSelectionChange={setRowSelection}
+					emptyMessage={emptyMessage}
 				/>
 			</div>
 
@@ -370,7 +420,7 @@ export const ThreadsContent = ({
 			<div className="lg:hidden space-y-4">
 				{filteredThreads.length === 0 ? (
 					<div className="text-center py-12 text-text-muted">
-						No threads found
+						{emptyMessage}
 					</div>
 				) : (
 					filteredThreads.map((thread) => (

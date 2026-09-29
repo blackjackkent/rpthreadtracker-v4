@@ -108,6 +108,7 @@ export const ThreadCard = ({
 							isArchived={thread.isArchived}
 							isQueued={thread.isQueued}
 							isCallingCharactersTurn={thread.isCallingCharactersTurn}
+							isPending={thread.isStatusPending}
 						/>
 					</div>
 
