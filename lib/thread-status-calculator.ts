@@ -127,6 +127,9 @@ export function calculateThreadStatus(
 
 const CONCURRENCY_LIMIT = 3;
 
+// Upper bound on threads per status request; clients send chunks of 10
+export const MAX_THREAD_STATUS_BATCH_SIZE = 25;
+
 /**
  * Fetch Tumblr data and calculate statuses for a batch of threads.
  * Runs requests with limited concurrency to avoid Tumblr rate limits.

@@ -15,7 +15,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExternalLinkAlt, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import type { PublicView } from "@/lib/db/public-view";
 import { fetchTumblrStatusesInChunks } from "@/lib/fetch-tumblr-statuses";
-import type { ThreadStatusRequest } from "@/types/tumblr";
 
 export interface PublicViewThread {
 	threadId: number;
@@ -212,23 +211,20 @@ export const PublicViewContent = ({
 	]);
 
 	const fetchStatuses = useCallback(async () => {
-		const requests: ThreadStatusRequest[] = threads
+		const threadIds = threads
 			.filter((t) => t.postId && t.characterUrlIdentifier)
-			.map((t) => ({
-				threadId: t.threadId,
-				postId: t.postId,
-				characterUrlIdentifier: t.characterUrlIdentifier,
-				partnerUrlIdentifier: t.partnerUrlIdentifier || undefined,
-				dateMarkedQueued: t.dateMarkedQueued || undefined,
-			}));
+			.map((t) => t.threadId);
 
-		if (requests.length === 0) {
+		if (threadIds.length === 0) {
 			setIsLoading(false);
 			return;
 		}
 
 		try {
-			const statuses = await fetchTumblrStatusesInChunks(requests);
+			const statuses = await fetchTumblrStatusesInChunks(threadIds, {
+				url: `/api/public-views/${encodeURIComponent(view.id)}/thread-status`,
+				toBody: (chunk) => ({ threadIds: chunk }),
+			});
 			const statusMap = new Map(
 				statuses.filter((s) => s.threadId).map((s) => [s.threadId!, s])
 			);
@@ -252,7 +248,7 @@ export const PublicViewContent = ({
 		} finally {
 			setIsLoading(false);
 		}
-	}, [threads]);
+	}, [threads, view.id]);
 
 	useEffect(() => {
 		fetchStatuses();

@@ -1,7 +1,4 @@
-import type {
-	ThreadStatusRequest,
-	ThreadStatusResponse,
-} from "@/types/tumblr";
+import type { ThreadStatusResponse } from "@/types/tumblr";
 import { withConcurrency } from "./concurrency";
 import { HttpError } from "./http-error";
 
@@ -14,29 +11,36 @@ export interface FetchProgress {
 	total: number;
 }
 
+export interface ThreadStatusEndpoint<T> {
+	url: string;
+	toBody: (chunk: T[]) => unknown;
+}
+
 /**
- * Fetch Tumblr statuses for a batch of threads in parallel chunks via /api/thread.
- * Client-safe — used by both the authenticated ThreadStatusProvider and public views.
+ * Fetch Tumblr statuses in chunks with limited concurrency.
+ * Client-safe — used by both the authenticated ThreadStatusProvider and public views,
+ * which post to different endpoints with different request bodies.
  */
-export async function fetchTumblrStatusesInChunks(
-	requests: ThreadStatusRequest[],
+export async function fetchTumblrStatusesInChunks<T>(
+	items: T[],
+	endpoint: ThreadStatusEndpoint<T>,
 	onProgress?: (progress: FetchProgress) => void,
 	onChunkComplete?: (statuses: ThreadStatusResponse[]) => void
 ): Promise<ThreadStatusResponse[]> {
-	if (requests.length === 0) return [];
+	if (items.length === 0) return [];
 
-	const chunks: ThreadStatusRequest[][] = [];
-	for (let i = 0; i < requests.length; i += CHUNK_SIZE) {
-		chunks.push(requests.slice(i, i + CHUNK_SIZE));
+	const chunks: T[][] = [];
+	for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+		chunks.push(items.slice(i, i + CHUNK_SIZE));
 	}
 
 	let completedCount = 0;
 
 	const chunkTasks = chunks.map((chunk) => async () => {
-		const response = await fetch("/api/thread", {
+		const response = await fetch(endpoint.url, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(chunk),
+			body: JSON.stringify(endpoint.toBody(chunk)),
 			cache: "no-store",
 		});
 
@@ -52,7 +56,7 @@ export async function fetchTumblrStatusesInChunks(
 		completedCount += chunk.length;
 		onProgress?.({
 			current: completedCount,
-			total: requests.length,
+			total: items.length,
 		});
 		onChunkComplete?.(chunkStatuses);
 

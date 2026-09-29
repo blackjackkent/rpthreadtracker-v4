@@ -3,6 +3,7 @@ import { getTumblrPostWithRetry } from "@/lib/tumblr-client";
 import {
 	calculateThreadStatus,
 	batchCalculateThreadStatuses,
+	MAX_THREAD_STATUS_BATCH_SIZE,
 } from "@/lib/thread-status-calculator";
 import { requireAuth } from "@/lib/api-auth";
 import type { ThreadStatusRequest } from "@/types/tumblr";
@@ -61,23 +62,40 @@ export async function GET(request: NextRequest) {
 	}
 }
 
+const isValidThreadStatusRequest = (item: unknown): item is ThreadStatusRequest => {
+	if (typeof item !== "object" || item === null) return false;
+	const { postId, characterUrlIdentifier } = item as Record<string, unknown>;
+	return (
+		typeof postId === "string" &&
+		postId.length > 0 &&
+		typeof characterUrlIdentifier === "string" &&
+		characterUrlIdentifier.length > 0
+	);
+};
+
 /**
  * POST /api/thread
  * Batch fetch thread status for multiple threads
- * Body: ThreadStatusRequest[]
+ * Body: ThreadStatusRequest[] (at most MAX_THREAD_STATUS_BATCH_SIZE)
  *
- * No authentication required — this is a Tumblr data proxy
- * that operates on public post IDs, not user-specific data.
- * Used by both authenticated views and public views.
+ * @requires Authentication — public views use /api/public-views/[viewId]/thread-status
  */
 export async function POST(request: NextRequest) {
-	try {
-		const body: ThreadStatusRequest[] = await request.json();
+	const authResult = await requireAuth();
+	if (authResult instanceof NextResponse) return authResult;
 
-		// Validate request body
-		if (!Array.isArray(body)) {
+	try {
+		const body: unknown = await request.json();
+
+		if (
+			!Array.isArray(body) ||
+			body.length > MAX_THREAD_STATUS_BATCH_SIZE ||
+			!body.every(isValidThreadStatusRequest)
+		) {
 			return NextResponse.json(
-				{ error: "Request body must be an array of ThreadStatusRequest" },
+				{
+					error: `Request body must be an array of at most ${MAX_THREAD_STATUS_BATCH_SIZE} ThreadStatusRequest objects`,
+				},
 				{ status: 400 }
 			);
 		}

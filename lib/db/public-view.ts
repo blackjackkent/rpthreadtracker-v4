@@ -79,6 +79,13 @@ export async function getPublicViewByUsernameAndSlug(
 	return row ? parsePublicView(row) : null;
 }
 
+export async function getPublicViewById(
+	id: string
+): Promise<PublicView | null> {
+	const row = await prisma.publicViews.findUnique({ where: { Id: id } });
+	return row ? parsePublicView(row) : null;
+}
+
 export async function isSlugAvailableForUser(
 	userId: string,
 	slug: string,
@@ -98,10 +105,12 @@ export async function isSlugAvailableForUser(
 export async function getThreadsForPublicView(
 	userId: string,
 	includeArchived: boolean,
-	characterIds: number[] | null
+	characterIds: number[] | null,
+	threadIds?: number[]
 ): Promise<ThreadWithCharacter[]> {
 	return prisma.threads.findMany({
 		where: {
+			...(threadIds ? { ThreadId: { in: threadIds } } : {}),
 			Characters: {
 				UserId: userId,
 				IsOnHiatus: false,

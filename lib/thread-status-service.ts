@@ -160,6 +160,7 @@ export async function refreshThreadStatusesInChunks(
 	const requests = threadsWithPostId.map(threadToRequest);
 	const allStatuses = await fetchTumblrStatusesInChunks(
 		requests,
+		{ url: "/api/thread", toBody: (chunk) => chunk },
 		onProgress,
 		(chunkStatuses) => {
 			if (!onChunkComplete) return;
