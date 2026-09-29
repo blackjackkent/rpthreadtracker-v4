@@ -13,6 +13,7 @@ import {
 	ColumnFiltersState,
 	flexRender,
 	RowSelectionState,
+	PaginationState,
 	Table,
 	Column,
 } from "@tanstack/react-table";
@@ -55,6 +56,13 @@ export const ThreadsTable = ({
 		{ id: "lastPostDate", desc: true },
 	]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+	const [pageIndex, setPageIndex] = useState(0);
+	// Settings load asynchronously, so fall back to the saved size until the user picks one here
+	const [pageSizeOverride, setPageSizeOverride] = useState<number | null>(null);
+	const pagination: PaginationState = {
+		pageIndex,
+		pageSize: pageSizeOverride ?? settings?.threadTablePageSize ?? 10,
+	};
 
 	// TanStack Table v8 works with React 19 but isn't optimized by React Compiler yet
 	// eslint-disable-next-line react-hooks/incompatible-library
@@ -65,9 +73,17 @@ export const ThreadsTable = ({
 			sorting,
 			columnFilters,
 			rowSelection,
+			pagination,
 		},
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
+		onPaginationChange: (updater) => {
+			const next = typeof updater === "function" ? updater(pagination) : updater;
+			setPageIndex(next.pageIndex);
+			if (next.pageSize !== pagination.pageSize) {
+				setPageSizeOverride(next.pageSize);
+			}
+		},
 		onRowSelectionChange: (updater) => {
 			onRowSelectionChange(
 				typeof updater === "function" ? updater : () => updater
@@ -82,11 +98,6 @@ export const ThreadsTable = ({
 		getRowId: (row) => String(row.threadId),
 		getRowCanExpand: () => true,
 		autoResetPageIndex: false,
-		initialState: {
-			pagination: {
-				pageSize: settings?.threadTablePageSize || 10,
-			},
-		},
 	});
 
 	return (
